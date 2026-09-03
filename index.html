@@ -99,11 +99,16 @@
   .kf-stat .n{font-size:21px;font-weight:900;color:var(--blue);line-height:1.15;margin-top:2px}
   .kf-stat .lbl{font-size:10px;color:var(--grey05);margin-top:1px;line-height:1.3}
   .kf-grid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(2,1fr);gap:18px 10px}
-  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;padding:2px 4px;position:relative}
-  .gauge canvas{max-height:80px}
+  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;padding:2px 4px;position:relative;min-width:0}
+  /* the dial is a fixed 2:1 box the half-donut fits exactly, with the % placed
+     inside it — the old version pulled the % and caption up with hardcoded
+     negative margins tuned for the screen, so at print sizes the caption
+     landed on top of the arc */
+  .gauge-dial{position:relative;width:100%;max-width:104px;height:52px}
+  .gauge-dial canvas{width:100%!important;height:100%!important}
   .card canvas{max-width:100% !important}
-  .gauge .pct{font-size:19px;font-weight:900;color:var(--grey06);margin-top:-52px}
-  .gauge .cap{font-size:11px;color:var(--grey05);margin-top:24px;line-height:1.35}
+  .gauge .pct{position:absolute;left:0;right:0;bottom:0;font-size:17px;font-weight:900;color:var(--grey06);line-height:1}
+  .gauge .cap{font-size:11px;color:var(--grey05);margin-top:7px;line-height:1.35}
   .note{font-size:11px;color:var(--grey03);margin-top:8px}
   /* proportional strip — simplified treemap/segmented-bar: one row of
      flex-weighted blocks instead of a full 2D treemap layout, which is
@@ -167,7 +172,23 @@
      when the dashboard sits inside an embedded/side-panel viewer, so a
      3rd card was spilling off-screen even though the grid math was fine */
 
-  /* ---- print / PDF factsheet: 6 A4 portrait pages, one per tab ---- */
+  /* Applied on screen for the moment before printing, so the charts are
+     BUILT at the A4 content width they'll be rasterized at. Without this they
+     were laid out at browser width and then squeezed into a ~half-as-wide
+     print column, which clipped every y-axis label off the left edge. */
+  body.printing-all main{max-width:186mm;padding:0;margin:0}
+  body.printing-all .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;align-items:start}
+  body.printing-all .stat-row{display:grid;grid-template-columns:repeat(3,1fr)}
+  body.printing-all .card{padding:10px;margin-bottom:0;font-size:11px}
+  body.printing-all .card h3{margin:0 0 8px;font-size:10.5px}
+  body.printing-all .kf-grid{grid-template-columns:repeat(5,1fr);gap:6px}
+  body.printing-all .kf-side{flex:0 0 110px}
+  body.printing-all .gauge-dial{max-width:70px;height:35px}
+  body.printing-all .gauge .cap{font-size:7.5px;margin-top:4px;line-height:1.25}
+  body.printing-all .gauge .pct{font-size:12px}
+  body.printing-all .topbar, body.printing-all nav, body.printing-all .filters{display:none}
+
+  /* ---- print / PDF factsheet: A4 portrait, one tab per page ---- */
   @media print{
     @page{ size:A4 portrait; margin:12mm; }
     body{background:#fff}
@@ -175,14 +196,17 @@
     .topbar{position:static; box-shadow:none}
     header{background:var(--blue) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; position:static}
     main{padding:0;max-width:none}
-    #tabs>section{display:block !important; page-break-after:always; break-after:page}
-    #tabs>section:last-child{page-break-after:auto; break-after:auto}
+    /* Continuous flow, not one-tab-per-page: the tabs now hold 8-11 cards
+       each, so forcing a break after every tab left pages a third full. The
+       blue section bar still marks where each tab starts. */
+    #tabs>section{display:block !important}
+    .page-bar{break-after:avoid; page-break-after:avoid}
+    .stat-row{break-inside:avoid}
     /* screen layout is a single portrait column; print goes back to a
        2-column grid so the A4 factsheet still packs 6 pages */
     /* multicol paginates unpredictably across page breaks — print goes back
        to an explicit 2-column grid so the A4 factsheet stays predictable */
-    .grid{display:flex; gap:8px}
-    .mcol{gap:8px}
+    .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; align-items:start}
     .stat-row{display:grid; grid-template-columns:repeat(3,1fr)}
     .card{break-inside:avoid; box-shadow:none; padding:10px; margin-bottom:0}
     .card h3{margin:0 0 8px; font-size:10.5px}
@@ -190,8 +214,9 @@
     .kf-panel{flex-direction:row;gap:12px}
     .kf-side{flex:0 0 110px;border-bottom:0;border-right:1px solid var(--line);padding-right:10px;padding-bottom:0}
     .kf-grid{flex:1;grid-template-columns:repeat(5,1fr); gap:6px}
-    .gauge .cap{font-size:8px}
-    .gauge .pct{font-size:14px}
+    .gauge .cap{font-size:7.5px;margin-top:4px;line-height:1.25}
+    .gauge .pct{font-size:12px}
+    .gauge-dial{max-width:70px;height:35px}
     .kf-stat .n{font-size:18px}
     .stat .n{font-size:20px}
     .stat{padding:8px 10px}
@@ -237,6 +262,9 @@
   </div>
   <div class="filter-field"><label>Age group</label>
     <details class="msel" id="f-age"><summary><span class="msel-txt">All ages</span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary><div class="msel-panel"></div></details>
+  </div>
+  <div class="filter-field"><label>Raion of interview</label>
+    <details class="msel" id="f-raion"><summary><span class="msel-txt">All raions</span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary><div class="msel-panel"></div></details>
   </div>
   <div class="filter-field"><label>Household type</label>
     <details class="msel" id="f-hhtype"><summary><span class="msel-txt">All household types</span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary><div class="msel-panel"></div></details>
@@ -341,7 +369,7 @@ function fillSelect(id, values, allLabel, field){
 }
 
 // ---------- multi-select filter dropdowns (checkbox lists) ----------
-const MULTI_FIELDS = ['f-interview','f-arrival','f-gender','f-age','f-hhtype'];
+const MULTI_FIELDS = ['f-interview','f-arrival','f-gender','f-age','f-hhtype','f-raion'];
 const MSEL = {}; // id -> Set of selected raw codes (empty set = "all")
 
 function fillMultiSelect(id, values, allLabel, field){
@@ -373,6 +401,7 @@ function populateFilterOptions(){
   fillMultiSelect('f-gender', uniqueSorted('resp_gender'), 'All genders', 'resp_gender');
   fillMultiSelect('f-age', ['18-24','25-34','35-59','60+'], 'All ages');
   fillMultiSelect('f-hhtype', uniqueSorted('household_type'), 'All household types');
+  fillMultiSelect('f-raion', uniqueSorted('mda_raion_interview'), 'All raions', 'mda_raion_interview');
   fillSelect('f-pwsn', ['true','false'], 'All households');
 }
 function resetFilterSelects(){
@@ -386,7 +415,7 @@ function resetFilterSelects(){
 }
 
 function applyFilters(){
-  const fi = MSEL['f-interview'], fa = MSEL['f-arrival'], fg = MSEL['f-gender'], fage = MSEL['f-age'], fh = MSEL['f-hhtype'];
+  const fi = MSEL['f-interview'], fa = MSEL['f-arrival'], fg = MSEL['f-gender'], fage = MSEL['f-age'], fh = MSEL['f-hhtype'], fr = MSEL['f-raion'];
   const fp = document.getElementById('f-pwsn').value;
   VIEW = DATA.records.filter(r=>
     (fi.size===0 || fi.has(r.interview_month)) &&
@@ -394,6 +423,7 @@ function applyFilters(){
     (fg.size===0 || fg.has(r.resp_gender)) &&
     (fage.size===0 || fage.has(r.age_group)) &&
     (fh.size===0 || fh.has(r.household_type)) &&
+    (fr.size===0 || fr.has(r.mda_raion_interview)) &&
     (!fp || String(r.pwsn)===fp)
   );
   document.getElementById('sample-n').textContent = VIEW.length;
@@ -517,6 +547,23 @@ const donutSliceLabels = {
   }
 };
 
+// several choice lists phrase every option as one long sentence sharing the
+// same opening ("Could not leave Ukraine due to security reasons", "...due to
+// financial constraints", ...). Wrapped to a chart tick, they all truncate to
+// the identical prefix and the chart says nothing — so drop the shared opening
+// and keep the part that actually differs.
+function stripSharedPrefix(labels){
+  if(labels.length < 3) return labels;
+  const split = labels.map(l=>String(l).split(' '));
+  let i = 0;
+  while(split.every(w => w.length > i+1 && w[i] === split[0][i])) i++;
+  if(i < 3) return labels; // only worth doing for a genuinely long shared opening
+  return split.map(w=>{
+    const t = w.slice(i).join(' ');
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  });
+}
+
 function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chronological=false}={}){
   const formatter = (code)=>L(code, field);
   const entries = chronological
@@ -551,7 +598,8 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
   const maxTicksX = denseX ? Math.max(6, Math.floor(cw / (isPrint?34:46))) : undefined;
   const tickFont = isPrint ? 8.5 : 10.5;
   const lineH = isPrint ? 10 : 12;
-  const wrappedLabels = entries.map(e=>wrapLabel(formatter(e[0]), wrapMax, 2));
+  const rawLabels = stripSharedPrefix(entries.map(e=>formatter(e[0])));
+  const wrappedLabels = rawLabels.map(l=>wrapLabel(l, wrapMax, 2));
   // size the chart to how many bars it has, rather than a fixed height for
   // every card. Chart.js gives every category row on a y-axis the SAME
   // height (sized to the tallest tick label), so the row height here must
@@ -575,7 +623,7 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
     type: 'bar',
     plugins: [barValueLabels],
     data: {
-      labels: horizontal ? wrappedLabels : entries.map(e=>formatter(e[0])),
+      labels: horizontal ? wrappedLabels : rawLabels,
       datasets: [{ data: pctValues, backgroundColor: PALETTE[0], borderRadius:4, maxBarThickness:22 }]
     },
     options: {
@@ -799,13 +847,13 @@ function gauge(canvasId, pctObj, captionEl){
   const ctx = document.getElementById(canvasId);
   const pctEl = ctx.parentElement.querySelector('.pct');
   if(!pctObj){ pctEl.textContent='n/a'; captionEl && (captionEl.textContent += ' (insufficient sample)'); charts[canvasId]=null;
-    charts[canvasId] = new Chart(ctx,{type:'doughnut',data:{datasets:[{data:[1],backgroundColor:['#e2e6ea']}]},options:{rotation:-90,circumference:180,cutout:'75%',plugins:{tooltip:{enabled:false}}}});
+    charts[canvasId] = new Chart(ctx,{type:'doughnut',data:{datasets:[{data:[1],backgroundColor:['#e2e6ea']}]},options:{rotation:-90,circumference:180,cutout:'72%',maintainAspectRatio:false,plugins:{tooltip:{enabled:false}}}});
     return; }
   pctEl.textContent = pctObj.pct+'%';
   charts[canvasId] = new Chart(ctx, {
     type:'doughnut',
     data:{ datasets:[{ data:[pctObj.pct, 100-pctObj.pct], backgroundColor:[PALETTE[0], '#e2e6ea'], borderWidth:0 }]},
-    options:{ rotation:-90, circumference:180, cutout:'75%', plugins:{tooltip:{enabled:false}}, animation:{duration:400} }
+    options:{ rotation:-90, circumference:180, cutout:'72%', maintainAspectRatio:false, plugins:{tooltip:{enabled:false}}, animation:{duration:400} }
   });
 }
 
@@ -855,16 +903,16 @@ function buildTabs(){
         <p class="note">*Estimated from age-band midpoints (exact age dropped for privacy).</p>
       </div>
       <div class="kf-grid">
-      <div class="gauge"><canvas id="g-tp"></canvas><div class="pct"></div><div class="cap">of respondents have been <b>granted temporary protection</b></div></div>
-      <div class="gauge"><canvas id="g-medical"></canvas><div class="pct"></div><div class="cap">of households have a member with a <b>serious medical condition</b></div></div>
-      <div class="gauge"><canvas id="g-docmissing"></canvas><div class="pct"></div><div class="cap">of households have a member whose <b>documentation is missing or expired</b></div></div>
-      <div class="gauge"><canvas id="g-remain"></canvas><div class="pct"></div><div class="cap">have immediate family members who <b>remained in Ukraine</b></div></div>
-      <div class="gauge"><canvas id="g-obstacles"></canvas><div class="pct"></div><div class="cap">of those have family facing <b>obstacles to reunite</b> in host country</div></div>
-      <div class="gauge"><canvas id="g-visited"></canvas><div class="pct"></div><div class="cap">of respondents have <b>visited Ukraine</b> at least once since departure</div></div>
-      <div class="gauge"><canvas id="g-returndiff"></canvas><div class="pct"></div><div class="cap">of visitors faced <b>difficulties returning</b> to the host country</div></div>
-      <div class="gauge"><canvas id="g-socprot"></canvas><div class="pct"></div><div class="cap">have <b>applied for social protection</b> benefits in host country</div></div>
-      <div class="gauge"><canvas id="g-needwork"></canvas><div class="pct"></div><div class="cap">of employed respondents <b>do not have</b> an employment contract</div></div>
-      <div class="gauge"><canvas id="g-urgentneed"></canvas><div class="pct"></div><div class="cap">of respondents have at least one <b>urgent need</b></div></div>
+      <div class="gauge"><div class="gauge-dial"><canvas id="g-tp"></canvas><div class="pct"></div></div><div class="cap">of respondents have been <b>granted temporary protection</b></div></div>
+      <div class="gauge"><div class="gauge-dial"><canvas id="g-medical"></canvas><div class="pct"></div></div><div class="cap">of households have a member with a <b>serious medical condition</b></div></div>
+      <div class="gauge"><div class="gauge-dial"><canvas id="g-docmissing"></canvas><div class="pct"></div></div><div class="cap">of households have a member whose <b>documentation is missing or expired</b></div></div>
+      <div class="gauge"><div class="gauge-dial"><canvas id="g-remain"></canvas><div class="pct"></div></div><div class="cap">have immediate family members who <b>remained in Ukraine</b></div></div>
+      <div class="gauge"><div class="gauge-dial"><canvas id="g-obstacles"></canvas><div class="pct"></div></div><div class="cap">of those have family facing <b>obstacles to reunite</b> in host country</div></div>
+      <div class="gauge"><div class="gauge-dial"><canvas id="g-visited"></canvas><div class="pct"></div></div><div class="cap">of respondents have <b>visited Ukraine</b> at least once since departure</div></div>
+      <div class="gauge"><div class="gauge-dial"><canvas id="g-returndiff"></canvas><div class="pct"></div></div><div class="cap">of visitors faced <b>difficulties returning</b> to the host country</div></div>
+      <div class="gauge"><div class="gauge-dial"><canvas id="g-socprot"></canvas><div class="pct"></div></div><div class="cap">have <b>applied for social protection</b> benefits in host country</div></div>
+      <div class="gauge"><div class="gauge-dial"><canvas id="g-needwork"></canvas><div class="pct"></div></div><div class="cap">of employed respondents <b>do not have</b> an employment contract</div></div>
+      <div class="gauge"><div class="gauge-dial"><canvas id="g-urgentneed"></canvas><div class="pct"></div></div><div class="cap">of respondents have at least one <b>urgent need</b></div></div>
       </div>
     </div>
 
@@ -1001,6 +1049,11 @@ function layoutMasonry(){
       MASONRY_CARDS.set(grid, cards);
     }
     grid.textContent = '';
+    // print: no column wrappers at all. A flex/multicol column can't be split
+    // across a page boundary, so an overflowing tab pushed whole columns to
+    // the next page and left half-empty pages behind. Plain grid children
+    // paginate row by row instead.
+    if(isPrint){ cards.forEach(c=>grid.appendChild(c)); return; }
     const colEls = [];
     for(let i=0;i<cols;i++){
       const c = document.createElement('div');
