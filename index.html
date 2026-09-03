@@ -22,19 +22,19 @@
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
-  header{background:var(--blue06);color:#fff;padding:14px 20px;border-bottom:3px solid var(--yellow);position:sticky;top:0;z-index:20}
+  header{background:var(--blue);color:#fff;padding:14px 20px;border-bottom:3px solid var(--yellow);position:sticky;top:0;z-index:20}
   header .head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  header .title-block{display:flex;align-items:center;gap:12px}
-  header .unhcr-logo{height:30px;width:auto;display:block}
+  header .title-block{display:flex;align-items:center;gap:14px}
+  header .unhcr-logo{height:44px;width:auto;display:block}
   header h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.01em}
   header .subtitle{margin:2px 0 0;font-size:11.5px;color:var(--blue01)}
   header .head-meta{text-align:right;flex-shrink:0}
   header .head-date{display:block;font-size:10.5px;color:var(--blue01);font-style:italic}
-  nav{display:flex;flex-wrap:wrap;gap:2px;background:#fff;padding:0 8px;justify-content:center;border-bottom:1px solid var(--line);position:sticky;top:63px;z-index:19;overflow-x:auto}
+  nav{display:flex;flex-wrap:wrap;gap:2px;background:#fff;padding:0 8px;justify-content:center;border-bottom:1px solid var(--line);position:sticky;top:76px;z-index:19;overflow-x:auto}
   nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--grey04);padding:11px 12px 9px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:700;transition:color .15s,border-color .15s}
   nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
   nav button:hover:not(.active){color:var(--blue05)}
-  .filters{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:100px;z-index:5}
+  .filters{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:113px;z-index:5}
   .filters label{font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--grey04);display:block;margin-bottom:4px}
   .filters select{font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;width:100%;font-family:inherit;color:var(--ink)}
   .filters select:focus{outline:2px solid var(--blue02);outline-offset:0;border-color:var(--blue)}
@@ -108,7 +108,7 @@
     @page{ size:A4 portrait; margin:12mm; }
     body{background:#fff}
     nav, .filters, footer{display:none !important}
-    header{background:var(--blue06) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; position:static}
+    header{background:var(--blue) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; position:static}
     main{padding:0;max-width:none}
     #tabs>section{display:block !important; page-break-after:always; break-after:page}
     #tabs>section:last-child{page-break-after:auto; break-after:auto}
@@ -185,6 +185,7 @@ Chart.defaults.font.size = 11.5;
 Chart.defaults.color = '#4a5560';
 Chart.defaults.plugins.legend.labels.boxWidth = 10;
 Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.animation = false; // snap-render — avoids catching charts mid-animation when the PDF factsheet is rasterized
 
 const MIN_CELL = 5;
 let DATA = null;         // full dataset
@@ -215,15 +216,17 @@ async function boot(){
   document.getElementById('reset-filters').onclick = () => { resetFilterSelects(); applyFilters(); renderAll(); };
   document.getElementById('print-btn').onclick = () => {
     // make every tab's charts real-sized before print rasterizes them —
-    // Chart.js sizes a canvas to 0x0 while its tab is hidden and only
-    // redraws on a resize; the print media query alone fires too late.
+    // Chart.js sizes a canvas to 0x0 while its tab is hidden. resize() alone
+    // is flaky once a chart was first created against a 0x0 container, so
+    // instead we fully re-render (destroy+recreate) every chart once all
+    // sections are visible and have real dimensions, then print.
     document.body.classList.add('printing-all');
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      Object.values(charts).forEach(c => c && c.resize());
+      renderAll();
       requestAnimationFrame(() => requestAnimationFrame(() => {
         window.print();
         document.body.classList.remove('printing-all');
-        Object.values(charts).forEach(c => c && c.resize());
+        renderAll();
       }));
     }));
   };
@@ -402,7 +405,6 @@ const TAB_DEFS = [
   {id:'displacement', label:'Displacement Patterns'},
   {id:'rights', label:'Documentation & Legal Status'},
   {id:'access', label:'Access to Services'},
-  {id:'methodology', label:'Methodology & Data Privacy'},
 ];
 
 function buildTabs(){
@@ -513,20 +515,7 @@ function buildTabs(){
     </div>
   </section>
 
-  <section id="tab-methodology">
-    <div class="page-bar">Methodology &amp; Data Privacy</div>
-    <div class="methodology">
-      <p><b>What this dashboard is.</b> It replaces the previous Power BI dashboard. Instead of a self-contained file with an embedded Kobo API token, this page is a static site that reads a pre-processed <code>data.json</code> file, rebuilt on a schedule from the live Kobo dataset.</p>
-      <p><b>Where the token lives.</b> The Kobo API token is stored as an encrypted secret in the hosting repository's CI settings and is used once, server-side, at rebuild time. It is never sent to a browser and never appears in this page's source.</p>
-      <p><b>What is filtered out before this file is ever written:</b> respondent name/contact details (never collected by the form), enumerator/device/audit metadata, all free-text "other, specify" answers, the entire protection-incidents module (GBV, trafficking, perpetrator fields), exact interview/departure/arrival dates (bucketed to month), exact age (bucketed to age group), and the precise raion of origin and interview location (kept at oblast level or dropped).</p>
-      <p><b>Small-cell suppression.</b> Any chart or figure whose underlying sample after filtering falls below <b>${MIN_CELL}</b> respondents is hidden and marked "insufficient sample" rather than shown, to reduce re-identification risk from narrow filter combinations.</p>
-      <div class="privacy-badge"><span class="dot"></span> data.json generated: <span id="gen-time">–</span> · <span id="gen-n">–</span> respondents after consent/eligibility filtering</div>
-      <p class="note" style="margin-top:14px">Individual interviews are conducted in transit centers, reception centers, and UNHCR office premises. Respondents are randomly selected to reduce bias (non-probability sampling); results should not be extrapolated to all refugees from Ukraine. Data is unweighted.</p>
-    </div>
-  </section>
   `;
-  document.getElementById('gen-time').textContent = new Date(DATA.generated_at).toLocaleString();
-  document.getElementById('gen-n').textContent = DATA.n_respondents;
 }
 
 function avg(records, field){
