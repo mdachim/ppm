@@ -92,6 +92,23 @@
   .gauge .pct{font-size:19px;font-weight:900;color:var(--grey06);margin-top:-52px}
   .gauge .cap{font-size:11px;color:var(--grey05);margin-top:24px;line-height:1.35}
   .note{font-size:11px;color:var(--grey03);margin-top:8px}
+  /* proportional strip — simplified treemap/segmented-bar: one row of
+     flex-weighted blocks instead of a full 2D treemap layout, which is
+     overkill for the 3-8 categories these fields have */
+  .treemap-row{display:flex;gap:2px;border-radius:8px;overflow:hidden}
+  .treemap-block{display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;font-size:10px;text-align:center;padding:4px 2px;min-width:0;overflow:hidden}
+  .treemap-block b{font-size:13px;font-weight:900}
+  .treemap-block span{font-size:9px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  .legend-inline{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;font-size:11px;color:var(--grey05)}
+  .legend-inline i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .waffle-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;max-width:230px;margin:0 auto}
+  .waffle-grid i{display:block;aspect-ratio:1/1;border-radius:2px}
+  .cmp-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .cmp-row:last-child{margin-bottom:0}
+  .cmp-lbl{flex:0 0 128px;font-size:11px;color:var(--grey05);text-align:right;line-height:1.25}
+  .cmp-track{flex:1;background:var(--canvas);border-radius:6px;height:14px;overflow:hidden}
+  .cmp-fill{height:100%;background:var(--blue);border-radius:6px}
+  .cmp-val{flex:0 0 32px;font-size:11px;font-weight:800;color:var(--blue06)}
   .suppressed{font-size:12.5px;color:var(--grey03);font-style:italic;padding:20px 0;text-align:center}
   .methodology{background:var(--blue01);border-radius:10px;padding:16px;font-size:12.5px;line-height:1.6;color:var(--blue06)}
   .methodology b{color:var(--blue06)}
@@ -133,9 +150,10 @@
     .filters{max-width:1180px;margin:0 auto}
     nav{padding:0 calc((100% - 1180px)/2)}
   }
-  @media screen and (min-width:1240px){
-    .grid{grid-template-columns:repeat(3,1fr)}
-  }
+  /* capped at 2 columns everywhere — a 3rd column relies on the full
+     browser window width, which doesn't match the actual visible pane
+     when the dashboard sits inside an embedded/side-panel viewer, so a
+     3rd card was spilling off-screen even though the grid math was fine */
 
   /* ---- print / PDF factsheet: 6 A4 portrait pages, one per tab ---- */
   @media print{
@@ -163,6 +181,12 @@
     .stat .n{font-size:20px}
     .stat{padding:8px 10px}
     body{font-size:11px}
+    .treemap-block{font-size:8px}
+    .treemap-block b{font-size:10px}
+    .legend-inline{font-size:8.5px;gap:4px 8px}
+    .waffle-grid{max-width:150px}
+    .cmp-lbl{flex-basis:95px;font-size:9px}
+    .cmp-val{font-size:9px}
   }
 </style>
 </head>
@@ -582,6 +606,7 @@ function donutChart(canvasId, dataObj, field=null){
 // one case a diverging chart genuinely needs an axis for (labels alone
 // can't convey "which side is bigger"), so it keeps light center-zero
 // gridlines instead of printed value text.
+const ACCOMM_LENGTH_ORDER = ['less_1_mth','less_3_mth','less_6_mth','less_12_mth','more_12_mth','no_limit','when_long_term','dont_know'];
 const PYRAMID_ORDER = ['60+','35-59','18-34','5-17','0-4'];
 const PYRAMID_LABELS = {'60+':'60+','35-59':'35–59','18-34':'18–34','5-17':'5–17','0-4':'0–4'};
 function pyramidChart(canvasId, records){
@@ -632,6 +657,104 @@ function pyramidChart(canvasId, records){
       scales:{
         x:{stacked:true, min:-maxAbs, max:maxAbs, grid:{color:'#eef1f4'}, ticks:{callback:v=>Math.abs(v)+'%', font:{size:isPrint?8:9.5}}},
         y:{stacked:true, grid:{display:false}, ticks:{font:{size:isPrint?8.5:10.5}}}
+      }
+    }
+  });
+}
+
+// simplified treemap / segmented bar — one flex row of blocks sized by
+// share of total, each big enough for its own %+label, plus a full legend
+// underneath (small slices lose their in-block text, legend covers them)
+function proportionalStrip(containerId, dataObj, field, {height=110, printHeight=70}={}){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const entries = sorted(Object.entries(dataObj));
+  const total = entries.reduce((a,[,v])=>a+v,0);
+  if(total < MIN_CELL){ el.innerHTML = '<div class="suppressed">Insufficient sample</div>'; return; }
+  const isPrint = document.body.classList.contains('printing-all');
+  const rows = entries.map((e,i)=>{
+    const pct = Math.round(1000*e[1]/total)/10;
+    const label = L(e[0], field);
+    const showText = pct>=8;
+    return {pct, label, color:PALETTE[i%PALETTE.length], showText};
+  });
+  const blocks = rows.map(r=>`<div class="treemap-block" style="flex:${r.pct} 1 0;background:${r.color}" title="${r.label}: ${r.pct}%">${r.showText?`<b>${r.pct}%</b><span>${r.label}</span>`:''}</div>`).join('');
+  const legend = rows.map(r=>`<span><i style="background:${r.color}"></i>${r.label} ${r.pct}%</span>`).join('');
+  el.innerHTML = `<div class="treemap-row" style="height:${isPrint?printHeight:height}px">${blocks}</div><div class="legend-inline">${legend}</div>`;
+}
+
+// pictogram / waffle — 100 unit squares, one per percentage point, colored
+// by category (rounding fixed up on the largest slice so squares sum to 100)
+function waffleChart(containerId, dataObj, field){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const entries = sorted(Object.entries(dataObj));
+  const total = entries.reduce((a,[,v])=>a+v,0);
+  if(total < MIN_CELL){ el.innerHTML = '<div class="suppressed">Insufficient sample</div>'; return; }
+  const counts = entries.map(e=>Math.round(100*e[1]/total));
+  const diff = 100 - counts.reduce((a,b)=>a+b,0);
+  counts[0] = Math.max(0, counts[0]+diff);
+  const dots = [];
+  entries.forEach((e,i)=>{ for(let k=0;k<counts[i];k++) dots.push(i); });
+  const legend = entries.map((e,i)=>`<span><i style="background:${PALETTE[i%PALETTE.length]}"></i>${L(e[0],field)} ${Math.round(1000*e[1]/total)/10}%</span>`).join('');
+  el.innerHTML = `<div class="waffle-grid">${dots.map(i=>`<i style="background:${PALETTE[i%PALETTE.length]}"></i>`).join('')}</div><div class="legend-inline">${legend}</div>`;
+}
+
+// comparison bars — one thin proportional track per group (eg household
+// type), used where the question is "how does X vary across groups" rather
+// than "what's the overall split"
+function comparisonBars(containerId, records, groupField, valueField, isPositive){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const groups = {};
+  records.forEach(r=>{
+    const g = r[groupField], v = r[valueField];
+    if(g===null||g===undefined||g==='' || v===null||v===undefined||v==='') return;
+    if(!groups[g]) groups[g] = {n:0,pos:0};
+    groups[g].n++;
+    if(isPositive(String(v))) groups[g].pos++;
+  });
+  const keys = Object.keys(groups).filter(k=>groups[k].n>=MIN_CELL).sort((a,b)=>groups[b].n-groups[a].n);
+  if(keys.length===0){ el.innerHTML = '<div class="suppressed">Insufficient sample</div>'; return; }
+  el.innerHTML = keys.map(k=>{
+    const pct = Math.round(100*groups[k].pos/groups[k].n);
+    return `<div class="cmp-row"><div class="cmp-lbl">${titleCase(k)}</div><div class="cmp-track"><div class="cmp-fill" style="width:${pct}%"></div></div><div class="cmp-val">${pct}%</div></div>`;
+  }).join('');
+}
+
+// time-series line — same dense-tick handling as the chronological bar
+// chart, but drawn as a line/area so departure & arrival read as trends
+function lineChart(canvasId, dataObj, {field=null, order=null}={}){
+  const formatter = (code)=>L(code, field);
+  const entries = order
+    ? order.filter(k=>k in dataObj).map(k=>[k,dataObj[k]])
+    : Object.entries(dataObj).sort((a,b)=>a[0]<b[0]?-1:1);
+  const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const ctx = document.getElementById(canvasId);
+  if(!ctx) return;
+  ctx.parentElement.querySelectorAll('.suppressed').forEach(n=>n.remove());
+  if(entries.length===0 || total < MIN_CELL){
+    const note = document.createElement('div');
+    note.className='suppressed'; note.textContent='Insufficient sample in this view';
+    ctx.style.display='none'; ctx.after(note);
+    return;
+  }
+  ctx.style.display='';
+  const isPrint = document.body.classList.contains('printing-all');
+  ctx.parentElement.style.height = (isPrint?140:200)+'px';
+  const dense = entries.length>10;
+  const maxTicksX = dense ? Math.max(6, Math.floor(ctx.parentElement.clientWidth/(isPrint?34:46))) : undefined;
+  const pctValues = entries.map(e=>Math.round(1000*e[1]/total)/10);
+  charts[canvasId] = new Chart(ctx, {
+    type:'line',
+    data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data:pctValues, borderColor:PALETTE[0], backgroundColor:PALETTE[0]+'26', fill:true, tension:.25, pointRadius:dense?0:3, pointBackgroundColor:PALETTE[0], borderWidth:2 }]},
+    options:{
+      maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}} },
+      scales:{
+        y:{ suggestedMax:Math.max(...pctValues,1)*1.2, ticks:{callback:v=>v+'%', font:{size:isPrint?8:9.5}}, grid:{color:'#eef1f4'} },
+        x:{ grid:{display:false}, ticks: dense ? {maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7.5:9.5}} : {font:{size:isPrint?8.5:10.5}} }
       }
     }
   });
@@ -725,7 +848,7 @@ function buildTabs(){
     </div>
     <div class="grid">
       <div class="card"><h3>Age &amp; gender of household members</h3><canvas id="c-pyramid"></canvas></div>
-      <div class="card"><h3>Household type</h3><canvas id="c-hhtype"></canvas></div>
+      <div class="card"><h3>Household type</h3><div id="c-hhtype"></div></div>
       <div class="card"><h3>Nationality</h3><canvas id="c-nationality"></canvas></div>
       <div class="card"><h3>Education level</h3><canvas id="c-educ"></canvas></div>
       <div class="card"><h3>Main activity before departure</h3><canvas id="c-activity"></canvas></div>
@@ -744,6 +867,7 @@ function buildTabs(){
       <div class="card"><h3>Top oblasts of origin</h3><canvas id="c-oblast"></canvas></div>
       <div class="card"><h3>Departure from Ukraine</h3><canvas id="c-departure"></canvas></div>
       <div class="card"><h3>Arrival to Moldova</h3><canvas id="c-arrival"></canvas></div>
+      <div class="card"><h3>Reasons for temporary visits to Ukraine</h3><canvas id="c-visitreason"></canvas></div>
     </div>
   </section>
 
@@ -756,8 +880,10 @@ function buildTabs(){
     </div>
     <div class="grid">
       <div class="card"><h3>Legal status in Moldova</h3><canvas id="c-legal"></canvas></div>
+      <div class="card"><h3>Previously held temporary protection status</h3><canvas id="c-tpprev"></canvas></div>
       <div class="card"><h3>Documents currently missing</h3><canvas id="c-missingdocs"></canvas></div>
-      <div class="card"><h3>Registration of vital events since arrival</h3><canvas id="c-vitalevents"></canvas></div>
+      <div class="card"><h3>Able to replace / renew missing documents</h3><div id="c-replacedocs"></div></div>
+      <div class="card"><h3>Registration of vital events since arrival</h3><div id="c-vitalevents"></div></div>
     </div>
   </section>
 
@@ -769,8 +895,11 @@ function buildTabs(){
       <div class="card stat"><div class="n" id="stat-noenrol">–</div><div class="lbl">HH with children have some not enrolled in school</div></div>
     </div>
     <div class="grid">
+      <div class="card"><h3>Barriers to family reunification / vital-event registration</h3><canvas id="c-reunifbarriers"></canvas></div>
       <div class="card"><h3>Current main activity in host country</h3><canvas id="c-workcoa"></canvas></div>
       <div class="card"><h3>Barriers to employment</h3><canvas id="c-diffwork"></canvas></div>
+      <div class="card"><h3>Qualification match with current job</h3><canvas id="c-qualmatch"></canvas></div>
+      <div class="card"><h3>Regularity of access to earnings (employed)</h3><div id="c-earnings"></div></div>
       <div class="card"><h3>Reasons children are not enrolled in school</h3><canvas id="c-notenrol"></canvas></div>
       <div class="card"><h3>Applied for social protection benefits</h3><canvas id="c-socprot"></canvas></div>
     </div>
@@ -785,8 +914,13 @@ function buildTabs(){
     </div>
     <div class="grid">
       <div class="card"><h3>Current accommodation</h3><canvas id="c-accomm"></canvas></div>
+      <div class="card"><h3>Anticipated length of stay in current accommodation</h3><canvas id="c-accomlength"></canvas></div>
       <div class="card"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
-      <div class="card"><h3>Access to childcare services</h3><canvas id="c-childcare"></canvas></div>
+      <div class="card"><h3>Information needs</h3><canvas id="c-infoneeds"></canvas></div>
+      <div class="card"><h3>Rental contract with landlord</h3><canvas id="c-rental"></canvas></div>
+      <div class="card"><h3>Reasons for lacking a rental contract</h3><canvas id="c-norentalwhy"></canvas></div>
+      <div class="card"><h3>Reasons for leaving current accommodation</h3><canvas id="c-leavewhy"></canvas></div>
+      <div class="card"><h3>Access to childcare services, by household type</h3><div id="c-childcarecmp"></div></div>
     </div>
   </section>
 
@@ -832,7 +966,7 @@ function renderAll(){
   const disab = pctFlag(VIEW,'disability', v=>['some_difficulty','lot_difficulty','cannot_do'].includes(v)); setStat('stat-disability', disab? disab.pct:null, disab?'%':'');
   const medcond = pctYes(VIEW,'medical_condition','yes'); setStat('stat-medcond', medcond? medcond.pct:null, medcond?'%':'');
   pyramidChart('c-pyramid', VIEW);
-  donutChart('c-hhtype', countBy(VIEW,'household_type'));
+  proportionalStrip('c-hhtype', countBy(VIEW,'household_type'));
   barChart('c-nationality', countBy(VIEW,'nationality'), {field:'nationality', top:6});
   barChart('c-educ', countBy(VIEW,'educ_level'), {field:'educ_level'});
   barChart('c-activity', countBy(VIEW,'resp_activity'), {field:'resp_activity'});
@@ -843,23 +977,29 @@ function renderAll(){
   const returndiff = pctYes(VIEW,'temp_return_difficulties','yes'); setStat('stat-returndiff', returndiff? returndiff.pct:null, returndiff?'%':'');
   const shortvisit = pctYes(VIEW,'return_stay','less_than_two_weeks'); setStat('stat-shortvisit', shortvisit? shortvisit.pct:null, shortvisit?'%':'');
   barChart('c-oblast', countBy(VIEW,'oblast_orig'), {field:'oblast_orig'});
-  barChart('c-departure', countBy(VIEW,'departure_month'), {horizontal:false, chronological:true});
-  barChart('c-arrival', countBy(VIEW,'arrival_month'), {horizontal:false, chronological:true});
+  lineChart('c-departure', countBy(VIEW,'departure_month'));
+  lineChart('c-arrival', countBy(VIEW,'arrival_month'));
+  barChart('c-visitreason', countBy(VIEW,'temp_return_reason'), {field:'temp_return_reason', top:8});
 
   // ---- Access to Rights #1 ----
   const lackdoc = pctYes(VIEW,'lack_documentation','yes'); setStat('stat-lackdoc', lackdoc? lackdoc.pct:null, lackdoc?'%':'');
   const docimpact = pctFlag(VIEW,'documents_affect', v=>v.split(' ').some(c=>!['no_specific_impact','prefer_no_answer'].includes(c))); setStat('stat-docimpact', docimpact? docimpact.pct:null, docimpact?'%':'');
   const tpdiff = pctYes(VIEW,'temp_protection_difficulty','yes'); setStat('stat-tpdiff', tpdiff? tpdiff.pct:null, tpdiff?'%':'');
   barChart('c-legal', countBy(VIEW,'temp_protection'), {field:'temp_protection', top:9});
+  donutChart('c-tpprev', countBy(VIEW,'tp_granted_previously'), 'tp_granted_previously');
   barChart('c-missingdocs', countBy(VIEW,'missing_docs',{multi:true}), {field:'missing_docs'});
-  donutChart('c-vitalevents', countBy(VIEW,'family_comp',{multi:true}), 'family_comp');
+  waffleChart('c-replacedocs', countBy(VIEW,'replacing_documentation'), 'replacing_documentation');
+  proportionalStrip('c-vitalevents', countBy(VIEW,'family_comp',{multi:true}), 'family_comp');
 
   // ---- Access to Rights #2 ----
   const reunif = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'reunification_support')); setStat('stat-reunif', reunif? reunif.pct:null, reunif?'%':'');
   const tracing = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'family_traig')); setStat('stat-tracing', tracing? tracing.pct:null, tracing?'%':'');
   const noenrol = pctFlag(VIEW,'school_enrol', v=>v==='no'||v==='yes_some'); setStat('stat-noenrol', noenrol? noenrol.pct:null, noenrol?'%':'');
+  barChart('c-reunifbarriers', countBy(VIEW,'family_comp_challenges',{multi:true}), {top:8, field:'family_comp_challenges'});
   barChart('c-workcoa', countBy(VIEW,'work_coa'), {field:'work_coa'});
   barChart('c-diffwork', countBy(VIEW,'diff_work',{multi:true}), {top:8, field:'diff_work'});
+  barChart('c-qualmatch', countBy(VIEW,'work_coa_qual'), {field:'work_coa_qual'});
+  proportionalStrip('c-earnings', countBy(VIEW,'access_earnings'), 'access_earnings');
   barChart('c-notenrol', countBy(VIEW,'not_enrol_reason',{multi:true}), {top:8, field:'not_enrol_reason'});
   barChart('c-socprot', countBy(VIEW,'social_prot_access',{multi:true}), {top:8, field:'social_prot_access'});
 
@@ -868,8 +1008,13 @@ function renderAll(){
   const leaveaccomm = pctYes(VIEW,'leave_accomm','yes'); setStat('stat-leaveaccomm', leaveaccomm? leaveaccomm.pct:null, leaveaccomm?'%':'');
   const childcare = pctYes(VIEW,'childcare_services','yes'); setStat('stat-childcare', childcare? childcare.pct:null, childcare?'%':'');
   donutChart('c-accomm', countBy(VIEW,'accomm_coa'), 'accomm_coa');
+  lineChart('c-accomlength', countBy(VIEW,'accomm_lenght'), {field:'accomm_lenght', order:ACCOMM_LENGTH_ORDER});
   barChart('c-needs', countBy(VIEW,'most_urgent_needs',{multi:true}), {field:'most_urgent_needs'});
-  donutChart('c-childcare', countBy(VIEW,'childcare_services'), 'childcare_services');
+  barChart('c-infoneeds', countBy(VIEW,'info_receive',{multi:true}), {top:8, field:'info_receive'});
+  donutChart('c-rental', countBy(VIEW,'rental_contract'), 'rental_contract');
+  barChart('c-norentalwhy', countBy(VIEW,'no_contract_why'), {field:'no_contract_why'});
+  barChart('c-leavewhy', countBy(VIEW,'leave_accomm_reason'), {field:'leave_accomm_reason'});
+  comparisonBars('c-childcarecmp', VIEW, 'household_type', 'childcare_services', v=>v==='yes');
 }
 
 boot();
