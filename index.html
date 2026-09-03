@@ -64,15 +64,28 @@
   .filters button.reset:hover{border-color:var(--red);color:var(--red);background:#fdf3f1}
   .filters button.reset:hover svg{stroke:var(--red)}
   /* floating PDF download action */
-  .fab-print{position:fixed;right:18px;bottom:18px;z-index:30;display:flex;align-items:center;gap:9px;border:none;background:var(--blue);color:#fff;border-radius:30px;padding:13px 20px 13px 16px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 4px 16px rgba(11,55,84,.28);transition:background .15s,transform .15s}
-  .fab-print svg{width:18px;height:18px;stroke:#fff;flex-shrink:0}
+  /* icon-only, small — a full text pill sat right on top of whatever chart
+     happened to scroll into the bottom-right corner (position:fixed floats
+     over content, not beside it), so keep its footprint to a minimum;
+     the label appears in a tooltip on hover instead of taking up space */
+  .fab-print{position:fixed;right:16px;bottom:16px;z-index:30;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border:none;border-radius:50%;background:var(--blue);color:#fff;font-family:inherit;cursor:pointer;box-shadow:0 4px 16px rgba(11,55,84,.28);transition:background .15s,transform .15s}
+  .fab-print svg{width:19px;height:19px;stroke:#fff;flex-shrink:0}
   .fab-print:hover{background:var(--blue05);transform:translateY(-1px)}
-  .fab-print .fab-label{white-space:nowrap}
   @media print{ .fab-print{display:none !important} }
   main{padding:18px 16px 40px;max-width:640px;margin:0 auto}
-  .grid{display:grid;gap:12px;align-items:start}
+  /* masonry, not a row grid: cards are wildly different heights (a 3-bar
+     chart next to a 9-bar one), and a row grid locks every card in a row to
+     the tallest of them, leaving big ragged holes under the short ones.
+     CSS multicol packs them tight instead. */
+  .grid{display:flex;gap:12px;align-items:flex-start}
+  .mcol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:12px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
-  .grid .card{margin-bottom:0}
+  .grid .card{margin-bottom:0;width:100%;break-inside:avoid}
+  /* every canvas gets its own sized box. The chart-sizing JS sets the height
+     of the canvas's PARENT — if that parent is the card, the card's title and
+     padding eat into the chart's space and the chart renders squeezed with
+     dead space under it. This wrapper is the thing that gets sized. */
+  .chart-wrap{position:relative;width:100%}
   .card h3{margin:0 0 12px;font-size:13px;font-weight:900;color:var(--blue06);letter-spacing:-.01em}
   .stat{padding:16px;position:relative;overflow:hidden}
   .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}
@@ -142,7 +155,6 @@
      factsheet (below) stays a fixed A4 portrait page regardless ---- */
   @media screen and (min-width:860px){
     main{max-width:1180px}
-    .grid{grid-template-columns:repeat(2,1fr)}
     .stat-row{grid-template-columns:repeat(3,1fr)}
     .icon-stats{grid-template-columns:repeat(2,1fr);max-width:420px}
     .kf-side{flex:0 0 170px}
@@ -167,7 +179,10 @@
     #tabs>section:last-child{page-break-after:auto; break-after:auto}
     /* screen layout is a single portrait column; print goes back to a
        2-column grid so the A4 factsheet still packs 6 pages */
-    .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+    /* multicol paginates unpredictably across page breaks — print goes back
+       to an explicit 2-column grid so the A4 factsheet stays predictable */
+    .grid{display:flex; gap:8px}
+    .mcol{gap:8px}
     .stat-row{display:grid; grid-template-columns:repeat(3,1fr)}
     .card{break-inside:avoid; box-shadow:none; padding:10px; margin-bottom:0}
     .card h3{margin:0 0 8px; font-size:10.5px}
@@ -243,9 +258,8 @@
   UNHCR Operational Portal for the Ukraine Emergency
 </footer>
 
-<button class="fab-print" id="print-btn">
+<button class="fab-print" id="print-btn" title="Download PDF factsheet" aria-label="Download PDF factsheet">
   <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-  <span class="fab-label">PDF factsheet</span>
 </button>
 
 <script>
@@ -525,15 +539,19 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
   // 6-8 category charts still fit their A4 card without bleeding into the
   // next row or pushing the page to overflow.
   const isPrint = document.body.classList.contains('printing-all');
-  const wrapMax = horizontal ? (isPrint ? 18 : (ctx.parentElement.clientWidth > 340 ? 30 : 20)) : 999;
+  // a chart on a hidden tab measures 0px wide, which used to make it pick the
+  // cramped narrow-screen wrap and truncate labels that had plenty of room —
+  // fall back to a typical card width instead of treating 0 as "narrow"
+  const cw = ctx.parentElement.clientWidth || 500;
+  const wrapMax = horizontal ? (isPrint ? 18 : (cw > 340 ? 24 : 18)) : 999;
   // dense chronological x-axis (eg 30+ months) needs rotated, thinned ticks
   // or labels collide into an illegible smear — autoSkip alone isn't enough
   // once font+rotation are fixed, so cap tick count off container width too.
   const denseX = !horizontal && entries.length > 10;
-  const maxTicksX = denseX ? Math.max(6, Math.floor(ctx.parentElement.clientWidth / (isPrint?34:46))) : undefined;
+  const maxTicksX = denseX ? Math.max(6, Math.floor(cw / (isPrint?34:46))) : undefined;
   const tickFont = isPrint ? 8.5 : 10.5;
   const lineH = isPrint ? 10 : 12;
-  const wrappedLabels = entries.map(e=>wrapLabel(formatter(e[0]), wrapMax, isPrint?2:3));
+  const wrappedLabels = entries.map(e=>wrapLabel(formatter(e[0]), wrapMax, 2));
   // size the chart to how many bars it has, rather than a fixed height for
   // every card. Chart.js gives every category row on a y-axis the SAME
   // height (sized to the tallest tick label), so the row height here must
@@ -542,8 +560,12 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
   // label happened to wrap onto more lines than the rest.
   if(horizontal){
     const maxLines = Math.max(1, ...wrappedLabels.map(l=>Array.isArray(l)?l.length:1));
-    const rowUnit = (isPrint?16:20) + maxLines*lineH;
-    ctx.parentElement.style.height = Math.max(isPrint?70:100, entries.length*rowUnit+(isPrint?10:18))+'px';
+    // a row only needs to be as tall as the taller of (the bar itself) and
+    // (its label block) — adding the two together is what left every chart
+    // padded out with dead space between bars
+    const barRow = isPrint ? 20 : 30;
+    const rowUnit = Math.max(barRow, maxLines*lineH + (isPrint?6:10));
+    ctx.parentElement.style.height = Math.max(isPrint?70:90, entries.length*rowUnit+(isPrint?10:16))+'px';
   } else if(denseX){
     ctx.parentElement.style.height = (isPrint?150:220)+'px';
   }
@@ -633,7 +655,19 @@ function pyramidChart(canvasId, records){
   }
   ctx.style.display='';
   const isPrint = document.body.classList.contains('printing-all');
-  ctx.parentElement.style.height = (isPrint?140:200)+'px';
+  ctx.parentElement.style.height = (isPrint?130:190)+'px';
+  // legend as real markup under the chart, matching the treemap/waffle
+  // legends — Chart.js's own legend floats inside the canvas centred on the
+  // full width (not on the plot area), so it sits visibly off-centre next to
+  // the y-axis labels and eats chart height
+  const wrap = ctx.parentElement;
+  let lg = wrap.nextElementSibling;
+  if(!lg || !lg.classList.contains('legend-inline')){
+    lg = document.createElement('div');
+    lg.className = 'legend-inline';
+    wrap.after(lg);
+  }
+  lg.innerHTML = `<span><i style="background:${PALETTE[1]}"></i>Male</span><span><i style="background:${PALETTE[0]}"></i>Female</span>`;
   const maleVals = PYRAMID_ORDER.map(k=>-Math.round(1000*male[k]/total)/10);
   const femaleVals = PYRAMID_ORDER.map(k=>Math.round(1000*female[k]/total)/10);
   const rawMax = Math.max(...maleVals.map(Math.abs), ...femaleVals, 2);
@@ -651,7 +685,7 @@ function pyramidChart(canvasId, records){
       indexAxis:'y', maintainAspectRatio:false,
       layout:{padding:{left:6,right:6}},
       plugins:{
-        legend:{position:'bottom', labels:{boxWidth:10, padding:10, font:{size:isPrint?8.5:11}}},
+        legend:{display:false},
         tooltip:{callbacks:{label:(c)=>Math.abs(c.raw)+'%'}}
       },
       scales:{
@@ -744,7 +778,7 @@ function lineChart(canvasId, dataObj, {field=null, order=null}={}){
   const isPrint = document.body.classList.contains('printing-all');
   ctx.parentElement.style.height = (isPrint?140:200)+'px';
   const dense = entries.length>10;
-  const maxTicksX = dense ? Math.max(6, Math.floor(ctx.parentElement.clientWidth/(isPrint?34:46))) : undefined;
+  const maxTicksX = dense ? Math.max(6, Math.floor((ctx.parentElement.clientWidth||500)/(isPrint?34:46))) : undefined;
   const pctValues = entries.map(e=>Math.round(1000*e[1]/total)/10);
   charts[canvasId] = new Chart(ctx, {
     type:'line',
@@ -793,6 +827,7 @@ function buildTabs(){
     b.classList.add('active');
     document.querySelectorAll('#tabs > section').forEach(s=>s.classList.remove('active'));
     document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+    layoutMasonry(); // this tab's cards are measurable only now that it's visible
   });
 
   const tabs = document.getElementById('tabs');
@@ -847,12 +882,12 @@ function buildTabs(){
       <div class="card stat"><div class="n" id="stat-medcond">–</div><div class="lbl">of HH have a serious medical condition</div></div>
     </div>
     <div class="grid">
-      <div class="card"><h3>Age &amp; gender of household members</h3><canvas id="c-pyramid"></canvas></div>
+      <div class="card"><h3>Age &amp; gender of household members</h3><div class="chart-wrap"><canvas id="c-pyramid"></canvas></div></div>
       <div class="card"><h3>Household type</h3><div id="c-hhtype"></div></div>
-      <div class="card"><h3>Nationality</h3><canvas id="c-nationality"></canvas></div>
-      <div class="card"><h3>Education level</h3><canvas id="c-educ"></canvas></div>
-      <div class="card"><h3>Main activity before departure</h3><canvas id="c-activity"></canvas></div>
-      <div class="card"><h3>Languages spoken at home</h3><canvas id="c-lang"></canvas></div>
+      <div class="card"><h3>Nationality</h3><div class="chart-wrap"><canvas id="c-nationality"></canvas></div></div>
+      <div class="card"><h3>Education level</h3><div class="chart-wrap"><canvas id="c-educ"></canvas></div></div>
+      <div class="card"><h3>Main activity before departure</h3><div class="chart-wrap"><canvas id="c-activity"></canvas></div></div>
+      <div class="card"><h3>Languages spoken at home</h3><div class="chart-wrap"><canvas id="c-lang"></canvas></div></div>
     </div>
   </section>
 
@@ -864,10 +899,10 @@ function buildTabs(){
       <div class="card stat"><div class="n" id="stat-shortvisit">–</div><div class="lbl">of visits lasted under two weeks</div></div>
     </div>
     <div class="grid">
-      <div class="card"><h3>Top oblasts of origin</h3><canvas id="c-oblast"></canvas></div>
-      <div class="card"><h3>Departure from Ukraine</h3><canvas id="c-departure"></canvas></div>
-      <div class="card"><h3>Arrival to Moldova</h3><canvas id="c-arrival"></canvas></div>
-      <div class="card"><h3>Reasons for temporary visits to Ukraine</h3><canvas id="c-visitreason"></canvas></div>
+      <div class="card"><h3>Top oblasts of origin</h3><div class="chart-wrap"><canvas id="c-oblast"></canvas></div></div>
+      <div class="card"><h3>Departure from Ukraine</h3><div class="chart-wrap"><canvas id="c-departure"></canvas></div></div>
+      <div class="card"><h3>Arrival to Moldova</h3><div class="chart-wrap"><canvas id="c-arrival"></canvas></div></div>
+      <div class="card"><h3>Reasons for temporary visits to Ukraine</h3><div class="chart-wrap"><canvas id="c-visitreason"></canvas></div></div>
     </div>
   </section>
 
@@ -879,9 +914,9 @@ function buildTabs(){
       <div class="card stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">had difficulty in the TP application</div></div>
     </div>
     <div class="grid">
-      <div class="card"><h3>Legal status in Moldova</h3><canvas id="c-legal"></canvas></div>
-      <div class="card"><h3>Previously held temporary protection status</h3><canvas id="c-tpprev"></canvas></div>
-      <div class="card"><h3>Documents currently missing</h3><canvas id="c-missingdocs"></canvas></div>
+      <div class="card"><h3>Legal status in Moldova</h3><div class="chart-wrap"><canvas id="c-legal"></canvas></div></div>
+      <div class="card"><h3>Previously held temporary protection status</h3><div class="chart-wrap"><canvas id="c-tpprev"></canvas></div></div>
+      <div class="card"><h3>Documents currently missing</h3><div class="chart-wrap"><canvas id="c-missingdocs"></canvas></div></div>
       <div class="card"><h3>Able to replace / renew missing documents</h3><div id="c-replacedocs"></div></div>
       <div class="card"><h3>Registration of vital events since arrival</h3><div id="c-vitalevents"></div></div>
     </div>
@@ -895,13 +930,13 @@ function buildTabs(){
       <div class="card stat"><div class="n" id="stat-noenrol">–</div><div class="lbl">HH with children have some not enrolled in school</div></div>
     </div>
     <div class="grid">
-      <div class="card"><h3>Barriers to family reunification / vital-event registration</h3><canvas id="c-reunifbarriers"></canvas></div>
-      <div class="card"><h3>Current main activity in host country</h3><canvas id="c-workcoa"></canvas></div>
-      <div class="card"><h3>Barriers to employment</h3><canvas id="c-diffwork"></canvas></div>
-      <div class="card"><h3>Qualification match with current job</h3><canvas id="c-qualmatch"></canvas></div>
+      <div class="card"><h3>Barriers to family reunification / vital-event registration</h3><div class="chart-wrap"><canvas id="c-reunifbarriers"></canvas></div></div>
+      <div class="card"><h3>Current main activity in host country</h3><div class="chart-wrap"><canvas id="c-workcoa"></canvas></div></div>
+      <div class="card"><h3>Barriers to employment</h3><div class="chart-wrap"><canvas id="c-diffwork"></canvas></div></div>
+      <div class="card"><h3>Qualification match with current job</h3><div class="chart-wrap"><canvas id="c-qualmatch"></canvas></div></div>
       <div class="card"><h3>Regularity of access to earnings (employed)</h3><div id="c-earnings"></div></div>
-      <div class="card"><h3>Reasons children are not enrolled in school</h3><canvas id="c-notenrol"></canvas></div>
-      <div class="card"><h3>Applied for social protection benefits</h3><canvas id="c-socprot"></canvas></div>
+      <div class="card"><h3>Reasons children are not enrolled in school</h3><div class="chart-wrap"><canvas id="c-notenrol"></canvas></div></div>
+      <div class="card"><h3>Applied for social protection benefits</h3><div class="chart-wrap"><canvas id="c-socprot"></canvas></div></div>
     </div>
   </section>
 
@@ -913,19 +948,58 @@ function buildTabs(){
       <div class="card stat"><div class="n" id="stat-childcare">–</div><div class="lbl">of HH with young children access childcare services</div></div>
     </div>
     <div class="grid">
-      <div class="card"><h3>Current accommodation</h3><canvas id="c-accomm"></canvas></div>
-      <div class="card"><h3>Anticipated length of stay in current accommodation</h3><canvas id="c-accomlength"></canvas></div>
-      <div class="card"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
-      <div class="card"><h3>Information needs</h3><canvas id="c-infoneeds"></canvas></div>
-      <div class="card"><h3>Rental contract with landlord</h3><canvas id="c-rental"></canvas></div>
-      <div class="card"><h3>Reasons for lacking a rental contract</h3><canvas id="c-norentalwhy"></canvas></div>
-      <div class="card"><h3>Reasons for leaving current accommodation</h3><canvas id="c-leavewhy"></canvas></div>
+      <div class="card"><h3>Current accommodation</h3><div class="chart-wrap"><canvas id="c-accomm"></canvas></div></div>
+      <div class="card"><h3>Anticipated length of stay in current accommodation</h3><div class="chart-wrap"><canvas id="c-accomlength"></canvas></div></div>
+      <div class="card"><h3>Most urgent needs</h3><div class="chart-wrap"><canvas id="c-needs"></canvas></div></div>
+      <div class="card"><h3>Information needs</h3><div class="chart-wrap"><canvas id="c-infoneeds"></canvas></div></div>
+      <div class="card"><h3>Rental contract with landlord</h3><div class="chart-wrap"><canvas id="c-rental"></canvas></div></div>
+      <div class="card"><h3>Reasons for lacking a rental contract</h3><div class="chart-wrap"><canvas id="c-norentalwhy"></canvas></div></div>
+      <div class="card"><h3>Reasons for leaving current accommodation</h3><div class="chart-wrap"><canvas id="c-leavewhy"></canvas></div></div>
       <div class="card"><h3>Access to childcare services, by household type</h3><div id="c-childcarecmp"></div></div>
     </div>
   </section>
 
   `;
 }
+
+// ---------- masonry ----------
+// CSS multicol balances badly when items can't be split (one 9-bar chart in a
+// column and three short ones in the other), so columns are filled here
+// instead: each card goes to whichever column is currently shortest. Cards are
+// kept in a stable list so re-layouts don't shuffle them arbitrarily.
+const MASONRY_CARDS = new WeakMap();
+function layoutMasonry(){
+  const isPrint = document.body.classList.contains('printing-all');
+  const cols = (isPrint || window.innerWidth >= 860) ? 2 : 1;
+  document.querySelectorAll('.grid').forEach(grid=>{
+    // a hidden tab measures every card at 0px, which would dump them all into
+    // the first column — leave it alone and lay it out when its tab is shown
+    if(!isPrint && grid.offsetParent === null) return;
+    let cards = MASONRY_CARDS.get(grid);
+    if(!cards){
+      cards = Array.from(grid.querySelectorAll(':scope > .card, :scope > .mcol > .card'));
+      MASONRY_CARDS.set(grid, cards);
+    }
+    grid.textContent = '';
+    const colEls = [];
+    for(let i=0;i<cols;i++){
+      const c = document.createElement('div');
+      c.className = 'mcol';
+      grid.appendChild(c);
+      colEls.push(c);
+    }
+    cards.forEach(card=>{
+      let target = colEls[0];
+      for(const c of colEls){ if(c.offsetHeight < target.offsetHeight) target = c; }
+      target.appendChild(card);
+    });
+  });
+}
+let masonryTimer = null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(masonryTimer);
+  masonryTimer = setTimeout(layoutMasonry, 150);
+});
 
 function avg(records, field){
   const vals = records.map(r=>r[field]).filter(v=>typeof v==='number');
@@ -1015,6 +1089,8 @@ function renderAll(){
   barChart('c-norentalwhy', countBy(VIEW,'no_contract_why'), {field:'no_contract_why'});
   barChart('c-leavewhy', countBy(VIEW,'leave_accomm_reason'), {field:'leave_accomm_reason'});
   comparisonBars('c-childcarecmp', VIEW, 'household_type', 'childcare_services', v=>v==='yes');
+
+  layoutMasonry(); // card heights just changed — repack the columns
 }
 
 boot();
