@@ -11,71 +11,92 @@
 <style>
   /* UNHCR dataviz brand palette — https://dataviz.unhcr.org/guidance/ */
   :root{
-    --unhcr-blue:#0072bc; --unhcr-blue-dark:#0b3754; --unhcr-blue-light:#cde3f1;
-    --unhcr-yellow:#ffc740; --unhcr-green:#32c189; --unhcr-cyan:#6cd8fd;
-    --unhcr-red:#d25a45; --unhcr-purple:#a097e3; --unhcr-brown:#7c3c36; --unhcr-grey:#bfbfbf;
-    --gray-900:#1c2530; --gray-700:#4a5560; --gray-400:#8b96a1; --gray-200:#e2e6ea; --gray-100:#f4f6f8;
-    --bg:#f4f6f8; --card:#ffffff; --text:var(--gray-900); --sub:var(--gray-700);
-    --border:var(--gray-200);
+    --blue:#0072bc; --blue06:#0b3754; --blue05:#05568b; --blue04:#0072bc;
+    --blue03:#4f9ed0; --blue02:#8fc1e1; --blue01:#cde3f1;
+    --yellow:#ffc740; --green:#32c189; --cyan:#6cd8fd; --red:#d25a45;
+    --purple:#a097e3; --brown:#7c3c36;
+    --grey01:#e5e5e5; --grey02:#bfbfbf; --grey03:#999; --grey04:#737373; --grey05:#4d4d4d; --grey06:#262626;
+    --ink:#1a1a1a; --canvas:#f5f8fb; --card:#ffffff; --line:#e2e8ef;
+    --shadow:0 1px 2px rgba(11,55,84,.06),0 3px 14px rgba(11,55,84,.05);
+    --f:'Lato',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:'Lato',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:14px}
-  header{background:var(--unhcr-blue);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  header{background:linear-gradient(135deg,var(--blue06),var(--blue));color:#fff;padding:16px 20px;border-bottom:3px solid var(--yellow);position:sticky;top:0;z-index:20}
   header .title-block{display:flex;align-items:center;gap:12px}
-  header .unhcr-logo{height:34px;width:auto;display:block}
-  header h1{margin:0;font-size:19px;font-weight:700}
-  header .subtitle{margin:2px 0 0;font-size:12px;color:#dceaf6}
-  nav{display:flex;flex-wrap:wrap;gap:6px;background:var(--unhcr-blue-dark);padding:10px;justify-content:center}
-  nav button{background:rgba(255,255,255,.08);border:1px solid transparent;color:#c7d9e8;padding:8px 14px;font-size:12.5px;cursor:pointer;white-space:nowrap;border-radius:20px;font-family:inherit;font-weight:600}
-  nav button.active{color:var(--unhcr-blue-dark);background:var(--unhcr-yellow);font-weight:800}
-  nav button:hover:not(.active){color:#fff;background:rgba(255,255,255,.18)}
-  .filters{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
-  .filters label{font-size:10.5px;color:var(--sub);display:block;margin-bottom:2px}
-  .filters select{font-size:12.5px;padding:5px 6px;border:1px solid var(--border);border-radius:6px;background:#fff;width:100%;font-family:inherit}
+  header .unhcr-logo{height:30px;width:auto;display:block}
+  header h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.01em}
+  header .subtitle{margin:2px 0 0;font-size:11.5px;color:var(--blue01)}
+  nav{display:flex;flex-wrap:wrap;gap:2px;background:#fff;padding:0 8px;justify-content:center;border-bottom:1px solid var(--line);position:sticky;top:63px;z-index:19;overflow-x:auto}
+  nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--grey04);padding:11px 12px 9px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:700;transition:color .15s,border-color .15s}
+  nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
+  nav button:hover:not(.active){color:var(--blue05)}
+  .filters{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:100px;z-index:5}
+  .filters label{font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--grey04);display:block;margin-bottom:4px}
+  .filters select{font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;width:100%;font-family:inherit;color:var(--ink)}
+  .filters select:focus{outline:2px solid var(--blue02);outline-offset:0;border-color:var(--blue)}
   .filters .filter-field{flex:1 1 auto;min-width:118px}
-  .filters .sample{width:100%;font-size:12px;color:var(--sub);text-align:center;order:99}
-  .filters .sample b{color:var(--unhcr-blue);font-size:14px}
+  .filters .sample{width:100%;font-size:12px;color:var(--grey04);text-align:center;order:99}
+  .filters .sample b{color:var(--blue);font-size:14px}
   .filters .btn-row{display:flex;gap:8px;width:100%}
   .filters button{font-family:inherit}
-  .filters button.reset{flex:1;border:1px solid var(--border);background:#fff;border-radius:6px;padding:7px 10px;font-size:12px;cursor:pointer;color:var(--sub)}
-  .filters button.print-btn{flex:2;border:none;background:var(--unhcr-blue);color:#fff;border-radius:6px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer}
-  .filters button.print-btn:hover{background:var(--unhcr-blue-dark)}
-  main{padding:16px;max-width:640px;margin:0 auto}
-  .grid{display:block}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px}
-  .card h3{margin:0 0 12px;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:#fff;font-weight:700;background:var(--gray-700);padding:8px 10px;border-radius:4px 4px 0 0;margin:-16px -16px 12px}
-  .stat{padding:14px 16px;border-top:3px solid var(--unhcr-blue)}
-  .stat .n{font-size:28px;font-weight:900;color:var(--unhcr-blue);line-height:1.1}
-  .stat .lbl{font-size:12px;color:var(--sub);margin-top:4px}
-  .stat-row{display:flex;gap:10px;margin-bottom:14px}
-  .stat-row .card{flex:1;margin-bottom:0;padding:12px}
-  .kf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
-  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;border-top:3px solid var(--unhcr-yellow);padding:12px 10px}
+  .filters button.reset{flex:1;border:1px solid var(--line);background:#fff;border-radius:6px;padding:8px 10px;font-size:12px;cursor:pointer;color:var(--grey05);transition:.15s}
+  .filters button.reset:hover{border-color:var(--red);color:var(--red)}
+  .filters button.print-btn{flex:2;border:none;background:var(--blue);color:#fff;border-radius:6px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .15s}
+  .filters button.print-btn:hover{background:var(--blue05)}
+  main{padding:18px 16px 40px;max-width:640px;margin:0 auto}
+  .grid{display:grid;gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+  .card h3{margin:0 0 12px;font-size:13px;font-weight:900;color:var(--blue06);letter-spacing:-.01em}
+  .stat{padding:16px;position:relative;overflow:hidden}
+  .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}
+  .stat .n{font-size:26px;font-weight:900;color:var(--blue06);line-height:1}
+  .stat .lbl{font-size:11.5px;color:var(--grey04);margin-top:6px;font-weight:700}
+  .stat-row{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
+  .stat-row .card{margin-bottom:0}
+  .kf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;padding:14px 10px;position:relative}
+  .gauge::before{content:"";position:absolute;left:0;top:0;right:0;height:4px;background:var(--yellow);border-radius:12px 12px 0 0}
   .gauge canvas{max-height:80px}
   .card canvas{max-width:100% !important}
-  .gauge .pct{font-size:19px;font-weight:900;color:var(--unhcr-blue);margin-top:-52px}
-  .gauge .cap{font-size:11px;color:var(--sub);margin-top:24px;line-height:1.3}
-  .note{font-size:11px;color:var(--gray-400);margin-top:8px}
-  .suppressed{font-size:12.5px;color:var(--gray-400);font-style:italic;padding:20px 0;text-align:center}
-  .methodology{background:var(--unhcr-blue-light);border:1px solid #b7d6ec;border-radius:8px;padding:16px;font-size:13px;line-height:1.6;color:var(--gray-900)}
-  .methodology b{color:var(--unhcr-blue-dark)}
-  .privacy-badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--gray-700);background:var(--gray-100);border:1px solid var(--border);border-radius:20px;padding:4px 10px;margin-top:10px}
-  .privacy-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--unhcr-green)}
-  .page-bar{background:var(--unhcr-blue-dark);color:#fff;font-weight:700;font-size:13px;letter-spacing:.03em;text-transform:uppercase;padding:9px 14px;border-radius:6px;margin-bottom:14px}
+  .gauge .pct{font-size:19px;font-weight:900;color:var(--blue06);margin-top:-52px}
+  .gauge .cap{font-size:11px;color:var(--grey04);margin-top:24px;line-height:1.3}
+  .note{font-size:11px;color:var(--grey03);margin-top:8px}
+  .suppressed{font-size:12.5px;color:var(--grey03);font-style:italic;padding:20px 0;text-align:center}
+  .methodology{background:var(--blue01);border-radius:10px;padding:16px;font-size:12.5px;line-height:1.6;color:var(--blue06)}
+  .methodology b{color:var(--blue06)}
+  .privacy-badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--grey05);background:var(--canvas);border:1px solid var(--line);border-radius:20px;padding:4px 10px;margin-top:10px}
+  .privacy-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .section-eyebrow{font-size:10.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:2px}
+  .page-bar{font-size:19px;font-weight:900;color:var(--blue06);letter-spacing:-.01em;margin-bottom:12px}
+  .intro-text{font-size:13px;line-height:1.6;color:var(--grey05);margin-bottom:14px}
+  .intro-text b{color:var(--blue06)}
+  .icon-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .icon-stat{display:flex;align-items:center;gap:10px;background:var(--canvas);border-radius:10px;padding:10px 12px}
+  .icon-stat .icon{font-size:24px;line-height:1}
+  .icon-stat .n{font-size:19px;font-weight:900;color:var(--blue06);line-height:1.1}
+  .icon-stat .lbl{font-size:10.5px;color:var(--grey04);font-weight:700}
+  .stat-list{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;margin-bottom:6px}
+  .stat-list .item{min-width:0}
+  .stat-list .n{font-size:24px;font-weight:900;color:var(--blue);line-height:1.1}
+  .stat-list .lbl{font-size:11px;color:var(--grey04);margin-top:2px;font-weight:600}
+  .ack-box{background:var(--canvas);border-radius:10px;padding:14px;font-size:12px;line-height:1.6;color:var(--grey05);margin-top:14px}
+  .ack-box h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);font-weight:900}
+  .gauge .cap b{color:var(--blue05)}
   #tabs>section{display:none}
   #tabs>section.active{display:block}
   /* forced on briefly (via JS) right before window.print() so every chart
      has a real, non-zero-size canvas to draw into before print rasterizes —
      the print media query alone reflows too late for Chart.js to catch */
   body.printing-all #tabs>section{display:block}
-  footer{padding:14px 24px;font-size:11px;color:var(--gray-400);text-align:center}
+  footer{padding:16px 24px;font-size:11px;color:var(--grey03);text-align:center}
 
   /* ---- print / PDF factsheet: 6 A4 portrait pages, one per tab ---- */
   @media print{
     @page{ size:A4 portrait; margin:12mm; }
     body{background:#fff}
     nav, .filters, footer{display:none !important}
-    header{background:var(--unhcr-blue) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+    header{background:var(--blue06) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; position:static}
     main{padding:0;max-width:none}
     #tabs>section{display:block !important; page-break-after:always; break-after:page}
     #tabs>section:last-child{page-break-after:auto; break-after:auto}
@@ -84,8 +105,8 @@
     .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
     .stat-row{display:grid; grid-template-columns:repeat(3,1fr)}
     .card{break-inside:avoid; box-shadow:none; padding:10px; margin-bottom:0}
-    .card h3{-webkit-print-color-adjust:exact; print-color-adjust:exact; margin:-10px -10px 8px; font-size:10.5px; padding:6px 8px}
-    .page-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:12px; padding:7px 12px}
+    .card h3{margin:0 0 8px; font-size:10.5px}
+    .page-bar{font-size:14px; margin-bottom:8px}
     .kf-grid{grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:10px !important}
     .gauge .cap{font-size:9.5px}
     .gauge .pct{font-size:16px}
@@ -245,6 +266,28 @@ function pctTrue(records, field){
   const num = records.filter(r=>r[field]===true || r[field]==='true').length;
   return {pct: Math.round(100*num/records.length), n: records.length};
 }
+// generalized version of pctYes for multi-select fields (space-joined codes)
+// or any custom positive-match rule
+function pctFlag(records, field, isPositive){
+  const denom = records.filter(r=>r[field]!==null && r[field]!==undefined && r[field]!=='').length;
+  if(denom < MIN_CELL) return null;
+  const num = records.filter(r=>isPositive(String(r[field]))).length;
+  return {pct: Math.round(100*num/denom), n: denom};
+}
+const hasCode = (val, code) => val.split(' ').includes(code);
+// exact ages were dropped from the dataset for privacy (bucketed to
+// age_group only) — this is a rough estimate from band midpoints, not a
+// true average, and is labeled as such wherever it's shown
+const AGE_BAND_MIDPOINT = {'0-17':10, '18-24':21, '25-34':29.5, '35-59':45, '60+':66};
+function avgAgeEstimate(records){
+  const vals = records.map(r=>AGE_BAND_MIDPOINT[r.age_group]).filter(v=>v!==undefined);
+  if(vals.length < MIN_CELL) return null;
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+}
+function totalHouseholdMembers(records){
+  if(records.length < MIN_CELL) return null;
+  return records.reduce((a,r)=>a+(r.household_size||0),0);
+}
 function sorted(entries){ return entries.sort((a,b)=>b[1]-a[1]); }
 
 function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chronological=false}={}){
@@ -280,7 +323,7 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
       maintainAspectRatio: !horizontal,
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}} },
       scales: horizontal
-        ? { x:{ ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, y:{ grid:{display:false}, ticks:{autoSkip:false} } }
+        ? { x:{ ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:10.5}, callback:function(v){ const l=this.getLabelForValue(v); return l && l.length>26 ? l.slice(0,25)+'…' : l; } } } }
         : { y:{ ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false} } }
     }
   });
@@ -349,22 +392,50 @@ function buildTabs(){
   const tabs = document.getElementById('tabs');
   tabs.innerHTML = `
   <section id="tab-overview" class="active">
+    <div class="card">
+      <p class="intro-text">To strengthen and promote an evidence-based protection response, UNHCR and its partners in <b>Moldova</b> have been implementing a Protection Profiling and Monitoring exercise to regularly collect and analyze data about the profiles, protection risks and needs of refugees from Ukraine and monitor changes over time. This dashboard presents findings based on the interviews in the current filter.</p>
+      <div class="icon-stats">
+        <div class="icon-stat"><span class="icon">🧍</span><div><div class="n" id="stat-n">–</div><div class="lbl"># of respondents</div></div></div>
+        <div class="icon-stat"><span class="icon">🏠</span><div><div class="n" id="stat-hhmembers">–</div><div class="lbl"># of household members</div></div></div>
+      </div>
+      <div class="methodology" style="margin:0">
+        <b>Methodology.</b> Individual interviews are conducted in transit centers, reception centers, and UNHCR office premises. Trained enumerators collect data digitally using KoboToolbox, safely stored on UNHCR's server. Respondents are randomly selected to reduce bias (non-probability sampling); results should not be extrapolated to all refugees from Ukraine. Data is unweighted. Sample: 100% Moldova.
+      </div>
+    </div>
+
     <div class="page-bar">Key Findings</div>
+
+    <div class="card">
+      <div class="stat-list">
+        <div class="item"><div class="n" id="stat-nationality">–</div><div class="lbl">of respondents were Ukrainian nationals</div></div>
+        <div class="item"><div class="n" id="stat-gender">–</div><div class="lbl">of respondents were female</div></div>
+        <div class="item"><div class="n" id="stat-age">–</div><div class="lbl">est. average age*</div></div>
+        <div class="item"><div class="n" id="stat-hhsize">–</div><div class="lbl">average household size</div></div>
+      </div>
+      <p class="note">*Exact age isn't in this dataset (dropped for privacy, kept as age bands only) — estimated from age-band midpoints.</p>
+    </div>
+
     <div class="kf-grid">
-      <div class="card gauge"><canvas id="g-tp"></canvas><div class="pct"></div><div class="cap">granted temporary protection</div></div>
-      <div class="card gauge"><canvas id="g-female"></canvas><div class="pct"></div><div class="cap">of respondents are female</div></div>
-      <div class="card gauge"><canvas id="g-medical"></canvas><div class="pct"></div><div class="cap">households with a serious medical condition</div></div>
-      <div class="card gauge"><canvas id="g-remain"></canvas><div class="pct"></div><div class="cap">have immediate family remaining in Ukraine</div></div>
-      <div class="card gauge"><canvas id="g-needwork"></canvas><div class="pct"></div><div class="cap">employed with no work contract</div></div>
+      <div class="card gauge"><canvas id="g-tp"></canvas><div class="pct"></div><div class="cap">of respondents have been <b>granted temporary protection</b></div></div>
+      <div class="card gauge"><canvas id="g-medical"></canvas><div class="pct"></div><div class="cap">of households have a member with a <b>serious medical condition</b></div></div>
+      <div class="card gauge"><canvas id="g-docmissing"></canvas><div class="pct"></div><div class="cap">of households have a member whose <b>documentation is missing or expired</b></div></div>
+      <div class="card gauge"><canvas id="g-remain"></canvas><div class="pct"></div><div class="cap">have immediate family members who <b>remained in Ukraine</b></div></div>
+      <div class="card gauge"><canvas id="g-obstacles"></canvas><div class="pct"></div><div class="cap">of those have family facing <b>obstacles to reunite</b> in host country</div></div>
+      <div class="card gauge"><canvas id="g-visited"></canvas><div class="pct"></div><div class="cap">of respondents have <b>visited Ukraine</b> at least once since departure</div></div>
+      <div class="card gauge"><canvas id="g-returndiff"></canvas><div class="pct"></div><div class="cap">of visitors faced <b>difficulties returning</b> to the host country</div></div>
+      <div class="card gauge"><canvas id="g-socprot"></canvas><div class="pct"></div><div class="cap">have <b>applied for social protection</b> benefits in host country</div></div>
+      <div class="card gauge"><canvas id="g-needwork"></canvas><div class="pct"></div><div class="cap">of employed respondents <b>do not have</b> an employment contract</div></div>
+      <div class="card gauge"><canvas id="g-urgentneed"></canvas><div class="pct"></div><div class="cap">of respondents have at least one <b>urgent need</b></div></div>
     </div>
-    <div class="stat-row">
-      <div class="card stat"><div class="n" id="stat-n">–</div><div class="lbl"># of respondents in current filter</div></div>
-      <div class="card stat"><div class="n" id="stat-hhsize">–</div><div class="lbl">avg. household size</div></div>
-      <div class="card stat"><div class="n" id="stat-pwsn">–</div><div class="lbl">% households with PWSN</div></div>
-    </div>
+
     <div class="grid">
       <div class="card"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
       <div class="card"><h3>Current legal status</h3><canvas id="c-legal"></canvas></div>
+    </div>
+
+    <div class="ack-box">
+      <h4>Acknowledgements</h4>
+      We are grateful for the extensive involvement and support of UNHCR's partners: Charity Center for Refugees, Law Center for Advocates, INTERSOS and REACH. We are also grateful for the support of local authorities, civil society, international organizations and donors. Most importantly, UNHCR would like to acknowledge the resilience and strength of refugees from Ukraine, who continue to share with us their challenges, fears and hopes.
     </div>
   </section>
 
@@ -442,16 +513,30 @@ function setStat(id, value, suffix=''){ document.getElementById(id).textContent 
 
 function renderAll(){
   const n = VIEW.length;
-  // overview gauges
+  // overview gauges (10, matching the original Power BI Key Findings page)
   gauge('g-tp', pctYes(VIEW,'temp_protection','granted_tp'));
-  gauge('g-female', pctYes(VIEW,'resp_gender','female'));
   gauge('g-medical', pctYes(VIEW,'medical_condition','yes'));
+  gauge('g-docmissing', pctYes(VIEW,'missing_documentation','yes'));
   gauge('g-remain', pctYes(VIEW,'remain_in_ukraine','yes'));
+  gauge('g-obstacles', pctYes(VIEW,'obstacles_y_n','yes'));
+  gauge('g-visited', pctFlag(VIEW,'temp_return', v=>v==='yes_more'||v==='yes_once'));
+  gauge('g-returndiff', pctYes(VIEW,'temp_return_difficulties','yes'));
+  gauge('g-socprot', pctFlag(VIEW,'social_prot_access', v=>{
+    const codes = v.split(' ');
+    return codes.some(c=>!['not_applied','none_of_above','prefer_no_answer','do_not_know'].includes(c));
+  }));
   gauge('g-needwork', (()=>{ const employed = VIEW.filter(r=>r.work_coa==='employed_here'||r.work_coa==='employed_remote'||r.work_coa==='self_employed'); if(employed.length<MIN_CELL) return null; const noc = employed.filter(r=>r.work_coa_contract==='no'); return {pct:Math.round(100*noc.length/employed.length), n:employed.length}; })());
+  gauge('g-urgentneed', pctFlag(VIEW,'most_urgent_needs', v=>{
+    const codes = v.split(' ');
+    return codes.some(c=>!['none','prefer_no_answer'].includes(c));
+  }));
 
   setStat('stat-n', n);
+  setStat('stat-hhmembers', totalHouseholdMembers(VIEW));
+  const nat = pctFlag(VIEW,'nationality', v=>hasCode(v,'ukrainian')); setStat('stat-nationality', nat? nat.pct:null, nat?'%':'');
+  const gen = pctYes(VIEW,'resp_gender','female'); setStat('stat-gender', gen? gen.pct:null, gen?'%':'');
+  setStat('stat-age', avgAgeEstimate(VIEW));
   setStat('stat-hhsize', avg(VIEW,'household_size'));
-  const pwsn = pctTrue(VIEW,'pwsn'); setStat('stat-pwsn', pwsn? pwsn.pct : null, pwsn? '%':'');
 
   barChart('c-needs', countBy(VIEW,'most_urgent_needs',{multi:true}), {field:'most_urgent_needs'});
   barChart('c-legal', countBy(VIEW,'temp_protection'), {field:'temp_protection', top:9});
