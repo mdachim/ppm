@@ -72,6 +72,7 @@
   main{padding:18px 16px 40px;max-width:640px;margin:0 auto}
   .grid{display:grid;gap:12px;align-items:start}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+  .grid .card{margin-bottom:0}
   .card h3{margin:0 0 12px;font-size:13px;font-weight:900;color:var(--blue06);letter-spacing:-.01em}
   .stat{padding:16px;position:relative;overflow:hidden}
   .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}
@@ -432,7 +433,8 @@ function wrapLabel(str, maxLen=24, maxLines=3){
 // so gauges — which are also doughnuts under the hood — aren't affected) ----------
 const barValueLabels = {
   id: 'barValueLabels',
-  afterDatasetsDraw(chart){
+  afterDatasetsDraw(chart, args, opts){
+    if(opts && opts.skip) return;
     const {ctx} = chart;
     const meta = chart.getDatasetMeta(0);
     const horizontal = chart.options.indexAxis === 'y';
@@ -500,6 +502,11 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
   // next row or pushing the page to overflow.
   const isPrint = document.body.classList.contains('printing-all');
   const wrapMax = horizontal ? (isPrint ? 18 : (ctx.parentElement.clientWidth > 340 ? 30 : 20)) : 999;
+  // dense chronological x-axis (eg 30+ months) needs rotated, thinned ticks
+  // or labels collide into an illegible smear — autoSkip alone isn't enough
+  // once font+rotation are fixed, so cap tick count off container width too.
+  const denseX = !horizontal && entries.length > 10;
+  const maxTicksX = denseX ? Math.max(6, Math.floor(ctx.parentElement.clientWidth / (isPrint?34:46))) : undefined;
   const tickFont = isPrint ? 8.5 : 10.5;
   const lineH = isPrint ? 10 : 12;
   const wrappedLabels = entries.map(e=>wrapLabel(formatter(e[0]), wrapMax, isPrint?2:3));
@@ -513,6 +520,8 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
     const maxLines = Math.max(1, ...wrappedLabels.map(l=>Array.isArray(l)?l.length:1));
     const rowUnit = (isPrint?16:20) + maxLines*lineH;
     ctx.parentElement.style.height = Math.max(isPrint?70:100, entries.length*rowUnit+(isPrint?10:18))+'px';
+  } else if(denseX){
+    ctx.parentElement.style.height = (isPrint?150:220)+'px';
   }
   const pctValues = entries.map(e=>Math.round(1000*e[1]/total)/10);
   const maxPct = Math.max(...pctValues, 1);
@@ -525,12 +534,12 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
     },
     options: {
       indexAxis: horizontal ? 'y' : 'x',
-      maintainAspectRatio: !horizontal,
-      layout: { padding: horizontal ? {right:30} : {top:20} },
-      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}} },
+      maintainAspectRatio: !horizontal && !denseX,
+      layout: { padding: horizontal ? {right:30} : {top:20, bottom: denseX?6:0} },
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}}, barValueLabels:{skip:denseX} },
       scales: horizontal
         ? { x:{ suggestedMax:maxPct*1.18, ticks:{callback:v=>v+'%', font:{size:tickFont}}, grid:{color:'#eef1f4'} }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:tickFont}} } }
-        : { y:{ suggestedMax:maxPct*1.18, ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false} } }
+        : { y:{ suggestedMax:maxPct*1.18, ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false}, ticks: denseX ? {maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7.5:9.5}} : {font:{size:tickFont}} } }
     }
   });
 }
