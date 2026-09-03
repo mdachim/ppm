@@ -177,7 +177,7 @@
      were laid out at browser width and then squeezed into a ~half-as-wide
      print column, which clipped every y-axis label off the left edge. */
   body.printing-all main{max-width:186mm;padding:0;margin:0}
-  body.printing-all .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;align-items:start}
+  body.printing-all .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;align-items:start}
   body.printing-all .stat-row{display:grid;grid-template-columns:repeat(3,1fr)}
   body.printing-all .card{padding:10px;margin-bottom:0;font-size:11px}
   body.printing-all .card h3{margin:0 0 8px;font-size:10.5px}
@@ -192,6 +192,11 @@
   @media print{
     @page{ size:A4 portrait; margin:12mm; }
     body{background:#fff}
+    /* must out-specify the body.printing-all prep rule above, or main stays
+       capped at the assumed A4 content width and sits left-aligned with a dead
+       gutter on any paper the browser actually uses (Letter, or A4 with
+       different margins) */
+    body.printing-all main, main{max-width:none;width:auto;margin:0;padding:0}
     nav, .filters, footer{display:none !important}
     .topbar{position:static; box-shadow:none}
     header{background:var(--blue) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; position:static}
@@ -199,14 +204,17 @@
     /* Continuous flow, not one-tab-per-page: the tabs now hold 8-11 cards
        each, so forcing a break after every tab left pages a third full. The
        blue section bar still marks where each tab starts. */
-    #tabs>section{display:block !important}
+    /* one tab per page again — 3 print columns make each tab's cards fit a
+       single A4 page, so sections no longer bleed onto a half-empty second */
+    #tabs>section{display:block !important; break-after:page; page-break-after:always}
+    #tabs>section:last-child{break-after:auto; page-break-after:auto}
     .page-bar{break-after:avoid; page-break-after:avoid}
     .stat-row{break-inside:avoid}
     /* screen layout is a single portrait column; print goes back to a
        2-column grid so the A4 factsheet still packs 6 pages */
     /* multicol paginates unpredictably across page breaks — print goes back
        to an explicit 2-column grid so the A4 factsheet stays predictable */
-    .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; align-items:start}
+    .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:7px; align-items:start}
     .stat-row{display:grid; grid-template-columns:repeat(3,1fr)}
     .card{break-inside:avoid; box-shadow:none; padding:10px; margin-bottom:0}
     .card h3{margin:0 0 8px; font-size:10.5px}
@@ -375,6 +383,11 @@ const MSEL = {}; // id -> Set of selected raw codes (empty set = "all")
 function fillMultiSelect(id, values, allLabel, field){
   MSEL[id] = new Set();
   const root = document.getElementById(id);
+  // hide the filter entirely if the field isn't in this data.json at all —
+  // an empty dropdown just looks broken (this is what you see if dashboard.html
+  // is newer than the data/ folder it's reading)
+  const wrapField = root.closest('.filter-field');
+  if(wrapField) wrapField.style.display = values.length ? '' : 'none';
   root.dataset.allLabel = allLabel;
   const panel = root.querySelector('.msel-panel');
   panel.innerHTML = values.map(v=>`<label class="msel-row"><input type="checkbox" value="${v}"> ${L(v,field)}</label>`).join('');
@@ -597,7 +610,7 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
   const denseX = !horizontal && entries.length > 10;
   const maxTicksX = denseX ? Math.max(6, Math.floor(cw / (isPrint?34:46))) : undefined;
   const tickFont = isPrint ? 8.5 : 10.5;
-  const lineH = isPrint ? 10 : 12;
+  const lineH = isPrint ? 8.5 : 12;
   const rawLabels = stripSharedPrefix(entries.map(e=>formatter(e[0])));
   const wrappedLabels = rawLabels.map(l=>wrapLabel(l, wrapMax, 2));
   // size the chart to how many bars it has, rather than a fixed height for
@@ -611,8 +624,8 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
     // a row only needs to be as tall as the taller of (the bar itself) and
     // (its label block) — adding the two together is what left every chart
     // padded out with dead space between bars
-    const barRow = isPrint ? 20 : 30;
-    const rowUnit = Math.max(barRow, maxLines*lineH + (isPrint?6:10));
+    const barRow = isPrint ? 15 : 30;
+    const rowUnit = Math.max(barRow, maxLines*lineH + (isPrint?4:10));
     ctx.parentElement.style.height = Math.max(isPrint?70:90, entries.length*rowUnit+(isPrint?10:16))+'px';
   } else if(denseX){
     ctx.parentElement.style.height = (isPrint?150:220)+'px';
@@ -662,12 +675,27 @@ function donutChart(canvasId, dataObj, field=null){
   // legend goes below (not to the right): a right-side legend gets squeezed
   // to near-zero width in a two-column card and clips label text.
   const isPrint = document.body.classList.contains('printing-all');
-  ctx.parentElement.style.height = Math.max(isPrint?120:160, (isPrint?90:150)+entries.length*(isPrint?13:16))+'px';
+  // legend as real markup, not inside the canvas: Chart.js lays its own legend
+  // out in canvas space and won't wrap a long label, so in a narrow print
+  // column the last entries were simply clipped off the bottom of the card.
+  // HTML legend wraps, and the card grows to fit it.
+  ctx.parentElement.style.height = (isPrint?100:165)+'px';
+  const wrap = ctx.parentElement;
+  let lg = wrap.nextElementSibling;
+  if(!lg || !lg.classList.contains('legend-inline')){
+    lg = document.createElement('div');
+    lg.className = 'legend-inline';
+    wrap.after(lg);
+  }
+  lg.innerHTML = entries.map((e,i)=>{
+    const pct = Math.round(1000*e[1]/total)/10;
+    return `<span><i style="background:${PALETTE[i%PALETTE.length]}"></i>${formatter(e[0])} ${pct}%</span>`;
+  }).join('');
   charts[canvasId] = new Chart(ctx, {
     type:'doughnut',
     plugins: [donutSliceLabels],
     data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data: entries.map(e=>e[1]), backgroundColor: PALETTE }]},
-    options:{ maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:isPrint?7:10, padding:isPrint?4:8, font:{size:isPrint?8.5:11.5}}}}, cutout:'55%' }
+    options:{ maintainAspectRatio:false, plugins:{legend:{display:false}}, cutout:'55%' }
   });
 }
 
