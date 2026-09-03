@@ -22,7 +22,12 @@
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
-  header{background:var(--blue);color:#fff;padding:14px 20px;border-bottom:3px solid var(--yellow);position:sticky;top:0;z-index:20}
+  /* header + nav + filters live in one sticky wrapper so their stacking is
+     always correct — three separately-stickied elements with hand-guessed
+     top offsets drifted out of sync and started overlapping content
+     whenever the header's actual height didn't match the assumption. */
+  .topbar{position:sticky;top:0;z-index:20;box-shadow:0 2px 8px rgba(11,55,84,.08)}
+  header{background:var(--blue);color:#fff;padding:14px 20px;border-bottom:3px solid var(--yellow)}
   header .head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
   header .title-block{display:flex;align-items:center;gap:14px}
   header .unhcr-logo{height:60px;width:auto;display:block}
@@ -30,11 +35,11 @@
   header .subtitle{margin:2px 0 0;font-size:11.5px;color:var(--blue01)}
   header .head-meta{text-align:right;flex-shrink:0}
   header .head-date{display:block;font-size:10.5px;color:var(--blue01);font-style:italic}
-  nav{display:flex;flex-wrap:wrap;gap:2px;background:#fff;padding:0 8px;justify-content:center;border-bottom:1px solid var(--line);position:sticky;top:92px;z-index:19;overflow-x:auto}
+  nav{display:flex;flex-wrap:wrap;gap:2px;background:#fff;padding:0 8px;justify-content:center;border-bottom:1px solid var(--line);overflow-x:auto}
   nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--grey04);padding:11px 12px 9px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:700;transition:color .15s,border-color .15s}
   nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
   nav button:hover:not(.active){color:var(--blue05)}
-  .filters{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:129px;z-index:5}
+  .filters{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--line)}
   .filters label{font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--grey04);display:block;margin-bottom:4px}
   .filters select{font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;width:100%;font-family:inherit;color:var(--ink)}
   .filters select:focus{outline:2px solid var(--blue02);outline-offset:0;border-color:var(--blue)}
@@ -65,7 +70,7 @@
   .fab-print .fab-label{white-space:nowrap}
   @media print{ .fab-print{display:none !important} }
   main{padding:18px 16px 40px;max-width:640px;margin:0 auto}
-  .grid{display:grid;gap:12px}
+  .grid{display:grid;gap:12px;align-items:start}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
   .card h3{margin:0 0 12px;font-size:13px;font-weight:900;color:var(--blue06);letter-spacing:-.01em}
   .stat{padding:16px;position:relative;overflow:hidden}
@@ -136,6 +141,7 @@
     @page{ size:A4 portrait; margin:12mm; }
     body{background:#fff}
     nav, .filters, footer{display:none !important}
+    .topbar{position:static; box-shadow:none}
     header{background:var(--blue) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; position:static}
     main{padding:0;max-width:none}
     #tabs>section{display:block !important; page-break-after:always; break-after:page}
@@ -161,6 +167,7 @@
 </head>
 <body>
 
+<div class="topbar">
 <header>
   <div class="head-row">
     <div class="title-block">
@@ -200,6 +207,7 @@
     Reset filters
   </button>
   <div class="sample"><b id="sample-n">–</b> respondents in current view</div>
+</div>
 </div>
 
 <main>
@@ -247,7 +255,14 @@ async function boot(){
   const [dataRes, labelRes] = await Promise.all([fetch('data/data.json'), fetch('data/labels.json')]);
   DATA = await dataRes.json();
   CHOICE_LABELS = await labelRes.json();
-  document.getElementById('head-date').textContent = new Date(DATA.generated_at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+  // "Data as of" reflects the most recent interview month in the dataset
+  // itself (exact dates are bucketed to month for privacy), not the day the
+  // static file happened to be rebuilt.
+  const months = uniqueSorted('interview_month');
+  const lastMonth = months.length ? months[months.length-1] : null;
+  document.getElementById('head-date').textContent = lastMonth
+    ? new Date(lastMonth+'-01T00:00:00').toLocaleDateString(undefined,{year:'numeric',month:'long'})
+    : '–';
   populateFilterOptions();
   applyFilters();
   buildTabs();
@@ -413,6 +428,55 @@ function wrapLabel(str, maxLen=24, maxLines=3){
   return lines.length > 1 ? lines : str;
 }
 
+// ---------- data-label plugins (scoped per-chart, not registered globally,
+// so gauges — which are also doughnuts under the hood — aren't affected) ----------
+const barValueLabels = {
+  id: 'barValueLabels',
+  afterDatasetsDraw(chart){
+    const {ctx} = chart;
+    const meta = chart.getDatasetMeta(0);
+    const horizontal = chart.options.indexAxis === 'y';
+    ctx.save();
+    ctx.font = '700 10.5px Lato, sans-serif';
+    ctx.fillStyle = '#0b3754';
+    meta.data.forEach((bar,i)=>{
+      const v = chart.data.datasets[0].data[i];
+      if(v===undefined || v===null) return;
+      const label = v+'%';
+      if(horizontal){
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText(label, bar.x+5, bar.y);
+      } else {
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText(label, bar.x, bar.y-3);
+      }
+    });
+    ctx.restore();
+  }
+};
+const donutSliceLabels = {
+  id: 'donutSliceLabels',
+  afterDatasetsDraw(chart){
+    const {ctx} = chart;
+    const meta = chart.getDatasetMeta(0);
+    const data = chart.data.datasets[0].data;
+    const total = data.reduce((a,b)=>a+b,0);
+    if(!total) return;
+    ctx.save();
+    ctx.font = '700 11px Lato, sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    meta.data.forEach((arc,i)=>{
+      const pct = Math.round(100*data[i]/total);
+      if(pct < 6) return; // slice too thin for its own label — legend covers it
+      const pos = arc.tooltipPosition();
+      ctx.fillText(pct+'%', pos.x, pos.y);
+    });
+    ctx.restore();
+  }
+};
+
 function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chronological=false}={}){
   const formatter = (code)=>L(code, field);
   const entries = chronological
@@ -450,19 +514,23 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
     const rowUnit = (isPrint?16:20) + maxLines*lineH;
     ctx.parentElement.style.height = Math.max(isPrint?70:100, entries.length*rowUnit+(isPrint?10:18))+'px';
   }
+  const pctValues = entries.map(e=>Math.round(1000*e[1]/total)/10);
+  const maxPct = Math.max(...pctValues, 1);
   charts[canvasId] = new Chart(ctx, {
     type: 'bar',
+    plugins: [barValueLabels],
     data: {
       labels: horizontal ? wrappedLabels : entries.map(e=>formatter(e[0])),
-      datasets: [{ data: entries.map(e=>Math.round(1000*e[1]/total)/10), backgroundColor: PALETTE[0], borderRadius:4, maxBarThickness:22 }]
+      datasets: [{ data: pctValues, backgroundColor: PALETTE[0], borderRadius:4, maxBarThickness:22 }]
     },
     options: {
       indexAxis: horizontal ? 'y' : 'x',
       maintainAspectRatio: !horizontal,
+      layout: { padding: horizontal ? {right:30} : {top:20} },
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}} },
       scales: horizontal
-        ? { x:{ ticks:{callback:v=>v+'%', font:{size:tickFont}}, grid:{color:'#eef1f4'} }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:tickFont}} } }
-        : { y:{ ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false} } }
+        ? { x:{ suggestedMax:maxPct*1.18, ticks:{callback:v=>v+'%', font:{size:tickFont}}, grid:{color:'#eef1f4'} }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:tickFont}} } }
+        : { y:{ suggestedMax:maxPct*1.18, ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false} } }
     }
   });
 }
@@ -485,9 +553,10 @@ function donutChart(canvasId, dataObj, field=null){
   // legend goes below (not to the right): a right-side legend gets squeezed
   // to near-zero width in a two-column card and clips label text.
   const isPrint = document.body.classList.contains('printing-all');
-  ctx.parentElement.style.height = Math.max(isPrint?120:160, (isPrint?90:130)+entries.length*(isPrint?13:15))+'px';
+  ctx.parentElement.style.height = Math.max(isPrint?120:160, (isPrint?90:150)+entries.length*(isPrint?13:16))+'px';
   charts[canvasId] = new Chart(ctx, {
     type:'doughnut',
+    plugins: [donutSliceLabels],
     data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data: entries.map(e=>e[1]), backgroundColor: PALETTE }]},
     options:{ maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:isPrint?7:10, padding:isPrint?4:8, font:{size:isPrint?8.5:11.5}}}}, cutout:'55%' }
   });
@@ -513,8 +582,9 @@ const TAB_DEFS = [
   {id:'overview', label:'Key Findings'},
   {id:'profile', label:'Refugee Profiles'},
   {id:'displacement', label:'Displacement Patterns'},
-  {id:'rights', label:'Documentation & Legal Status'},
-  {id:'access', label:'Access to Services'},
+  {id:'rights1', label:'Access to Rights #1'},
+  {id:'rights2', label:'Access to Rights #2'},
+  {id:'rights3', label:'Access to Rights #3'},
 ];
 
 function buildTabs(){
@@ -594,8 +664,8 @@ function buildTabs(){
     </div>
   </section>
 
-  <section id="tab-rights">
-    <div class="page-bar">Documentation &amp; Legal Status</div>
+  <section id="tab-rights1">
+    <div class="page-bar">Access to Rights #1 — Identity Documents &amp; Legal Status</div>
     <div class="stat-row">
       <div class="card stat"><div class="n" id="stat-lackdoc">–</div><div class="lbl">HH missing an ID document</div></div>
       <div class="card stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">difficulty in TP application</div></div>
@@ -609,16 +679,22 @@ function buildTabs(){
     </div>
   </section>
 
-  <section id="tab-access">
-    <div class="page-bar">Access to Services</div>
+  <section id="tab-rights2">
+    <div class="page-bar">Access to Rights #2 — Education, Work &amp; Social Protection</div>
+    <div class="grid">
+      <div class="card"><h3>School enrolment (school-aged children)</h3><canvas id="c-school"></canvas></div>
+      <div class="card"><h3>Current main activity in host country</h3><canvas id="c-workcoa"></canvas></div>
+      <div class="card"><h3>Barriers to employment</h3><canvas id="c-diffwork"></canvas></div>
+      <div class="card"><h3>Applied for social protection benefits</h3><canvas id="c-socprot"></canvas></div>
+    </div>
+  </section>
+
+  <section id="tab-rights3">
+    <div class="page-bar">Access to Rights #3 — Accommodation &amp; Urgent Needs</div>
     <div class="grid">
       <div class="card"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
       <div class="card"><h3>Current accommodation</h3><canvas id="c-accomm"></canvas></div>
       <div class="card"><h3>Rental contract with landlord</h3><canvas id="c-rental"></canvas></div>
-      <div class="card"><h3>Current main activity in host country</h3><canvas id="c-workcoa"></canvas></div>
-      <div class="card"><h3>Barriers to employment</h3><canvas id="c-diffwork"></canvas></div>
-      <div class="card"><h3>Applied for social protection benefits</h3><canvas id="c-socprot"></canvas></div>
-      <div class="card"><h3>School enrolment (school-aged children)</h3><canvas id="c-school"></canvas></div>
     </div>
   </section>
 
