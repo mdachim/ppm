@@ -21,154 +21,143 @@
     --f:'Lato',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--f);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
-
+  body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  
   .topbar{position:sticky;top:0;z-index:20;box-shadow:0 2px 8px rgba(11,55,84,.08)}
-  header{background:var(--blue);color:#fff;padding:12px 18px;border-bottom:3px solid var(--yellow)}
-  header .head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
-  header .title-block{display:flex;align-items:center;gap:12px}
-  header .unhcr-logo{height:52px;width:auto;display:block}
-  header h1{margin:0;font-size:17px;font-weight:900;letter-spacing:-.01em}
-  header .subtitle{margin:2px 0 0;font-size:11px;color:var(--blue01)}
+  header{background:var(--blue);color:#fff;padding:14px 20px;border-bottom:3px solid var(--yellow)}
+  header .head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  header .title-block{display:flex;align-items:center;gap:14px}
+  header .unhcr-logo{height:60px;width:auto;display:block}
+  header h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.01em}
+  header .subtitle{margin:2px 0 0;font-size:11.5px;color:var(--blue01)}
   header .head-meta{text-align:right;flex-shrink:0}
-  header .head-date{display:block;font-size:10px;color:var(--blue01);font-style:italic}
+  header .head-date{display:block;font-size:10.5px;color:var(--blue01);font-style:italic}
   nav{display:flex;flex-wrap:wrap;gap:2px;background:#fff;padding:0 8px;justify-content:center;border-bottom:1px solid var(--line);overflow-x:auto}
-  nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--grey04);padding:9px 10px 8px;font-size:11.5px;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:700;transition:color .15s,border-color .15s}
+  nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--grey04);padding:11px 12px 9px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:700;transition:color .15s,border-color .15s}
   nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
   nav button:hover:not(.active){color:var(--blue05)}
-
-  .filters{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end;background:var(--card);padding:10px 14px;border-bottom:1px solid var(--line)}
-  .filters label{font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--grey04);display:block;margin-bottom:3px}
-  .filters select{font-size:11.5px;padding:6px 7px;border:1px solid var(--line);border-radius:6px;background:#fff;width:100%;font-family:inherit;color:var(--ink)}
+  .filters{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--line)}
+  .filters label{font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--grey04);display:block;margin-bottom:4px}
+  .filters select{font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;width:100%;font-family:inherit;color:var(--ink)}
   .filters select:focus{outline:2px solid var(--blue02);outline-offset:0;border-color:var(--blue)}
-  .filters .filter-field{flex:1 1 auto;min-width:110px;position:relative}
-
+  .filters .filter-field{flex:1 1 auto;min-width:118px;position:relative}
+  
   .msel{position:relative}
-  .msel summary{list-style:none;font-size:11.5px;padding:6px 7px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .msel summary{list-style:none;font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px}
   .msel summary::-webkit-details-marker{display:none}
-  .msel summary svg{width:11px;height:11px;stroke:var(--grey04);flex-shrink:0;transition:transform .15s}
+  .msel summary svg{width:12px;height:12px;stroke:var(--grey04);flex-shrink:0;transition:transform .15s}
   .msel[open] summary svg{transform:rotate(180deg)}
   .msel[open] summary{border-color:var(--blue);outline:2px solid var(--blue02)}
   .msel-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .msel-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;width:max-content;max-width:240px;max-height:220px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;z-index:40}
-  .msel-row{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:5px;font-size:11.5px;color:var(--ink);cursor:pointer;white-space:nowrap}
+  .msel-row{display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:5px;font-size:12.5px;color:var(--ink);cursor:pointer;white-space:nowrap}
   .msel-row:hover{background:var(--canvas)}
-  .msel-row input{margin:0;accent-color:var(--blue);width:13px;height:13px;flex-shrink:0}
-  .filters .sample{width:100%;font-size:11px;color:var(--grey04);text-align:center;order:99}
-  .filters .sample b{color:var(--blue);font-size:13px}
+  .msel-row input{margin:0;accent-color:var(--blue);width:14px;height:14px;flex-shrink:0}
+  .filters .sample{width:100%;font-size:12px;color:var(--grey04);text-align:center;order:99}
+  .filters .sample b{color:var(--blue);font-size:14px}
   .filters button{font-family:inherit}
-  .filters button.reset{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:18px;padding:6px 13px;font-size:11px;font-weight:700;cursor:pointer;color:var(--grey05);transition:.15s}
-  .filters button.reset svg{width:12px;height:12px;stroke:var(--grey05);transition:stroke .15s}
+  .filters button.reset{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;color:var(--grey05);transition:.15s}
+  .filters button.reset svg{width:13px;height:13px;stroke:var(--grey05);transition:stroke .15s}
   .filters button.reset:hover{border-color:var(--red);color:var(--red);background:#fdf3f1}
   .filters button.reset:hover svg{stroke:var(--red)}
 
-  .fab-print{position:fixed;right:16px;bottom:16px;z-index:30;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border:none;border-radius:50%;background:var(--blue);color:#fff;font-family:inherit;cursor:pointer;box-shadow:0 4px 14px rgba(11,55,84,.25);transition:background .15s,transform .15s}
-  .fab-print svg{width:17px;height:17px;stroke:#fff;flex-shrink:0}
+  .fab-print{position:fixed;right:16px;bottom:16px;z-index:30;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border:none;border-radius:50%;background:var(--blue);color:#fff;font-family:inherit;cursor:pointer;box-shadow:0 4px 16px rgba(11,55,84,.28);transition:background .15s,transform .15s}
+  .fab-print svg{width:19px;height:19px;stroke:#fff;flex-shrink:0}
   .fab-print:hover{background:var(--blue05);transform:translateY(-1px)}
   @media print{ .fab-print{display:none !important} }
-
-  main{padding:14px 14px 36px;max-width:640px;margin:0 auto}
-  .grid{display:flex;gap:10px;align-items:flex-start}
-  .mcol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px}
+  
+  main{padding:18px 16px 40px;max-width:640px;margin:0 auto}
+  .grid{display:flex;gap:12px;align-items:flex-start}
+  .mcol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
   .grid .card{margin-bottom:0;width:100%;break-inside:avoid}
-
   .chart-wrap{position:relative;width:100%}
-  .card h3{margin:0 0 8px;font-size:12px;font-weight:900;color:var(--blue06);letter-spacing:-.01em}
-  .stat{padding:12px 14px;position:relative;overflow:hidden}
+  .card h3{margin:0 0 12px;font-size:13px;font-weight:900;color:var(--blue06);letter-spacing:-.01em}
+  .stat{padding:16px;position:relative;overflow:hidden}
   .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}
-  .stat .n{font-size:23px;font-weight:900;color:var(--blue06);line-height:1}
-  .stat .lbl{font-size:10.5px;color:var(--grey04);margin-top:4px;font-weight:700}
-  .stat-row{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:10px}
+  .stat .n{font-size:26px;font-weight:900;color:var(--blue06);line-height:1}
+  .stat .lbl{font-size:11.5px;color:var(--grey04);margin-top:6px;font-weight:700}
+  .stat-row{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
   .stat-row .card{margin-bottom:0}
-
-  .kf-panel{display:flex;flex-direction:row;gap:14px}
-  .kf-side{flex:0 0 112px;display:flex;flex-direction:column;gap:10px;padding-right:10px;border-right:1px solid var(--line)}
-  .kf-h{font-size:8.5px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--grey04)}
-  .kf-stat .n{font-size:19px;font-weight:900;color:var(--blue);line-height:1.15;margin-top:2px}
-  .kf-stat .lbl{font-size:9.5px;color:var(--grey05);margin-top:1px;line-height:1.25}
-  .kf-grid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(2,1fr);gap:14px 8px}
+  .kf-panel{display:flex;flex-direction:row;gap:16px}
+  .kf-side{flex:0 0 118px;display:flex;flex-direction:column;gap:13px;padding-right:12px;border-right:1px solid var(--line)}
+  .kf-h{font-size:9px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--grey04)}
+  .kf-stat .n{font-size:21px;font-weight:900;color:var(--blue);line-height:1.15;margin-top:2px}
+  .kf-stat .lbl{font-size:10px;color:var(--grey05);margin-top:1px;line-height:1.3}
+  .kf-grid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(2,1fr);gap:18px 10px}
   .kf-grid.rows442{grid-template-columns:repeat(4,1fr)}
   .kf-grid.rows442 .gauge:nth-child(9){grid-column:2}
-
-  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;padding:1px 3px;position:relative;min-width:0}
-  .gauge-dial{position:relative;width:100%;max-width:96px;height:48px}
+  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;padding:2px 4px;position:relative;min-width:0}
+  .gauge-dial{position:relative;width:100%;max-width:104px;height:52px}
   .gauge-dial canvas{width:100%!important;height:100%!important}
   .card canvas{max-width:100% !important}
-  .gauge .pct{position:absolute;left:0;right:0;bottom:0;font-size:15px;font-weight:900;color:var(--grey06);line-height:1}
-  .gauge .cap{font-size:10px;color:var(--grey05);margin-top:5px;line-height:1.25}
-  .note{font-size:10px;color:var(--grey03);margin-top:6px}
-
-  .treemap-row{display:flex;gap:2px;border-radius:6px;overflow:hidden}
-  .treemap-block{display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;font-size:9.5px;text-align:center;padding:3px 2px;min-width:0;overflow:hidden}
-  .treemap-block b{font-size:11.5px;font-weight:900}
-  .treemap-block span{font-size:8.5px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
-
-  .legend-inline{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:8px;font-size:10.5px;line-height:1.3;color:var(--grey05)}
-  .legend-inline i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:-1px}
-
-  .waffle-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:2.5px;max-width:210px;margin:0 auto}
+  .gauge .pct{position:absolute;left:0;right:0;bottom:0;font-size:17px;font-weight:900;color:var(--grey06);line-height:1}
+  .gauge .cap{font-size:11px;color:var(--grey05);margin-top:7px;line-height:1.35}
+  .note{font-size:11px;color:var(--grey03);margin-top:8px}
+  .treemap-row{display:flex;gap:2px;border-radius:8px;overflow:hidden}
+  .treemap-block{display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;font-size:10px;text-align:center;padding:4px 2px;min-width:0;overflow:hidden}
+  .treemap-block b{font-size:13px;font-weight:900}
+  .treemap-block span{font-size:9px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  .legend-inline{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;font-size:11px;color:var(--grey05)}
+  .legend-inline i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .waffle-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;max-width:230px;margin:0 auto}
   .waffle-grid i{display:block;aspect-ratio:1/1;border-radius:2px}
-
-  .cmp-row{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+  .cmp-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
   .cmp-row:last-child{margin-bottom:0}
-  .cmp-lbl{flex:0 0 110px;font-size:10px;color:var(--grey05);text-align:right;line-height:1.2}
-  .cmp-track{flex:1;background:var(--canvas);border-radius:4px;height:12px;overflow:hidden}
-  .cmp-fill{height:100%;background:var(--blue);border-radius:4px}
-  .cmp-val{flex:0 0 28px;font-size:10px;font-weight:800;color:var(--blue06)}
-
-  .suppressed{font-size:11.5px;color:var(--grey03);font-style:italic;padding:16px 0;text-align:center}
-  body.printing-all .suppressed{font-size:8px;padding:8px 0}
-
-  .methodology{background:var(--blue01);border-radius:8px;padding:12px 14px;font-size:11.5px;line-height:1.5;color:var(--blue06)}
+  .cmp-lbl{flex:0 0 128px;font-size:11px;color:var(--grey05);text-align:right;line-height:1.25}
+  .cmp-track{flex:1;background:var(--canvas);border-radius:6px;height:14px;overflow:hidden}
+  .cmp-fill{height:100%;background:var(--blue);border-radius:6px}
+  .cmp-val{flex:0 0 32px;font-size:11px;font-weight:800;color:var(--blue06)}
+  .suppressed{font-size:12.5px;color:var(--grey03);font-style:italic;padding:20px 0;text-align:center}
+  body.printing-all .suppressed{font-size:8px;padding:10px 0}
+  .methodology{background:var(--blue01);border-radius:10px;padding:16px;font-size:12.5px;line-height:1.6;color:var(--blue06)}
   .methodology b{color:var(--blue06)}
-  .page-bar{background:var(--blue);color:#fff;font-weight:900;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;padding:8px 12px;border-radius:6px;margin-bottom:10px}
-  .sub-h{font-size:9.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--grey04);margin:5px 0 6px;padding-top:6px;border-top:1px solid var(--line)}
-  .sub-bar{background:var(--grey05);color:#fff;font-weight:900;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:5px;margin:0 0 8px}
-  .intro-text{font-size:12px;line-height:1.5;color:var(--grey05);margin-bottom:12px}
+  .page-bar{background:var(--blue);color:#fff;font-weight:900;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;border-radius:8px;margin-bottom:12px}
+  .sub-h{font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--grey04);margin:6px 0 7px;padding-top:8px;border-top:1px solid var(--line)}
+  .sub-bar{background:var(--grey05);color:#fff;font-weight:900;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:6px 12px;border-radius:6px;margin:0 0 10px}
+  .intro-text{font-size:13px;line-height:1.6;color:var(--grey05);margin-bottom:14px}
   .intro-text b{color:var(--blue06)}
-  .icon-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-  .icon-stat{display:flex;align-items:center;gap:8px;background:var(--canvas);border-radius:8px;padding:8px 10px}
-  .icon-stat .icon{font-size:20px;line-height:1}
-  .icon-stat .n{font-size:17px;font-weight:900;color:var(--blue06);line-height:1.1}
-  .icon-stat .lbl{font-size:10px;color:var(--grey04);font-weight:700}
-  .ack-box{background:var(--canvas);border-radius:8px;padding:12px;font-size:11px;line-height:1.5;color:var(--grey05);margin-top:12px}
-  .ack-box h4{margin:0 0 6px;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);font-weight:900}
+  .icon-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .icon-stat{display:flex;align-items:center;gap:10px;background:var(--canvas);border-radius:10px;padding:10px 12px}
+  .icon-stat .icon{font-size:24px;line-height:1}
+  .icon-stat .n{font-size:19px;font-weight:900;color:var(--blue06);line-height:1.1}
+  .icon-stat .lbl{font-size:10.5px;color:var(--grey04);font-weight:700}
+  .ack-box{background:var(--canvas);border-radius:10px;padding:14px;font-size:12px;line-height:1.6;color:var(--grey05);margin-top:14px}
+  .ack-box h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);font-weight:900}
   .gauge .cap b{color:var(--blue05)}
-
   #tabs>section{display:none}
   #tabs>section.active{display:block}
   body.printing-all #tabs>section{display:block}
-  footer{padding:14px 20px;font-size:10.5px;color:var(--grey03);text-align:center}
+  footer{padding:16px 24px;font-size:11px;color:var(--grey03);text-align:center}
 
   @media screen and (min-width:860px){
     main{max-width:1180px}
     .stat-row{grid-template-columns:repeat(3,1fr)}
     .icon-stats{grid-template-columns:repeat(2,1fr);max-width:420px}
-    .kf-side{flex:0 0 150px}
+    .kf-side{flex:0 0 170px}
     .filters{max-width:1180px;margin:0 auto}
     nav{padding:0 calc((100% - 1180px)/2)}
   }
 
   body.printing-all main{max-width:186mm;padding:0;margin:0}
-  body.printing-all .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;align-items:start}
-  body.printing-all .grid.cols-3{grid-template-columns:repeat(3,1fr);gap:6px}
+  body.printing-all .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;align-items:start}
+  body.printing-all .grid.cols-3{grid-template-columns:repeat(3,1fr);gap:7px}
   body.printing-all .stat-row{display:grid;grid-template-columns:repeat(3,1fr)}
-  body.printing-all .card{padding:7px;margin-bottom:0;font-size:10.5px}
-  body.printing-all .card h3{margin:0 0 5px;font-size:9.5px}
-  body.printing-all .kf-grid{grid-template-columns:repeat(4,1fr);gap:7px 5px}
-  body.printing-all .kf-side{flex:0 0 100px}
-  body.printing-all .gauge-dial{max-width:66px;height:33px}
-  body.printing-all .gauge .cap{font-size:7px;margin-top:3px;line-height:1.2}
-  body.printing-all .gauge .pct{font-size:11px}
+  body.printing-all .card{padding:8px;margin-bottom:0;font-size:11px}
+  body.printing-all .card h3{margin:0 0 6px;font-size:10px}
+  body.printing-all .kf-grid{grid-template-columns:repeat(4,1fr);gap:8px 6px}
+  body.printing-all .kf-side{flex:0 0 110px}
+  body.printing-all .gauge-dial{max-width:70px;height:35px}
+  body.printing-all .gauge .cap{font-size:7.5px;margin-top:4px;line-height:1.25}
+  body.printing-all .gauge .pct{font-size:12px}
   body.printing-all nav, body.printing-all .filters{display:none}
   body.printing-all .topbar{position:static;box-shadow:none}
-  body.printing-all header{padding:8px 12px}
-  body.printing-all header .unhcr-logo{height:36px}
-  body.printing-all header h1{font-size:14px}
+  body.printing-all header{padding:10px 14px}
+  body.printing-all header .unhcr-logo{height:40px}
+  body.printing-all header h1{font-size:15px}
 
   @media print{
-    @page{ size:A4 portrait; margin:10mm; }
+    @page{ size:A4 portrait; margin:12mm; }
     body{background:#fff}
     body.printing-all main, main{max-width:none;width:auto;margin:0;padding:0}
     nav, .filters, footer{display:none !important}
@@ -179,33 +168,33 @@
     #tabs>section:last-child{break-after:auto; page-break-after:auto}
     .page-bar{break-after:avoid; page-break-after:avoid}
     .stat-row{break-inside:avoid}
-    .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:7px; align-items:start}
-    .grid.cols-3{grid-template-columns:repeat(3,1fr); gap:6px}
-    .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:7px}
-    .card{break-inside:avoid; box-shadow:none; padding:7px; margin-bottom:0}
-    .card h3{margin:0 0 5px; font-size:9.5px}
-    .page-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:10.5px; padding:5px 9px; margin-bottom:6px}
-    .sub-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:8px; padding:3px 7px; margin:0 0 4px}
-    .kf-panel{flex-direction:row;gap:10px}
-    .kf-side{flex:0 0 100px;border-bottom:0;border-right:1px solid var(--line);padding-right:8px;padding-bottom:0}
-    .kf-grid{flex:1;grid-template-columns:repeat(4,1fr); gap:7px 5px}
-    .suppressed{font-size:7.5px;padding:8px 0}
-    .gauge .cap{font-size:7px;margin-top:3px;line-height:1.2}
-    .gauge .pct{font-size:11px}
-    .gauge-dial{max-width:66px;height:33px}
-    .kf-stat .n{font-size:16px}
-    .stat .n{font-size:16px}
-    .stat{padding:5px 8px}
-    .stat .lbl{font-size:7.5px;margin-top:2px}
-    .sub-h{font-size:7.5px;margin:3px 0 4px;padding-top:4px}
-    .note{font-size:7px;margin-top:3px}
-    body{font-size:10.5px}
-    .treemap-block{font-size:7.5px}
-    .treemap-block b{font-size:9px}
-    .legend-inline{font-size:8px;gap:3px 6px}
-    .waffle-grid{max-width:140px}
-    .cmp-lbl{flex-basis:85px;font-size:8.5px}
-    .cmp-val{font-size:8.5px}
+    .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; align-items:start}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr); gap:7px}
+    .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:8px}
+    .card{break-inside:avoid; box-shadow:none; padding:8px; margin-bottom:0}
+    .card h3{margin:0 0 6px; font-size:10px}
+    .page-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:11px; padding:6px 11px; margin-bottom:7px}
+    .sub-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:8.5px; padding:3px 8px; margin:0 0 5px}
+    .kf-panel{flex-direction:row;gap:12px}
+    .kf-side{flex:0 0 110px;border-bottom:0;border-right:1px solid var(--line);padding-right:10px;padding-bottom:0}
+    .kf-grid{flex:1;grid-template-columns:repeat(4,1fr); gap:8px 6px}
+    .suppressed{font-size:8px;padding:10px 0}
+    .gauge .cap{font-size:7.5px;margin-top:4px;line-height:1.25}
+    .gauge .pct{font-size:12px}
+    .gauge-dial{max-width:70px;height:35px}
+    .kf-stat .n{font-size:18px}
+    .stat .n{font-size:17px}
+    .stat{padding:6px 9px}
+    .stat .lbl{font-size:8px;margin-top:3px}
+    .sub-h{font-size:8px;margin:4px 0 5px;padding-top:5px}
+    .note{font-size:7.5px;margin-top:4px}
+    body{font-size:11px}
+    .treemap-block{font-size:8px}
+    .treemap-block b{font-size:10px}
+    .legend-inline{font-size:8.5px;gap:4px 8px}
+    .waffle-grid{max-width:150px}
+    .cmp-lbl{flex-basis:95px;font-size:9px}
+    .cmp-val{font-size:9px}
   }
 </style>
 </head>
@@ -262,7 +251,7 @@
 </main>
 
 <footer>
-  UNHCR Operational Portal for the Ukraine Emergency
+  UNHCR Moldova. For inquiries, please approach mdachim@unhcr.org
 </footer>
 
 <button class="fab-print" id="print-btn" title="Download PDF factsheet" aria-label="Download PDF factsheet">
@@ -270,11 +259,12 @@
 </button>
 
 <script>
+// UNHCR dataviz brand palette — https://dataviz.unhcr.org/guidance/
 const PALETTE = ['#0072bc','#ffc740','#32c189','#6cd8fd','#d25a45','#a097e3','#7c3c36','#bfbfbf'];
 Chart.defaults.font.family = "'Lato',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
-Chart.defaults.font.size = 10.5;
+Chart.defaults.font.size = 11.5;
 Chart.defaults.color = '#4a5560';
-Chart.defaults.plugins.legend.labels.boxWidth = 9;
+Chart.defaults.plugins.legend.labels.boxWidth = 10;
 Chart.defaults.plugins.legend.labels.usePointStyle = true;
 Chart.defaults.animation = false;
 
@@ -284,20 +274,35 @@ let VIEW = [];
 const charts = {};
 
 let CHOICE_LABELS = {field_to_list:{}, choices_by_list:{}};
-function titleCase(code){ return String(code).replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+function cleanRawText(str){
+  if(!str) return str;
+  let s = String(str).trim();
+  s = s.replace(/^(?:yes|no)\s*[-–—:]\s*/i, '');
+  s = s.replace(/\[\s*(?:please\s+)?(?:specify|open\s+ended)[^\]]*\]/gi, '');
+  s = s.replace(/open\s+ended\s*[-–—:]?\s*/gi, '');
+  s = s.replace(/\(\s*(?:please\s+)?specify\s*\)/gi, '');
+  s = s.replace(/[\s;:\-–—\.]+$/, '').trim();
+  return s.length > 0 ? (s.charAt(0).toUpperCase() + s.slice(1)) : str;
+}
+
+function titleCase(code){
+  const clean = cleanRawText(code);
+  return String(clean).replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+}
 
 function L(code, field){
   if(code===null||code===undefined||code==='') return null;
   const listName = field && CHOICE_LABELS.field_to_list[field];
   const list = listName && CHOICE_LABELS.choices_by_list[listName];
   const label = list && list[code];
-  return label || titleCase(code);
+  return label ? cleanRawText(label) : titleCase(code);
 }
 
 async function boot(){
   const [dataRes, labelRes] = await Promise.all([fetch('data/data.json'), fetch('data/labels.json')]);
   DATA = await dataRes.json();
   CHOICE_LABELS = await labelRes.json();
+
   const months = uniqueSorted('interview_month');
   const lastMonth = months.length ? months[months.length-1] : null;
   document.getElementById('head-date').textContent = lastMonth
@@ -425,7 +430,6 @@ function pctFlag(records, field, isPositive){
   return {pct: Math.round(100*num/answered.length), n: answered.length};
 }
 const hasCode = (val, code) => val.split(' ').includes(code);
-
 const AGE_BAND_MIDPOINT = {'0-17':10, '18-24':21, '25-34':29.5, '35-59':45, '60+':66};
 function avgAgeEstimate(records){
   const vals = records.map(r=>AGE_BAND_MIDPOINT[r.age_group]).filter(v=>v!==undefined);
@@ -438,7 +442,7 @@ function totalHouseholdMembers(records){
 }
 function sorted(entries){ return entries.sort((a,b)=>b[1]-a[1]); }
 
-function wrapLabel(str, maxLen=28, maxLines=2){
+function wrapLabel(str, maxLen=24, maxLines=3){
   if(!str) return str;
   const words = String(str).split(' ');
   const lines = []; let cur = '';
@@ -462,7 +466,7 @@ const barValueLabels = {
     const meta = chart.getDatasetMeta(0);
     const horizontal = chart.options.indexAxis === 'y';
     ctx.save();
-    ctx.font = '700 9.5px Lato, sans-serif';
+    ctx.font = '700 10.5px Lato, sans-serif';
     ctx.fillStyle = '#0b3754';
     meta.data.forEach((bar,i)=>{
       const v = chart.data.datasets[0].data[i];
@@ -470,7 +474,7 @@ const barValueLabels = {
       const label = v+'%';
       if(horizontal){
         ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillText(label, bar.x+4, bar.y);
+        ctx.fillText(label, bar.x+5, bar.y);
       } else {
         ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
         ctx.fillText(label, bar.x, bar.y-3);
@@ -479,7 +483,6 @@ const barValueLabels = {
     ctx.restore();
   }
 };
-
 const donutSliceLabels = {
   id: 'donutSliceLabels',
   afterDatasetsDraw(chart){
@@ -489,13 +492,13 @@ const donutSliceLabels = {
     const total = data.reduce((a,b)=>a+b,0);
     if(!total) return;
     ctx.save();
-    ctx.font = '700 10px Lato, sans-serif';
+    ctx.font = '700 11px Lato, sans-serif';
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     meta.data.forEach((arc,i)=>{
       const pct = Math.round(100*data[i]/total);
-      if(pct < 8) return;
+      if(pct < 6) return;
       const pos = arc.tooltipPosition();
       ctx.fillText(pct+'%', pos.x, pos.y);
     });
@@ -534,24 +537,23 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
     return;
   }
   ctx.style.display='';
-
   const isPrint = document.body.classList.contains('printing-all');
   const cw = ctx.parentElement.clientWidth || 500;
-  const wrapMax = horizontal ? (isPrint ? 18 : (cw > 340 ? 30 : 20)) : 999;
+  const wrapMax = horizontal ? (isPrint ? 18 : (cw > 340 ? 24 : 18)) : 999;
   const denseX = !horizontal && entries.length > 10;
-  const maxTicksX = denseX ? Math.max(6, Math.floor(cw / (isPrint?34:44))) : undefined;
-  const tickFont = isPrint ? 8 : 9.5;
-  const lineH = isPrint ? 8 : 11;
+  const maxTicksX = denseX ? Math.max(6, Math.floor(cw / (isPrint?34:46))) : undefined;
+  const tickFont = isPrint ? 8.5 : 10.5;
+  const lineH = isPrint ? 8.5 : 12;
   const rawLabels = stripSharedPrefix(entries.map(e=>formatter(e[0])));
   const wrappedLabels = rawLabels.map(l=>wrapLabel(l, wrapMax, 2));
-
+  
   if(horizontal){
     const maxLines = Math.max(1, ...wrappedLabels.map(l=>Array.isArray(l)?l.length:1));
-    const barRow = isPrint ? 13 : 24;
-    const rowUnit = Math.max(barRow, maxLines*lineH + (isPrint?3:7));
-    ctx.parentElement.style.height = Math.max(isPrint?54:75, entries.length*rowUnit+(isPrint?6:12))+'px';
+    const barRow = isPrint ? 14 : 30;
+    const rowUnit = Math.max(barRow, maxLines*lineH + (isPrint?3:10));
+    ctx.parentElement.style.height = Math.max(isPrint?60:90, entries.length*rowUnit+(isPrint?8:16))+'px';
   } else if(denseX){
-    ctx.parentElement.style.height = (isPrint?130:190)+'px';
+    ctx.parentElement.style.height = (isPrint?150:220)+'px';
   }
   const pctValues = entries.map(e=>Math.round(1000*e[1]/total)/10);
   const maxPct = Math.max(...pctValues, 1);
@@ -560,18 +562,18 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
     plugins: [barValueLabels],
     data: {
       labels: horizontal ? wrappedLabels : rawLabels,
-      datasets: [{ data: pctValues, backgroundColor: PALETTE[0], borderRadius:3, maxBarThickness:18 }]
+      datasets: [{ data: pctValues, backgroundColor: PALETTE[0], borderRadius:4, maxBarThickness:22 }]
     },
     options: {
       indexAxis: horizontal ? 'y' : 'x',
       maintainAspectRatio: !horizontal && !denseX,
-      layout: { padding: horizontal ? {right:36, left:2} : {top:16, bottom: denseX?4:0} },
+      layout: { padding: horizontal ? {right:30} : {top:20, bottom: denseX?6:0} },
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}}, barValueLabels:{skip:denseX} },
       scales: horizontal
-        ? { x:{ display:false, suggestedMax:maxPct*1.24 }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:tickFont}} } }
+        ? { x:{ display:false, suggestedMax:maxPct*1.18 }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:tickFont}} } }
         : denseX
-          ? { y:{ suggestedMax:maxPct*1.2, ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false}, ticks:{maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7:8.5}} } }
-          : { y:{ display:false, suggestedMax:maxPct*1.2 }, x:{ grid:{display:false}, ticks:{font:{size:tickFont}} } }
+          ? { y:{ suggestedMax:maxPct*1.18, ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false}, ticks:{maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7.5:9.5}} } }
+          : { y:{ display:false, suggestedMax:maxPct*1.18 }, x:{ grid:{display:false}, ticks:{font:{size:tickFont}} } }
     }
   });
 }
@@ -592,7 +594,7 @@ function donutChart(canvasId, dataObj, field=null){
   }
   ctx.style.display='';
   const isPrint = document.body.classList.contains('printing-all');
-  ctx.parentElement.style.height = (isPrint?80:145)+'px';
+  ctx.parentElement.style.height = (isPrint?86:165)+'px';
   const wrap = ctx.parentElement;
   let lg = wrap.nextElementSibling;
   if(!lg || !lg.classList.contains('legend-inline')){
@@ -640,7 +642,7 @@ function pyramidChart(canvasId, records){
   }
   ctx.style.display='';
   const isPrint = document.body.classList.contains('printing-all');
-  ctx.parentElement.style.height = (isPrint?115:165)+'px';
+  ctx.parentElement.style.height = (isPrint?130:190)+'px';
   const wrap = ctx.parentElement;
   let lg = wrap.nextElementSibling;
   if(!lg || !lg.classList.contains('legend-inline')){
@@ -658,26 +660,26 @@ function pyramidChart(canvasId, records){
     data:{
       labels: PYRAMID_ORDER.map(k=>PYRAMID_LABELS[k]),
       datasets:[
-        {label:'Male', data:maleVals, backgroundColor:PALETTE[1], maxBarThickness:16},
-        {label:'Female', data:femaleVals, backgroundColor:PALETTE[0], maxBarThickness:16}
+        {label:'Male', data:maleVals, backgroundColor:PALETTE[1], maxBarThickness:20},
+        {label:'Female', data:femaleVals, backgroundColor:PALETTE[0], maxBarThickness:20}
       ]
     },
     options:{
       indexAxis:'y', maintainAspectRatio:false,
-      layout:{padding:{left:4,right:4}},
+      layout:{padding:{left:6,right:6}},
       plugins:{
         legend:{display:false},
         tooltip:{callbacks:{label:(c)=>Math.abs(c.raw)+'%'}}
       },
       scales:{
-        x:{stacked:true, min:-maxAbs, max:maxAbs, grid:{color:'#eef1f4'}, ticks:{callback:v=>Math.abs(v)+'%', font:{size:isPrint?7.5:8.5}}},
-        y:{stacked:true, grid:{display:false}, ticks:{font:{size:isPrint?8:9.5}}}
+        x:{stacked:true, min:-maxAbs, max:maxAbs, grid:{color:'#eef1f4'}, ticks:{callback:v=>Math.abs(v)+'%', font:{size:isPrint?8:9.5}}},
+        y:{stacked:true, grid:{display:false}, ticks:{font:{size:isPrint?8.5:10.5}}}
       }
     }
   });
 }
 
-function proportionalStrip(containerId, dataObj, field, {height=90, printHeight=48}={}){
+function proportionalStrip(containerId, dataObj, field, {height=110, printHeight=52}={}){
   const el = document.getElementById(containerId);
   if(!el) return;
   const entries = sorted(Object.entries(dataObj));
@@ -749,19 +751,19 @@ function lineChart(canvasId, dataObj, {field=null, order=null}={}){
   }
   ctx.style.display='';
   const isPrint = document.body.classList.contains('printing-all');
-  ctx.parentElement.style.height = (isPrint?100:175)+'px';
+  ctx.parentElement.style.height = (isPrint?112:200)+'px';
   const dense = entries.length>10;
-  const maxTicksX = dense ? Math.max(6, Math.floor((ctx.parentElement.clientWidth||500)/(isPrint?34:44))) : undefined;
+  const maxTicksX = dense ? Math.max(6, Math.floor((ctx.parentElement.clientWidth||500)/(isPrint?34:46))) : undefined;
   const pctValues = entries.map(e=>Math.round(1000*e[1]/total)/10);
   charts[canvasId] = new Chart(ctx, {
     type:'line',
-    data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data:pctValues, borderColor:PALETTE[0], backgroundColor:PALETTE[0]+'26', fill:true, tension:.25, pointRadius:dense?0:2.5, pointBackgroundColor:PALETTE[0], borderWidth:1.8 }]},
+    data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data:pctValues, borderColor:PALETTE[0], backgroundColor:PALETTE[0]+'26', fill:true, tension:.25, pointRadius:dense?0:3, pointBackgroundColor:PALETTE[0], borderWidth:2 }]},
     options:{
       maintainAspectRatio:false,
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}} },
       scales:{
-        y:{ suggestedMax:Math.max(...pctValues,1)*1.2, ticks:{callback:v=>v+'%', font:{size:isPrint?7.5:8.5}}, grid:{color:'#eef1f4'} },
-        x:{ grid:{display:false}, ticks: dense ? {maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7:8.5}} : {font:{size:isPrint?8:9.5}} }
+        y:{ suggestedMax:Math.max(...pctValues,1)*1.2, ticks:{callback:v=>v+'%', font:{size:isPrint?8:9.5}}, grid:{color:'#eef1f4'} },
+        x:{ grid:{display:false}, ticks: dense ? {maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7.5:9.5}} : {font:{size:isPrint?8.5:10.5}} }
       }
     }
   });
@@ -913,7 +915,7 @@ function buildTabs(){
       <div class="card"><h3>Challenges registering them in Ukraine</h3><div class="chart-wrap"><canvas id="c-famchalukr"></canvas></div></div>
       <div class="card stat"><div class="n" id="stat-famchange">–</div><div class="lbl">had a change in family composition</div>
         <div class="sub-h">Faced challenges registering it</div>
-        <div style="display:flex;gap:12px"><div><div class="n" id="stat-famchalhc" style="font-size:17px">–</div><div class="lbl">in Moldova</div></div><div><div class="n" id="stat-famchalukr" style="font-size:17px">–</div><div class="lbl">in Ukraine</div></div></div></div>
+        <div style="display:flex;gap:14px"><div><div class="n" id="stat-famchalhc" style="font-size:19px">–</div><div class="lbl">in Moldova</div></div><div><div class="n" id="stat-famchalukr" style="font-size:19px">–</div><div class="lbl">in Ukraine</div></div></div></div>
     </div>
   </section>
 
@@ -938,7 +940,7 @@ function buildTabs(){
       <div class="card"><h3>Qualification match with current job</h3><div class="chart-wrap"><canvas id="c-qualmatch"></canvas></div></div>
       <div class="card"><h3>Regularity of access to earnings (employed)</h3><div id="c-earnings"></div>
         <div class="sub-h">Working conditions</div>
-        <div style="display:flex;gap:14px"><div><div class="n" id="stat-worklong" style="font-size:17px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">work beyond the legal limit</div></div><div><div class="n" id="stat-docskept" style="font-size:17px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">documents kept by employer</div></div></div></div>
+        <div style="display:flex;gap:16px"><div><div class="n" id="stat-worklong" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">work beyond the legal limit</div></div><div><div class="n" id="stat-docskept" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">documents kept by employer</div></div></div></div>
     </div>
 
     <div class="sub-bar">Education &amp; social protection</div>
@@ -946,7 +948,7 @@ function buildTabs(){
       <div class="card"><h3>Reasons children are not enrolled in school</h3><div class="chart-wrap"><canvas id="c-notenrol"></canvas></div></div>
       <div class="card"><h3>Social protection benefits applied for</h3><div class="chart-wrap"><canvas id="c-socprot"></canvas></div></div>
       <div class="card"><h3>Challenges accessing social protection</h3><div class="chart-wrap"><canvas id="c-socprotdiff"></canvas></div>
-        <div class="sub-h">Faced any challenge</div><div class="n" id="stat-socprotchal" style="font-size:17px;font-weight:900;color:var(--blue06)">–</div></div>
+        <div class="sub-h">Faced any challenge</div><div class="n" id="stat-socprotchal" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div></div>
     </div>
   </section>
 
@@ -973,7 +975,7 @@ function buildTabs(){
       <div class="card"><h3>Most urgent needs</h3><div class="chart-wrap"><canvas id="c-needs"></canvas></div></div>
       <div class="card"><h3>Information needs</h3><div class="chart-wrap"><canvas id="c-infoneeds"></canvas></div></div>
       <div class="card"><h3>Access to childcare services</h3><div class="chart-wrap"><canvas id="c-childcare"></canvas></div>
-        <p class="note" style="margin:2px 0 6px">Households with children below mandatory school age.</p>
+        <p class="note" style="margin:2px 0 8px">Households with children below mandatory school age.</p>
         <div class="sub-h">By household type</div><div id="c-childcarecmp"></div></div>
     </div>
   </section>
@@ -1047,7 +1049,7 @@ function renderAll(){
   setStat('stat-age', avgAgeEstimate(VIEW));
   setStat('stat-hhsize', avg(VIEW,'household_size'));
 
-  // Refugee Profiles
+  // ---- Refugee Profiles ----
   const pwsn = pctTrue(VIEW,'pwsn'); setStat('stat-pwsn', pwsn? pwsn.pct:null, pwsn?'%':'');
   const disab = pctFlag(VIEW,'disability', v=>['some_difficulty','lot_difficulty','cannot_do'].includes(v)); setStat('stat-disability', disab? disab.pct:null, disab?'%':'');
   const medcond = pctYes(VIEW,'medical_condition','yes'); setStat('stat-medcond', medcond? medcond.pct:null, medcond?'%':'');
@@ -1058,7 +1060,7 @@ function renderAll(){
   barChart('c-activity', countBy(VIEW,'resp_activity'), {field:'resp_activity'});
   barChart('c-lang', countBy(VIEW,'language_other',{multi:true}), {field:'language_other'});
 
-  // Displacement Patterns
+  // ---- Displacement Patterns ----
   const visited = pctFlag(VIEW,'temp_return', v=>v==='yes_more'||v==='yes_once'); setStat('stat-visited', visited? visited.pct:null, visited?'%':'');
   const returndiff = pctYes(VIEW,'temp_return_difficulties','yes'); setStat('stat-returndiff', returndiff? returndiff.pct:null, returndiff?'%':'');
   const shortvisit = pctYes(VIEW,'return_stay','less_than_two_weeks'); setStat('stat-shortvisit', shortvisit? shortvisit.pct:null, shortvisit?'%':'');
@@ -1071,7 +1073,7 @@ function renderAll(){
   barChart('c-returndiffwhat', countBy(VIEW,'temp_return_difficulties_what',{multi:true}), {top:8, field:'temp_return_difficulties_what'});
   barChart('c-noreturn', countBy(VIEW,'no_return_reason',{multi:true}), {top:8, field:'no_return_reason'});
 
-  // Access to Rights #1
+  // ---- Access to Rights #1 ----
   const lackdoc = pctYes(VIEW,'lack_documentation','yes'); setStat('stat-lackdoc', lackdoc? lackdoc.pct:null, lackdoc?'%':'');
   const docimpact = pctFlag(VIEW,'documents_affect', v=>v.split(' ').some(c=>!['no_specific_impact','prefer_no_answer'].includes(c))); setStat('stat-docimpact', docimpact? docimpact.pct:null, docimpact?'%':'');
   const tpdiff = pctYes(VIEW,'temp_protection_difficulty','yes'); setStat('stat-tpdiff', tpdiff? tpdiff.pct:null, tpdiff?'%':'');
@@ -1090,7 +1092,7 @@ function renderAll(){
   barChart('c-tpdiffwhat', countBy(VIEW,'temp_protection_difficulty_what',{multi:true}), {top:8, field:'temp_protection_difficulty_what'});
   barChart('c-famchalukr', countBy(VIEW,'family_comp_challenges_ukr',{multi:true}), {top:8, field:'family_comp_challenges_ukr'});
 
-  // Access to Rights #2
+  // ---- Access to Rights #2 ----
   const reunif = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'reunification_support')); setStat('stat-reunif', reunif? reunif.pct:null, reunif?'%':'');
   const tracing = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'family_traig')); setStat('stat-tracing', tracing? tracing.pct:null, tracing?'%':'');
   const noenrol = pctFlag(VIEW,'school_enrol', v=>v==='no'||v==='yes_some'); setStat('stat-noenrol', noenrol? noenrol.pct:null, noenrol?'%':'');
@@ -1107,7 +1109,7 @@ function renderAll(){
   barChart('c-socprot', countBy(VIEW,'social_prot_access',{multi:true}), {top:8, field:'social_prot_access'});
   barChart('c-socprotdiff', countBy(VIEW,'social_prot_difficulties',{multi:true}), {top:8, field:'social_prot_difficulties'});
 
-  // Access to Rights #3
+  // ---- Access to Rights #3 ----
   const rental = pctYes(VIEW,'rental_contract','yes'); setStat('stat-rental', rental? rental.pct:null, rental?'%':'');
   const leaveaccomm = pctYes(VIEW,'leave_accomm','yes'); setStat('stat-leaveaccomm', leaveaccomm? leaveaccomm.pct:null, leaveaccomm?'%':'');
   const childcare = pctYes(VIEW,'childcare_services','yes'); setStat('stat-childcare', childcare? childcare.pct:null, childcare?'%':'');
