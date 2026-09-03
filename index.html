@@ -386,10 +386,10 @@ function pctTrue(records, field){
 // generalized version of pctYes for multi-select fields (space-joined codes)
 // or any custom positive-match rule
 function pctFlag(records, field, isPositive){
-  const denom = records.filter(r=>r[field]!==null && r[field]!==undefined && r[field]!=='').length;
-  if(denom < MIN_CELL) return null;
-  const num = records.filter(r=>isPositive(String(r[field]))).length;
-  return {pct: Math.round(100*num/denom), n: denom};
+  const answered = records.filter(r=>r[field]!==null && r[field]!==undefined && r[field]!=='');
+  if(answered.length < MIN_CELL) return null;
+  const num = answered.filter(r=>isPositive(String(r[field]))).length;
+  return {pct: Math.round(100*num/answered.length), n: answered.length};
 }
 const hasCode = (val, code) => val.split(' ').includes(code);
 // exact ages were dropped from the dataset for privacy (bucketed to
@@ -537,9 +537,15 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
       maintainAspectRatio: !horizontal && !denseX,
       layout: { padding: horizontal ? {right:30} : {top:20, bottom: denseX?6:0} },
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}}, barValueLabels:{skip:denseX} },
+      // one or the other, never both: bars that already carry a printed %
+      // label get no value-axis at all (no ticks, no gridlines) — only the
+      // dense chronological chart (too many bars for per-bar text) keeps a
+      // real scale instead of labels.
       scales: horizontal
-        ? { x:{ suggestedMax:maxPct*1.18, ticks:{callback:v=>v+'%', font:{size:tickFont}}, grid:{color:'#eef1f4'} }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:tickFont}} } }
-        : { y:{ suggestedMax:maxPct*1.18, ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false}, ticks: denseX ? {maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7.5:9.5}} : {font:{size:tickFont}} } }
+        ? { x:{ display:false, suggestedMax:maxPct*1.18 }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:tickFont}} } }
+        : denseX
+          ? { y:{ suggestedMax:maxPct*1.18, ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false}, ticks:{maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7.5:9.5}} } }
+          : { y:{ display:false, suggestedMax:maxPct*1.18 }, x:{ grid:{display:false}, ticks:{font:{size:tickFont}} } }
     }
   });
 }
@@ -568,6 +574,66 @@ function donutChart(canvasId, dataObj, field=null){
     plugins: [donutSliceLabels],
     data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data: entries.map(e=>e[1]), backgroundColor: PALETTE }]},
     options:{ maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:isPrint?7:10, padding:isPrint?4:8, font:{size:isPrint?8.5:11.5}}}}, cutout:'55%' }
+  });
+}
+
+// age-gender pyramid: diverging horizontal bars (male left/negative, female
+// right/positive) sharing one symmetric numeric scale — that scale is the
+// one case a diverging chart genuinely needs an axis for (labels alone
+// can't convey "which side is bigger"), so it keeps light center-zero
+// gridlines instead of printed value text.
+const PYRAMID_ORDER = ['60+','35-59','18-34','5-17','0-4'];
+const PYRAMID_LABELS = {'60+':'60+','35-59':'35–59','18-34':'18–34','5-17':'5–17','0-4':'0–4'};
+function pyramidChart(canvasId, records){
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const ctx = document.getElementById(canvasId);
+  if(!ctx) return;
+  ctx.parentElement.querySelectorAll('.suppressed').forEach(n=>n.remove());
+  let total = 0;
+  const male = Object.fromEntries(PYRAMID_ORDER.map(k=>[k,0]));
+  const female = Object.fromEntries(PYRAMID_ORDER.map(k=>[k,0]));
+  records.forEach(r=>{
+    (r.hh_pyramid||[]).forEach(m=>{
+      if(!(m.age_group in male)) return;
+      total++;
+      if(m.gender==='male') male[m.age_group]++;
+      else if(m.gender==='female') female[m.age_group]++;
+    });
+  });
+  if(total < MIN_CELL){
+    ctx.style.display='none';
+    const note = document.createElement('div'); note.className='suppressed'; note.textContent='Insufficient sample';
+    ctx.after(note);
+    return;
+  }
+  ctx.style.display='';
+  const isPrint = document.body.classList.contains('printing-all');
+  ctx.parentElement.style.height = (isPrint?140:200)+'px';
+  const maleVals = PYRAMID_ORDER.map(k=>-Math.round(1000*male[k]/total)/10);
+  const femaleVals = PYRAMID_ORDER.map(k=>Math.round(1000*female[k]/total)/10);
+  const rawMax = Math.max(...maleVals.map(Math.abs), ...femaleVals, 2);
+  const maxAbs = Math.ceil(rawMax*1.15/5)*5;
+  charts[canvasId] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: PYRAMID_ORDER.map(k=>PYRAMID_LABELS[k]),
+      datasets:[
+        {label:'Male', data:maleVals, backgroundColor:PALETTE[1], maxBarThickness:20},
+        {label:'Female', data:femaleVals, backgroundColor:PALETTE[0], maxBarThickness:20}
+      ]
+    },
+    options:{
+      indexAxis:'y', maintainAspectRatio:false,
+      layout:{padding:{left:6,right:6}},
+      plugins:{
+        legend:{position:'bottom', labels:{boxWidth:10, padding:10, font:{size:isPrint?8.5:11}}},
+        tooltip:{callbacks:{label:(c)=>Math.abs(c.raw)+'%'}}
+      },
+      scales:{
+        x:{stacked:true, min:-maxAbs, max:maxAbs, grid:{color:'#eef1f4'}, ticks:{callback:v=>Math.abs(v)+'%', font:{size:isPrint?8:9.5}}},
+        y:{stacked:true, grid:{display:false}, ticks:{font:{size:isPrint?8.5:10.5}}}
+      }
+    }
   });
 }
 
@@ -652,24 +718,32 @@ function buildTabs(){
 
   <section id="tab-profile">
     <div class="page-bar">Refugee Profiles</div>
+    <div class="stat-row">
+      <div class="card stat"><div class="n" id="stat-pwsn">–</div><div class="lbl">of households have a person with specific needs (PWSN)</div></div>
+      <div class="card stat"><div class="n" id="stat-disability">–</div><div class="lbl">of respondents report a disability</div></div>
+      <div class="card stat"><div class="n" id="stat-medcond">–</div><div class="lbl">of HH have a serious medical condition</div></div>
+    </div>
     <div class="grid">
-      <div class="card"><h3>Gender</h3><canvas id="c-gender"></canvas></div>
-      <div class="card"><h3>Age group</h3><canvas id="c-age"></canvas></div>
+      <div class="card"><h3>Age &amp; gender of household members</h3><canvas id="c-pyramid"></canvas></div>
+      <div class="card"><h3>Household type</h3><canvas id="c-hhtype"></canvas></div>
+      <div class="card"><h3>Nationality</h3><canvas id="c-nationality"></canvas></div>
       <div class="card"><h3>Education level</h3><canvas id="c-educ"></canvas></div>
       <div class="card"><h3>Main activity before departure</h3><canvas id="c-activity"></canvas></div>
-      <div class="card"><h3>Household type</h3><canvas id="c-hhtype"></canvas></div>
       <div class="card"><h3>Languages spoken at home</h3><canvas id="c-lang"></canvas></div>
     </div>
   </section>
 
   <section id="tab-displacement">
     <div class="page-bar">Displacement Patterns</div>
+    <div class="stat-row">
+      <div class="card stat"><div class="n" id="stat-visited">–</div><div class="lbl">have visited Ukraine at least once since departure</div></div>
+      <div class="card stat"><div class="n" id="stat-returndiff">–</div><div class="lbl">of visitors faced difficulties returning to Moldova</div></div>
+      <div class="card stat"><div class="n" id="stat-shortvisit">–</div><div class="lbl">of visits lasted under two weeks</div></div>
+    </div>
     <div class="grid">
-      <div class="card"><h3>Oblast of origin</h3><canvas id="c-oblast"></canvas></div>
-      <div class="card"><h3>Arrival month (host country)</h3><canvas id="c-arrival"></canvas></div>
-      <div class="card"><h3>Visited Ukraine since departure?</h3><canvas id="c-return"></canvas></div>
-      <div class="card"><h3>Duration of most recent visit</h3><canvas id="c-returnstay"></canvas></div>
-      <div class="card"><h3>Main reason unable to visit Ukraine</h3><canvas id="c-noreturn"></canvas></div>
+      <div class="card"><h3>Top oblasts of origin</h3><canvas id="c-oblast"></canvas></div>
+      <div class="card"><h3>Departure from Ukraine</h3><canvas id="c-departure"></canvas></div>
+      <div class="card"><h3>Arrival to Moldova</h3><canvas id="c-arrival"></canvas></div>
     </div>
   </section>
 
@@ -677,33 +751,42 @@ function buildTabs(){
     <div class="page-bar">Access to Rights #1 — Identity Documents &amp; Legal Status</div>
     <div class="stat-row">
       <div class="card stat"><div class="n" id="stat-lackdoc">–</div><div class="lbl">HH missing an ID document</div></div>
-      <div class="card stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">difficulty in TP application</div></div>
-      <div class="card stat"><div class="n" id="stat-famchange">–</div><div class="lbl">change in family composition</div></div>
+      <div class="card stat"><div class="n" id="stat-docimpact">–</div><div class="lbl">say missing docs limit access to services</div></div>
+      <div class="card stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">had difficulty in the TP application</div></div>
     </div>
     <div class="grid">
-      <div class="card"><h3>Current legal status</h3><canvas id="c-legal"></canvas></div>
+      <div class="card"><h3>Legal status in Moldova</h3><canvas id="c-legal"></canvas></div>
       <div class="card"><h3>Documents currently missing</h3><canvas id="c-missingdocs"></canvas></div>
-      <div class="card"><h3>Why temporary protection not applied for</h3><canvas id="c-tpreason"></canvas></div>
-      <div class="card"><h3>Difficulties in the TP application / extension process</h3><canvas id="c-tpdiffwhat"></canvas></div>
+      <div class="card"><h3>Registration of vital events since arrival</h3><canvas id="c-vitalevents"></canvas></div>
     </div>
   </section>
 
   <section id="tab-rights2">
-    <div class="page-bar">Access to Rights #2 — Education, Work &amp; Social Protection</div>
+    <div class="page-bar">Access to Rights #2 — Family, Work, Education &amp; Social Protection</div>
+    <div class="stat-row">
+      <div class="card stat"><div class="n" id="stat-reunif">–</div><div class="lbl">cite family reunification as an urgent need</div></div>
+      <div class="card stat"><div class="n" id="stat-tracing">–</div><div class="lbl">cite tracing of family members as an urgent need</div></div>
+      <div class="card stat"><div class="n" id="stat-noenrol">–</div><div class="lbl">HH with children have some not enrolled in school</div></div>
+    </div>
     <div class="grid">
-      <div class="card"><h3>School enrolment (school-aged children)</h3><canvas id="c-school"></canvas></div>
       <div class="card"><h3>Current main activity in host country</h3><canvas id="c-workcoa"></canvas></div>
       <div class="card"><h3>Barriers to employment</h3><canvas id="c-diffwork"></canvas></div>
+      <div class="card"><h3>Reasons children are not enrolled in school</h3><canvas id="c-notenrol"></canvas></div>
       <div class="card"><h3>Applied for social protection benefits</h3><canvas id="c-socprot"></canvas></div>
     </div>
   </section>
 
   <section id="tab-rights3">
-    <div class="page-bar">Access to Rights #3 — Accommodation &amp; Urgent Needs</div>
+    <div class="page-bar">Access to Rights #3 — Accommodation, Urgent Needs &amp; Childcare</div>
+    <div class="stat-row">
+      <div class="card stat"><div class="n" id="stat-rental">–</div><div class="lbl">of renters hold a rental contract</div></div>
+      <div class="card stat"><div class="n" id="stat-leaveaccomm">–</div><div class="lbl">expect to leave current accommodation soon</div></div>
+      <div class="card stat"><div class="n" id="stat-childcare">–</div><div class="lbl">of HH with young children access childcare services</div></div>
+    </div>
     <div class="grid">
-      <div class="card"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
       <div class="card"><h3>Current accommodation</h3><canvas id="c-accomm"></canvas></div>
-      <div class="card"><h3>Rental contract with landlord</h3><canvas id="c-rental"></canvas></div>
+      <div class="card"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
+      <div class="card"><h3>Access to childcare services</h3><canvas id="c-childcare"></canvas></div>
     </div>
   </section>
 
@@ -744,37 +827,49 @@ function renderAll(){
   setStat('stat-age', avgAgeEstimate(VIEW));
   setStat('stat-hhsize', avg(VIEW,'household_size'));
 
-  barChart('c-needs', countBy(VIEW,'most_urgent_needs',{multi:true}), {field:'most_urgent_needs'});
-  barChart('c-legal', countBy(VIEW,'temp_protection'), {field:'temp_protection', top:9});
-
-  donutChart('c-gender', countBy(VIEW,'resp_gender'), 'resp_gender');
-  barChart('c-age', countBy(VIEW,'age_group'), {horizontal:false});
+  // ---- Refugee Profiles ----
+  const pwsn = pctTrue(VIEW,'pwsn'); setStat('stat-pwsn', pwsn? pwsn.pct:null, pwsn?'%':'');
+  const disab = pctFlag(VIEW,'disability', v=>['some_difficulty','lot_difficulty','cannot_do'].includes(v)); setStat('stat-disability', disab? disab.pct:null, disab?'%':'');
+  const medcond = pctYes(VIEW,'medical_condition','yes'); setStat('stat-medcond', medcond? medcond.pct:null, medcond?'%':'');
+  pyramidChart('c-pyramid', VIEW);
+  donutChart('c-hhtype', countBy(VIEW,'household_type'));
+  barChart('c-nationality', countBy(VIEW,'nationality'), {field:'nationality', top:6});
   barChart('c-educ', countBy(VIEW,'educ_level'), {field:'educ_level'});
   barChart('c-activity', countBy(VIEW,'resp_activity'), {field:'resp_activity'});
-  donutChart('c-hhtype', countBy(VIEW,'household_type'));
   barChart('c-lang', countBy(VIEW,'language_other',{multi:true}), {field:'language_other'});
 
+  // ---- Displacement Patterns ----
+  const visited = pctFlag(VIEW,'temp_return', v=>v==='yes_more'||v==='yes_once'); setStat('stat-visited', visited? visited.pct:null, visited?'%':'');
+  const returndiff = pctYes(VIEW,'temp_return_difficulties','yes'); setStat('stat-returndiff', returndiff? returndiff.pct:null, returndiff?'%':'');
+  const shortvisit = pctYes(VIEW,'return_stay','less_than_two_weeks'); setStat('stat-shortvisit', shortvisit? shortvisit.pct:null, shortvisit?'%':'');
   barChart('c-oblast', countBy(VIEW,'oblast_orig'), {field:'oblast_orig'});
+  barChart('c-departure', countBy(VIEW,'departure_month'), {horizontal:false, chronological:true});
   barChart('c-arrival', countBy(VIEW,'arrival_month'), {horizontal:false, chronological:true});
-  donutChart('c-return', countBy(VIEW,'temp_return'), 'temp_return');
-  barChart('c-returnstay', countBy(VIEW,'return_stay'), {field:'return_stay'});
-  barChart('c-noreturn', countBy(VIEW,'no_return_reason'), {top:10, field:'no_return_reason'});
 
+  // ---- Access to Rights #1 ----
   const lackdoc = pctYes(VIEW,'lack_documentation','yes'); setStat('stat-lackdoc', lackdoc? lackdoc.pct:null, lackdoc?'%':'');
+  const docimpact = pctFlag(VIEW,'documents_affect', v=>v.split(' ').some(c=>!['no_specific_impact','prefer_no_answer'].includes(c))); setStat('stat-docimpact', docimpact? docimpact.pct:null, docimpact?'%':'');
   const tpdiff = pctYes(VIEW,'temp_protection_difficulty','yes'); setStat('stat-tpdiff', tpdiff? tpdiff.pct:null, tpdiff?'%':'');
-  const famchange = (()=>{ const denom = VIEW.filter(r=>r.family_comp!==null).length; if(denom<MIN_CELL) return null; const yes = VIEW.filter(r=>r.family_comp && r.family_comp!=='no').length; return Math.round(100*yes/denom); })();
-  setStat('stat-famchange', famchange, famchange!==null?'%':'');
-
+  barChart('c-legal', countBy(VIEW,'temp_protection'), {field:'temp_protection', top:9});
   barChart('c-missingdocs', countBy(VIEW,'missing_docs',{multi:true}), {field:'missing_docs'});
-  barChart('c-tpreason', countBy(VIEW,'temp_protection_reasons'), {field:'temp_protection_reasons'});
-  barChart('c-tpdiffwhat', countBy(VIEW,'temp_protection_difficulty_what',{multi:true}), {top:10, field:'temp_protection_difficulty_what'});
+  donutChart('c-vitalevents', countBy(VIEW,'family_comp',{multi:true}), 'family_comp');
 
-  donutChart('c-accomm', countBy(VIEW,'accomm_coa'), 'accomm_coa');
-  donutChart('c-rental', countBy(VIEW,'rental_contract'), 'rental_contract');
+  // ---- Access to Rights #2 ----
+  const reunif = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'reunification_support')); setStat('stat-reunif', reunif? reunif.pct:null, reunif?'%':'');
+  const tracing = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'family_traig')); setStat('stat-tracing', tracing? tracing.pct:null, tracing?'%':'');
+  const noenrol = pctFlag(VIEW,'school_enrol', v=>v==='no'||v==='yes_some'); setStat('stat-noenrol', noenrol? noenrol.pct:null, noenrol?'%':'');
   barChart('c-workcoa', countBy(VIEW,'work_coa'), {field:'work_coa'});
   barChart('c-diffwork', countBy(VIEW,'diff_work',{multi:true}), {top:8, field:'diff_work'});
+  barChart('c-notenrol', countBy(VIEW,'not_enrol_reason',{multi:true}), {top:8, field:'not_enrol_reason'});
   barChart('c-socprot', countBy(VIEW,'social_prot_access',{multi:true}), {top:8, field:'social_prot_access'});
-  donutChart('c-school', countBy(VIEW,'school_enrol'), 'school_enrol');
+
+  // ---- Access to Rights #3 ----
+  const rental = pctYes(VIEW,'rental_contract','yes'); setStat('stat-rental', rental? rental.pct:null, rental?'%':'');
+  const leaveaccomm = pctYes(VIEW,'leave_accomm','yes'); setStat('stat-leaveaccomm', leaveaccomm? leaveaccomm.pct:null, leaveaccomm?'%':'');
+  const childcare = pctYes(VIEW,'childcare_services','yes'); setStat('stat-childcare', childcare? childcare.pct:null, childcare?'%':'');
+  donutChart('c-accomm', countBy(VIEW,'accomm_coa'), 'accomm_coa');
+  barChart('c-needs', countBy(VIEW,'most_urgent_needs',{multi:true}), {field:'most_urgent_needs'});
+  donutChart('c-childcare', countBy(VIEW,'childcare_services'), 'childcare_services');
 }
 
 boot();
