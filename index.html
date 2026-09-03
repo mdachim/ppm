@@ -21,237 +21,191 @@
     --f:'Lato',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
-  /* header + nav + filters live in one sticky wrapper so their stacking is
-     always correct — three separately-stickied elements with hand-guessed
-     top offsets drifted out of sync and started overlapping content
-     whenever the header's actual height didn't match the assumption. */
+  body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--f);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
   .topbar{position:sticky;top:0;z-index:20;box-shadow:0 2px 8px rgba(11,55,84,.08)}
-  header{background:var(--blue);color:#fff;padding:14px 20px;border-bottom:3px solid var(--yellow)}
-  header .head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  header .title-block{display:flex;align-items:center;gap:14px}
-  header .unhcr-logo{height:60px;width:auto;display:block}
-  header h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.01em}
-  header .subtitle{margin:2px 0 0;font-size:11.5px;color:var(--blue01)}
+  header{background:var(--blue);color:#fff;padding:12px 18px;border-bottom:3px solid var(--yellow)}
+  header .head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  header .title-block{display:flex;align-items:center;gap:12px}
+  header .unhcr-logo{height:52px;width:auto;display:block}
+  header h1{margin:0;font-size:17px;font-weight:900;letter-spacing:-.01em}
+  header .subtitle{margin:2px 0 0;font-size:11px;color:var(--blue01)}
   header .head-meta{text-align:right;flex-shrink:0}
-  header .head-date{display:block;font-size:10.5px;color:var(--blue01);font-style:italic}
+  header .head-date{display:block;font-size:10px;color:var(--blue01);font-style:italic}
   nav{display:flex;flex-wrap:wrap;gap:2px;background:#fff;padding:0 8px;justify-content:center;border-bottom:1px solid var(--line);overflow-x:auto}
-  nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--grey04);padding:11px 12px 9px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:700;transition:color .15s,border-color .15s}
+  nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--grey04);padding:9px 10px 8px;font-size:11.5px;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:700;transition:color .15s,border-color .15s}
   nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
   nav button:hover:not(.active){color:var(--blue05)}
-  .filters{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--line)}
-  .filters label{font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--grey04);display:block;margin-bottom:4px}
-  .filters select{font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;width:100%;font-family:inherit;color:var(--ink)}
+
+  .filters{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end;background:var(--card);padding:10px 14px;border-bottom:1px solid var(--line)}
+  .filters label{font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--grey04);display:block;margin-bottom:3px}
+  .filters select{font-size:11.5px;padding:6px 7px;border:1px solid var(--line);border-radius:6px;background:#fff;width:100%;font-family:inherit;color:var(--ink)}
   .filters select:focus{outline:2px solid var(--blue02);outline-offset:0;border-color:var(--blue)}
-  .filters .filter-field{flex:1 1 auto;min-width:118px;position:relative}
-  /* multi-select dropdown (checkbox list) */
+  .filters .filter-field{flex:1 1 auto;min-width:110px;position:relative}
+
   .msel{position:relative}
-  .msel summary{list-style:none;font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .msel summary{list-style:none;font-size:11.5px;padding:6px 7px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px}
   .msel summary::-webkit-details-marker{display:none}
-  .msel summary svg{width:12px;height:12px;stroke:var(--grey04);flex-shrink:0;transition:transform .15s}
+  .msel summary svg{width:11px;height:11px;stroke:var(--grey04);flex-shrink:0;transition:transform .15s}
   .msel[open] summary svg{transform:rotate(180deg)}
   .msel[open] summary{border-color:var(--blue);outline:2px solid var(--blue02)}
   .msel-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .msel-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;width:max-content;max-width:240px;max-height:220px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;z-index:40}
-  .msel-row{display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:5px;font-size:12.5px;color:var(--ink);cursor:pointer;white-space:nowrap}
+  .msel-row{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:5px;font-size:11.5px;color:var(--ink);cursor:pointer;white-space:nowrap}
   .msel-row:hover{background:var(--canvas)}
-  .msel-row input{margin:0;accent-color:var(--blue);width:14px;height:14px;flex-shrink:0}
-  .filters .sample{width:100%;font-size:12px;color:var(--grey04);text-align:center;order:99}
-  .filters .sample b{color:var(--blue);font-size:14px}
+  .msel-row input{margin:0;accent-color:var(--blue);width:13px;height:13px;flex-shrink:0}
+  .filters .sample{width:100%;font-size:11px;color:var(--grey04);text-align:center;order:99}
+  .filters .sample b{color:var(--blue);font-size:13px}
   .filters button{font-family:inherit}
-  .filters button.reset{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;color:var(--grey05);transition:.15s}
-  .filters button.reset svg{width:13px;height:13px;stroke:var(--grey05);transition:stroke .15s}
+  .filters button.reset{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:18px;padding:6px 13px;font-size:11px;font-weight:700;cursor:pointer;color:var(--grey05);transition:.15s}
+  .filters button.reset svg{width:12px;height:12px;stroke:var(--grey05);transition:stroke .15s}
   .filters button.reset:hover{border-color:var(--red);color:var(--red);background:#fdf3f1}
   .filters button.reset:hover svg{stroke:var(--red)}
-  /* floating PDF download action */
-  /* icon-only, small — a full text pill sat right on top of whatever chart
-     happened to scroll into the bottom-right corner (position:fixed floats
-     over content, not beside it), so keep its footprint to a minimum;
-     the label appears in a tooltip on hover instead of taking up space */
-  .fab-print{position:fixed;right:16px;bottom:16px;z-index:30;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border:none;border-radius:50%;background:var(--blue);color:#fff;font-family:inherit;cursor:pointer;box-shadow:0 4px 16px rgba(11,55,84,.28);transition:background .15s,transform .15s}
-  .fab-print svg{width:19px;height:19px;stroke:#fff;flex-shrink:0}
+
+  .fab-print{position:fixed;right:16px;bottom:16px;z-index:30;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border:none;border-radius:50%;background:var(--blue);color:#fff;font-family:inherit;cursor:pointer;box-shadow:0 4px 14px rgba(11,55,84,.25);transition:background .15s,transform .15s}
+  .fab-print svg{width:17px;height:17px;stroke:#fff;flex-shrink:0}
   .fab-print:hover{background:var(--blue05);transform:translateY(-1px)}
   @media print{ .fab-print{display:none !important} }
-  main{padding:18px 16px 40px;max-width:640px;margin:0 auto}
-  /* masonry, not a row grid: cards are wildly different heights (a 3-bar
-     chart next to a 9-bar one), and a row grid locks every card in a row to
-     the tallest of them, leaving big ragged holes under the short ones.
-     CSS multicol packs them tight instead. */
-  .grid{display:flex;gap:12px;align-items:flex-start}
-  .mcol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:12px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+
+  main{padding:14px 14px 36px;max-width:640px;margin:0 auto}
+  .grid{display:flex;gap:10px;align-items:flex-start}
+  .mcol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px}
   .grid .card{margin-bottom:0;width:100%;break-inside:avoid}
-  /* every canvas gets its own sized box. The chart-sizing JS sets the height
-     of the canvas's PARENT — if that parent is the card, the card's title and
-     padding eat into the chart's space and the chart renders squeezed with
-     dead space under it. This wrapper is the thing that gets sized. */
+
   .chart-wrap{position:relative;width:100%}
-  .card h3{margin:0 0 12px;font-size:13px;font-weight:900;color:var(--blue06);letter-spacing:-.01em}
-  .stat{padding:16px;position:relative;overflow:hidden}
+  .card h3{margin:0 0 8px;font-size:12px;font-weight:900;color:var(--blue06);letter-spacing:-.01em}
+  .stat{padding:12px 14px;position:relative;overflow:hidden}
   .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}
-  .stat .n{font-size:26px;font-weight:900;color:var(--blue06);line-height:1}
-  .stat .lbl{font-size:11.5px;color:var(--grey04);margin-top:6px;font-weight:700}
-  .stat-row{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
+  .stat .n{font-size:23px;font-weight:900;color:var(--blue06);line-height:1}
+  .stat .lbl{font-size:10.5px;color:var(--grey04);margin-top:4px;font-weight:700}
+  .stat-row{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:10px}
   .stat-row .card{margin-bottom:0}
-  .kf-panel{display:flex;flex-direction:row;gap:16px}
-  .kf-side{flex:0 0 118px;display:flex;flex-direction:column;gap:13px;padding-right:12px;border-right:1px solid var(--line)}
-  .kf-h{font-size:9px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--grey04)}
-  .kf-stat .n{font-size:21px;font-weight:900;color:var(--blue);line-height:1.15;margin-top:2px}
-  .kf-stat .lbl{font-size:10px;color:var(--grey05);margin-top:1px;line-height:1.3}
-  .kf-grid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(2,1fr);gap:18px 10px}
-  /* 10 gauges read better as 4 / 4 / 2 than 5 / 5 — pushing the 9th to the
-     second column leaves the final pair centred under the rows above */
+
+  .kf-panel{display:flex;flex-direction:row;gap:14px}
+  .kf-side{flex:0 0 112px;display:flex;flex-direction:column;gap:10px;padding-right:10px;border-right:1px solid var(--line)}
+  .kf-h{font-size:8.5px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--grey04)}
+  .kf-stat .n{font-size:19px;font-weight:900;color:var(--blue);line-height:1.15;margin-top:2px}
+  .kf-stat .lbl{font-size:9.5px;color:var(--grey05);margin-top:1px;line-height:1.25}
+  .kf-grid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(2,1fr);gap:14px 8px}
   .kf-grid.rows442{grid-template-columns:repeat(4,1fr)}
   .kf-grid.rows442 .gauge:nth-child(9){grid-column:2}
-  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;padding:2px 4px;position:relative;min-width:0}
-  /* the dial is a fixed 2:1 box the half-donut fits exactly, with the % placed
-     inside it — the old version pulled the % and caption up with hardcoded
-     negative margins tuned for the screen, so at print sizes the caption
-     landed on top of the arc */
-  .gauge-dial{position:relative;width:100%;max-width:104px;height:52px}
+
+  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;padding:1px 3px;position:relative;min-width:0}
+  .gauge-dial{position:relative;width:100%;max-width:96px;height:48px}
   .gauge-dial canvas{width:100%!important;height:100%!important}
   .card canvas{max-width:100% !important}
-  .gauge .pct{position:absolute;left:0;right:0;bottom:0;font-size:17px;font-weight:900;color:var(--grey06);line-height:1}
-  .gauge .cap{font-size:11px;color:var(--grey05);margin-top:7px;line-height:1.35}
-  .note{font-size:11px;color:var(--grey03);margin-top:8px}
-  /* proportional strip — simplified treemap/segmented-bar: one row of
-     flex-weighted blocks instead of a full 2D treemap layout, which is
-     overkill for the 3-8 categories these fields have */
-  .treemap-row{display:flex;gap:2px;border-radius:8px;overflow:hidden}
-  .treemap-block{display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;font-size:10px;text-align:center;padding:4px 2px;min-width:0;overflow:hidden}
-  .treemap-block b{font-size:13px;font-weight:900}
-  .treemap-block span{font-size:9px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
-  .legend-inline{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;font-size:11px;color:var(--grey05)}
-  .legend-inline i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
-  .waffle-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;max-width:230px;margin:0 auto}
+  .gauge .pct{position:absolute;left:0;right:0;bottom:0;font-size:15px;font-weight:900;color:var(--grey06);line-height:1}
+  .gauge .cap{font-size:10px;color:var(--grey05);margin-top:5px;line-height:1.25}
+  .note{font-size:10px;color:var(--grey03);margin-top:6px}
+
+  .treemap-row{display:flex;gap:2px;border-radius:6px;overflow:hidden}
+  .treemap-block{display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;font-size:9.5px;text-align:center;padding:3px 2px;min-width:0;overflow:hidden}
+  .treemap-block b{font-size:11.5px;font-weight:900}
+  .treemap-block span{font-size:8.5px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+
+  .legend-inline{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:8px;font-size:10.5px;line-height:1.3;color:var(--grey05)}
+  .legend-inline i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+
+  .waffle-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:2.5px;max-width:210px;margin:0 auto}
   .waffle-grid i{display:block;aspect-ratio:1/1;border-radius:2px}
-  .cmp-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+
+  .cmp-row{display:flex;align-items:center;gap:6px;margin-bottom:7px}
   .cmp-row:last-child{margin-bottom:0}
-  .cmp-lbl{flex:0 0 128px;font-size:11px;color:var(--grey05);text-align:right;line-height:1.25}
-  .cmp-track{flex:1;background:var(--canvas);border-radius:6px;height:14px;overflow:hidden}
-  .cmp-fill{height:100%;background:var(--blue);border-radius:6px}
-  .cmp-val{flex:0 0 32px;font-size:11px;font-weight:800;color:var(--blue06)}
-  .suppressed{font-size:12.5px;color:var(--grey03);font-style:italic;padding:20px 0;text-align:center}
-  body.printing-all .suppressed{font-size:8px;padding:10px 0}
-  .methodology{background:var(--blue01);border-radius:10px;padding:16px;font-size:12.5px;line-height:1.6;color:var(--blue06)}
+  .cmp-lbl{flex:0 0 110px;font-size:10px;color:var(--grey05);text-align:right;line-height:1.2}
+  .cmp-track{flex:1;background:var(--canvas);border-radius:4px;height:12px;overflow:hidden}
+  .cmp-fill{height:100%;background:var(--blue);border-radius:4px}
+  .cmp-val{flex:0 0 28px;font-size:10px;font-weight:800;color:var(--blue06)}
+
+  .suppressed{font-size:11.5px;color:var(--grey03);font-style:italic;padding:16px 0;text-align:center}
+  body.printing-all .suppressed{font-size:8px;padding:8px 0}
+
+  .methodology{background:var(--blue01);border-radius:8px;padding:12px 14px;font-size:11.5px;line-height:1.5;color:var(--blue06)}
   .methodology b{color:var(--blue06)}
-  .privacy-badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--grey05);background:var(--canvas);border:1px solid var(--line);border-radius:20px;padding:4px 10px;margin-top:10px}
-  .privacy-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
-  .section-eyebrow{font-size:10.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:2px}
-  .page-bar{background:var(--blue);color:#fff;font-weight:900;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;border-radius:8px;margin-bottom:12px}
-  .sub-h{font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--grey04);margin:6px 0 7px;padding-top:8px;border-top:1px solid var(--line)}
-  .sub-bar{background:var(--grey05);color:#fff;font-weight:900;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:6px 12px;border-radius:6px;margin:0 0 10px}
-  .intro-text{font-size:13px;line-height:1.6;color:var(--grey05);margin-bottom:14px}
+  .page-bar{background:var(--blue);color:#fff;font-weight:900;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;padding:8px 12px;border-radius:6px;margin-bottom:10px}
+  .sub-h{font-size:9.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--grey04);margin:5px 0 6px;padding-top:6px;border-top:1px solid var(--line)}
+  .sub-bar{background:var(--grey05);color:#fff;font-weight:900;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:5px;margin:0 0 8px}
+  .intro-text{font-size:12px;line-height:1.5;color:var(--grey05);margin-bottom:12px}
   .intro-text b{color:var(--blue06)}
-  .icon-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-  .icon-stat{display:flex;align-items:center;gap:10px;background:var(--canvas);border-radius:10px;padding:10px 12px}
-  .icon-stat .icon{font-size:24px;line-height:1}
-  .icon-stat .n{font-size:19px;font-weight:900;color:var(--blue06);line-height:1.1}
-  .icon-stat .lbl{font-size:10.5px;color:var(--grey04);font-weight:700}
-  .stat-list{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;margin-bottom:6px}
-  .stat-list .item{min-width:0}
-  .stat-list .n{font-size:24px;font-weight:900;color:var(--blue);line-height:1.1}
-  .stat-list .lbl{font-size:11px;color:var(--grey04);margin-top:2px;font-weight:600}
-  .ack-box{background:var(--canvas);border-radius:10px;padding:14px;font-size:12px;line-height:1.6;color:var(--grey05);margin-top:14px}
-  .ack-box h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);font-weight:900}
+  .icon-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .icon-stat{display:flex;align-items:center;gap:8px;background:var(--canvas);border-radius:8px;padding:8px 10px}
+  .icon-stat .icon{font-size:20px;line-height:1}
+  .icon-stat .n{font-size:17px;font-weight:900;color:var(--blue06);line-height:1.1}
+  .icon-stat .lbl{font-size:10px;color:var(--grey04);font-weight:700}
+  .ack-box{background:var(--canvas);border-radius:8px;padding:12px;font-size:11px;line-height:1.5;color:var(--grey05);margin-top:12px}
+  .ack-box h4{margin:0 0 6px;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);font-weight:900}
   .gauge .cap b{color:var(--blue05)}
+
   #tabs>section{display:none}
   #tabs>section.active{display:block}
-  /* forced on briefly (via JS) right before window.print() so every chart
-     has a real, non-zero-size canvas to draw into before print rasterizes —
-     the print media query alone reflows too late for Chart.js to catch */
   body.printing-all #tabs>section{display:block}
-  footer{padding:16px 24px;font-size:11px;color:var(--grey03);text-align:center}
+  footer{padding:14px 20px;font-size:10.5px;color:var(--grey03);text-align:center}
 
-  /* ---- web view widens into a landscape layout on real screens; the PDF
-     factsheet (below) stays a fixed A4 portrait page regardless ---- */
   @media screen and (min-width:860px){
     main{max-width:1180px}
     .stat-row{grid-template-columns:repeat(3,1fr)}
     .icon-stats{grid-template-columns:repeat(2,1fr);max-width:420px}
-    .kf-side{flex:0 0 170px}
+    .kf-side{flex:0 0 150px}
     .filters{max-width:1180px;margin:0 auto}
     nav{padding:0 calc((100% - 1180px)/2)}
   }
-  /* capped at 2 columns everywhere — a 3rd column relies on the full
-     browser window width, which doesn't match the actual visible pane
-     when the dashboard sits inside an embedded/side-panel viewer, so a
-     3rd card was spilling off-screen even though the grid math was fine */
 
-  /* Applied on screen for the moment before printing, so the charts are
-     BUILT at the A4 content width they'll be rasterized at. Without this they
-     were laid out at browser width and then squeezed into a ~half-as-wide
-     print column, which clipped every y-axis label off the left edge. */
   body.printing-all main{max-width:186mm;padding:0;margin:0}
-  body.printing-all .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;align-items:start}
-  body.printing-all .grid.cols-3{grid-template-columns:repeat(3,1fr);gap:7px}
+  body.printing-all .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;align-items:start}
+  body.printing-all .grid.cols-3{grid-template-columns:repeat(3,1fr);gap:6px}
   body.printing-all .stat-row{display:grid;grid-template-columns:repeat(3,1fr)}
-  body.printing-all .card{padding:8px;margin-bottom:0;font-size:11px}
-  body.printing-all .card h3{margin:0 0 6px;font-size:10px}
-  body.printing-all .kf-grid{grid-template-columns:repeat(4,1fr);gap:8px 6px}
-  body.printing-all .kf-side{flex:0 0 110px}
-  body.printing-all .gauge-dial{max-width:70px;height:35px}
-  body.printing-all .gauge .cap{font-size:7.5px;margin-top:4px;line-height:1.25}
-  body.printing-all .gauge .pct{font-size:12px}
+  body.printing-all .card{padding:7px;margin-bottom:0;font-size:10.5px}
+  body.printing-all .card h3{margin:0 0 5px;font-size:9.5px}
+  body.printing-all .kf-grid{grid-template-columns:repeat(4,1fr);gap:7px 5px}
+  body.printing-all .kf-side{flex:0 0 100px}
+  body.printing-all .gauge-dial{max-width:66px;height:33px}
+  body.printing-all .gauge .cap{font-size:7px;margin-top:3px;line-height:1.2}
+  body.printing-all .gauge .pct{font-size:11px}
   body.printing-all nav, body.printing-all .filters{display:none}
   body.printing-all .topbar{position:static;box-shadow:none}
-  body.printing-all header{padding:10px 14px}
-  body.printing-all header .unhcr-logo{height:40px}
-  body.printing-all header h1{font-size:15px}
+  body.printing-all header{padding:8px 12px}
+  body.printing-all header .unhcr-logo{height:36px}
+  body.printing-all header h1{font-size:14px}
 
-  /* ---- print / PDF factsheet: A4 portrait, one tab per page ---- */
   @media print{
-    @page{ size:A4 portrait; margin:12mm; }
+    @page{ size:A4 portrait; margin:10mm; }
     body{background:#fff}
-    /* must out-specify the body.printing-all prep rule above, or main stays
-       capped at the assumed A4 content width and sits left-aligned with a dead
-       gutter on any paper the browser actually uses (Letter, or A4 with
-       different margins) */
     body.printing-all main, main{max-width:none;width:auto;margin:0;padding:0}
     nav, .filters, footer{display:none !important}
     .topbar{position:static; box-shadow:none}
     header{background:var(--blue) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; position:static}
     main{padding:0;max-width:none}
-    /* Continuous flow, not one-tab-per-page: the tabs now hold 8-11 cards
-       each, so forcing a break after every tab left pages a third full. The
-       blue section bar still marks where each tab starts. */
-    /* one tab per page again — 3 print columns make each tab's cards fit a
-       single A4 page, so sections no longer bleed onto a half-empty second */
     #tabs>section{display:block !important; break-after:page; page-break-after:always}
     #tabs>section:last-child{break-after:auto; page-break-after:auto}
     .page-bar{break-after:avoid; page-break-after:avoid}
     .stat-row{break-inside:avoid}
-    /* screen layout is a single portrait column; print goes back to a
-       2-column grid so the A4 factsheet still packs 6 pages */
-    /* multicol paginates unpredictably across page breaks — print goes back
-       to an explicit 2-column grid so the A4 factsheet stays predictable */
-    .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; align-items:start}
-    .grid.cols-3{grid-template-columns:repeat(3,1fr); gap:7px}
-    .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:8px}
-    .card{break-inside:avoid; box-shadow:none; padding:8px; margin-bottom:0}
-    .card h3{margin:0 0 6px; font-size:10px}
-    .page-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:11px; padding:6px 11px; margin-bottom:7px}
-    .sub-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:8.5px; padding:3px 8px; margin:0 0 5px}
-    .kf-panel{flex-direction:row;gap:12px}
-    .kf-side{flex:0 0 110px;border-bottom:0;border-right:1px solid var(--line);padding-right:10px;padding-bottom:0}
-    .kf-grid{flex:1;grid-template-columns:repeat(4,1fr); gap:8px 6px}
-    .suppressed{font-size:8px;padding:10px 0}
-    .gauge .cap{font-size:7.5px;margin-top:4px;line-height:1.25}
-    .gauge .pct{font-size:12px}
-    .gauge-dial{max-width:70px;height:35px}
-    .kf-stat .n{font-size:18px}
-    .stat .n{font-size:17px}
-    .stat{padding:6px 9px}
-    .stat .lbl{font-size:8px;margin-top:3px}
-    .sub-h{font-size:8px;margin:4px 0 5px;padding-top:5px}
-    .note{font-size:7.5px;margin-top:4px}
-    body{font-size:11px}
-    .treemap-block{font-size:8px}
-    .treemap-block b{font-size:10px}
-    .legend-inline{font-size:8.5px;gap:4px 8px}
-    .waffle-grid{max-width:150px}
-    .cmp-lbl{flex-basis:95px;font-size:9px}
-    .cmp-val{font-size:9px}
+    .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:7px; align-items:start}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr); gap:6px}
+    .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:7px}
+    .card{break-inside:avoid; box-shadow:none; padding:7px; margin-bottom:0}
+    .card h3{margin:0 0 5px; font-size:9.5px}
+    .page-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:10.5px; padding:5px 9px; margin-bottom:6px}
+    .sub-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:8px; padding:3px 7px; margin:0 0 4px}
+    .kf-panel{flex-direction:row;gap:10px}
+    .kf-side{flex:0 0 100px;border-bottom:0;border-right:1px solid var(--line);padding-right:8px;padding-bottom:0}
+    .kf-grid{flex:1;grid-template-columns:repeat(4,1fr); gap:7px 5px}
+    .suppressed{font-size:7.5px;padding:8px 0}
+    .gauge .cap{font-size:7px;margin-top:3px;line-height:1.2}
+    .gauge .pct{font-size:11px}
+    .gauge-dial{max-width:66px;height:33px}
+    .kf-stat .n{font-size:16px}
+    .stat .n{font-size:16px}
+    .stat{padding:5px 8px}
+    .stat .lbl{font-size:7.5px;margin-top:2px}
+    .sub-h{font-size:7.5px;margin:3px 0 4px;padding-top:4px}
+    .note{font-size:7px;margin-top:3px}
+    body{font-size:10.5px}
+    .treemap-block{font-size:7.5px}
+    .treemap-block b{font-size:9px}
+    .legend-inline{font-size:8px;gap:3px 6px}
+    .waffle-grid{max-width:140px}
+    .cmp-lbl{flex-basis:85px;font-size:8.5px}
+    .cmp-val{font-size:8.5px}
   }
 </style>
 </head>
@@ -316,25 +270,22 @@
 </button>
 
 <script>
-// UNHCR dataviz brand palette — https://dataviz.unhcr.org/guidance/
 const PALETTE = ['#0072bc','#ffc740','#32c189','#6cd8fd','#d25a45','#a097e3','#7c3c36','#bfbfbf'];
 Chart.defaults.font.family = "'Lato',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
-Chart.defaults.font.size = 11.5;
+Chart.defaults.font.size = 10.5;
 Chart.defaults.color = '#4a5560';
-Chart.defaults.plugins.legend.labels.boxWidth = 10;
+Chart.defaults.plugins.legend.labels.boxWidth = 9;
 Chart.defaults.plugins.legend.labels.usePointStyle = true;
-Chart.defaults.animation = false; // snap-render — avoids catching charts mid-animation when the PDF factsheet is rasterized
+Chart.defaults.animation = false;
 
 const MIN_CELL = 5;
-let DATA = null;         // full dataset
-let VIEW = [];           // filtered records
-const charts = {};       // registry so we can destroy/redraw on filter change
+let DATA = null;
+let VIEW = [];
+const charts = {};
 
 let CHOICE_LABELS = {field_to_list:{}, choices_by_list:{}};
 function titleCase(code){ return String(code).replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
-// L(code, field) resolves a raw Kobo code to its English label, scoped to
-// the specific question it came from (avoids two questions that happen to
-// reuse the same code, e.g. "other", meaning different things).
+
 function L(code, field){
   if(code===null||code===undefined||code==='') return null;
   const listName = field && CHOICE_LABELS.field_to_list[field];
@@ -347,9 +298,6 @@ async function boot(){
   const [dataRes, labelRes] = await Promise.all([fetch('data/data.json'), fetch('data/labels.json')]);
   DATA = await dataRes.json();
   CHOICE_LABELS = await labelRes.json();
-  // "Data as of" reflects the most recent interview month in the dataset
-  // itself (exact dates are bucketed to month for privacy), not the day the
-  // static file happened to be rebuilt.
   const months = uniqueSorted('interview_month');
   const lastMonth = months.length ? months[months.length-1] : null;
   document.getElementById('head-date').textContent = lastMonth
@@ -360,11 +308,6 @@ async function boot(){
   buildTabs();
   document.getElementById('reset-filters').onclick = () => { resetFilterSelects(); applyFilters(); renderAll(); };
   document.getElementById('print-btn').onclick = () => {
-    // make every tab's charts real-sized before print rasterizes them —
-    // Chart.js sizes a canvas to 0x0 while its tab is hidden. resize() alone
-    // is flaky once a chart was first created against a 0x0 container, so
-    // instead we fully re-render (destroy+recreate) every chart once all
-    // sections are visible and have real dimensions, then print.
     document.body.classList.add('printing-all');
     requestAnimationFrame(() => requestAnimationFrame(() => {
       renderAll();
@@ -376,14 +319,13 @@ async function boot(){
     }));
   };
   document.getElementById('f-pwsn').addEventListener('change', ()=>{ applyFilters(); renderAll(); });
-  // close any open multi-select dropdown when clicking outside it
   document.addEventListener('click', (e)=>{
     document.querySelectorAll('.msel[open]').forEach(d=>{ if(!d.contains(e.target)) d.removeAttribute('open'); });
   });
   renderAll();
 }
 
-function uniqueSorted(field, mapFn){
+function uniqueSorted(field){
   const s = new Set();
   DATA.records.forEach(r=>{ const v=r[field]; if(v!==null && v!==undefined && v!=='') s.add(v); });
   return [...s].sort();
@@ -393,16 +335,12 @@ function fillSelect(id, values, allLabel, field){
   el.innerHTML = `<option value="">${allLabel}</option>` + values.map(v=>`<option value="${v}">${L(v,field)}</option>`).join('');
 }
 
-// ---------- multi-select filter dropdowns (checkbox lists) ----------
 const MULTI_FIELDS = ['f-interview','f-arrival','f-gender','f-age','f-hhtype','f-raion'];
-const MSEL = {}; // id -> Set of selected raw codes (empty set = "all")
+const MSEL = {};
 
 function fillMultiSelect(id, values, allLabel, field){
   MSEL[id] = new Set();
   const root = document.getElementById(id);
-  // hide the filter entirely if the field isn't in this data.json at all —
-  // an empty dropdown just looks broken (this is what you see if dashboard.html
-  // is newer than the data/ folder it's reading)
   const wrapField = root.closest('.filter-field');
   if(wrapField) wrapField.style.display = values.length ? '' : 'none';
   root.dataset.allLabel = allLabel;
@@ -459,7 +397,6 @@ function applyFilters(){
   document.getElementById('sample-n').textContent = VIEW.length;
 }
 
-// ---------- aggregation helpers ----------
 function countBy(records, field, {multi=false}={}){
   const c = {};
   records.forEach(r=>{
@@ -481,8 +418,6 @@ function pctTrue(records, field){
   const num = records.filter(r=>r[field]===true || r[field]==='true').length;
   return {pct: Math.round(100*num/records.length), n: records.length};
 }
-// generalized version of pctYes for multi-select fields (space-joined codes)
-// or any custom positive-match rule
 function pctFlag(records, field, isPositive){
   const answered = records.filter(r=>r[field]!==null && r[field]!==undefined && r[field]!=='');
   if(answered.length < MIN_CELL) return null;
@@ -490,9 +425,7 @@ function pctFlag(records, field, isPositive){
   return {pct: Math.round(100*num/answered.length), n: answered.length};
 }
 const hasCode = (val, code) => val.split(' ').includes(code);
-// exact ages were dropped from the dataset for privacy (bucketed to
-// age_group only) — this is a rough estimate from band midpoints, not a
-// true average, and is labeled as such wherever it's shown
+
 const AGE_BAND_MIDPOINT = {'0-17':10, '18-24':21, '25-34':29.5, '35-59':45, '60+':66};
 function avgAgeEstimate(records){
   const vals = records.map(r=>AGE_BAND_MIDPOINT[r.age_group]).filter(v=>v!==undefined);
@@ -505,13 +438,7 @@ function totalHouseholdMembers(records){
 }
 function sorted(entries){ return entries.sort((a,b)=>b[1]-a[1]); }
 
-// wraps a long tick label onto multiple lines (word-boundary) instead of
-// truncating mid-word with an ellipsis — Chart.js renders an array-of-strings
-// label as multiple stacked lines natively. Chart.js gives every category on
-// a y-axis the SAME row height (sized to the tallest tick), so a single
-// runaway label would blow up every row — capped at maxLines, with the
-// overflow folded into the last line and ellipsised.
-function wrapLabel(str, maxLen=24, maxLines=3){
+function wrapLabel(str, maxLen=28, maxLines=2){
   if(!str) return str;
   const words = String(str).split(' ');
   const lines = []; let cur = '';
@@ -527,8 +454,6 @@ function wrapLabel(str, maxLen=24, maxLines=3){
   return lines.length > 1 ? lines : str;
 }
 
-// ---------- data-label plugins (scoped per-chart, not registered globally,
-// so gauges — which are also doughnuts under the hood — aren't affected) ----------
 const barValueLabels = {
   id: 'barValueLabels',
   afterDatasetsDraw(chart, args, opts){
@@ -537,7 +462,7 @@ const barValueLabels = {
     const meta = chart.getDatasetMeta(0);
     const horizontal = chart.options.indexAxis === 'y';
     ctx.save();
-    ctx.font = '700 10.5px Lato, sans-serif';
+    ctx.font = '700 9.5px Lato, sans-serif';
     ctx.fillStyle = '#0b3754';
     meta.data.forEach((bar,i)=>{
       const v = chart.data.datasets[0].data[i];
@@ -545,7 +470,7 @@ const barValueLabels = {
       const label = v+'%';
       if(horizontal){
         ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillText(label, bar.x+5, bar.y);
+        ctx.fillText(label, bar.x+4, bar.y);
       } else {
         ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
         ctx.fillText(label, bar.x, bar.y-3);
@@ -554,6 +479,7 @@ const barValueLabels = {
     ctx.restore();
   }
 };
+
 const donutSliceLabels = {
   id: 'donutSliceLabels',
   afterDatasetsDraw(chart){
@@ -563,13 +489,13 @@ const donutSliceLabels = {
     const total = data.reduce((a,b)=>a+b,0);
     if(!total) return;
     ctx.save();
-    ctx.font = '700 11px Lato, sans-serif';
+    ctx.font = '700 10px Lato, sans-serif';
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     meta.data.forEach((arc,i)=>{
       const pct = Math.round(100*data[i]/total);
-      if(pct < 6) return; // slice too thin for its own label — legend covers it
+      if(pct < 8) return;
       const pos = arc.tooltipPosition();
       ctx.fillText(pct+'%', pos.x, pos.y);
     });
@@ -577,17 +503,12 @@ const donutSliceLabels = {
   }
 };
 
-// several choice lists phrase every option as one long sentence sharing the
-// same opening ("Could not leave Ukraine due to security reasons", "...due to
-// financial constraints", ...). Wrapped to a chart tick, they all truncate to
-// the identical prefix and the chart says nothing — so drop the shared opening
-// and keep the part that actually differs.
 function stripSharedPrefix(labels){
   if(labels.length < 3) return labels;
   const split = labels.map(l=>String(l).split(' '));
   let i = 0;
   while(split.every(w => w.length > i+1 && w[i] === split[0][i])) i++;
-  if(i < 3) return labels; // only worth doing for a genuinely long shared opening
+  if(i < 3) return labels;
   return split.map(w=>{
     const t = w.slice(i).join(' ');
     return t.charAt(0).toUpperCase() + t.slice(1);
@@ -613,41 +534,24 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
     return;
   }
   ctx.style.display='';
-  // the PDF factsheet forces every tab visible+narrow at once (see
-  // 'printing-all' below) — keep labels shorter and text smaller there so
-  // 6-8 category charts still fit their A4 card without bleeding into the
-  // next row or pushing the page to overflow.
+
   const isPrint = document.body.classList.contains('printing-all');
-  // a chart on a hidden tab measures 0px wide, which used to make it pick the
-  // cramped narrow-screen wrap and truncate labels that had plenty of room —
-  // fall back to a typical card width instead of treating 0 as "narrow"
   const cw = ctx.parentElement.clientWidth || 500;
-  const wrapMax = horizontal ? (isPrint ? 18 : (cw > 340 ? 24 : 18)) : 999;
-  // dense chronological x-axis (eg 30+ months) needs rotated, thinned ticks
-  // or labels collide into an illegible smear — autoSkip alone isn't enough
-  // once font+rotation are fixed, so cap tick count off container width too.
+  const wrapMax = horizontal ? (isPrint ? 18 : (cw > 340 ? 30 : 20)) : 999;
   const denseX = !horizontal && entries.length > 10;
-  const maxTicksX = denseX ? Math.max(6, Math.floor(cw / (isPrint?34:46))) : undefined;
-  const tickFont = isPrint ? 8.5 : 10.5;
-  const lineH = isPrint ? 8.5 : 12;
+  const maxTicksX = denseX ? Math.max(6, Math.floor(cw / (isPrint?34:44))) : undefined;
+  const tickFont = isPrint ? 8 : 9.5;
+  const lineH = isPrint ? 8 : 11;
   const rawLabels = stripSharedPrefix(entries.map(e=>formatter(e[0])));
   const wrappedLabels = rawLabels.map(l=>wrapLabel(l, wrapMax, 2));
-  // size the chart to how many bars it has, rather than a fixed height for
-  // every card. Chart.js gives every category row on a y-axis the SAME
-  // height (sized to the tallest tick label), so the row height here must
-  // be driven by the MAX line count across all labels, not a per-row sum —
-  // summing produced wildly uneven/overlapping rows whenever just one
-  // label happened to wrap onto more lines than the rest.
+
   if(horizontal){
     const maxLines = Math.max(1, ...wrappedLabels.map(l=>Array.isArray(l)?l.length:1));
-    // a row only needs to be as tall as the taller of (the bar itself) and
-    // (its label block) — adding the two together is what left every chart
-    // padded out with dead space between bars
-    const barRow = isPrint ? 14 : 30;
-    const rowUnit = Math.max(barRow, maxLines*lineH + (isPrint?3:10));
-    ctx.parentElement.style.height = Math.max(isPrint?60:90, entries.length*rowUnit+(isPrint?8:16))+'px';
+    const barRow = isPrint ? 13 : 24;
+    const rowUnit = Math.max(barRow, maxLines*lineH + (isPrint?3:7));
+    ctx.parentElement.style.height = Math.max(isPrint?54:75, entries.length*rowUnit+(isPrint?6:12))+'px';
   } else if(denseX){
-    ctx.parentElement.style.height = (isPrint?150:220)+'px';
+    ctx.parentElement.style.height = (isPrint?130:190)+'px';
   }
   const pctValues = entries.map(e=>Math.round(1000*e[1]/total)/10);
   const maxPct = Math.max(...pctValues, 1);
@@ -656,22 +560,18 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
     plugins: [barValueLabels],
     data: {
       labels: horizontal ? wrappedLabels : rawLabels,
-      datasets: [{ data: pctValues, backgroundColor: PALETTE[0], borderRadius:4, maxBarThickness:22 }]
+      datasets: [{ data: pctValues, backgroundColor: PALETTE[0], borderRadius:3, maxBarThickness:18 }]
     },
     options: {
       indexAxis: horizontal ? 'y' : 'x',
       maintainAspectRatio: !horizontal && !denseX,
-      layout: { padding: horizontal ? {right:30} : {top:20, bottom: denseX?6:0} },
+      layout: { padding: horizontal ? {right:36, left:2} : {top:16, bottom: denseX?4:0} },
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}}, barValueLabels:{skip:denseX} },
-      // one or the other, never both: bars that already carry a printed %
-      // label get no value-axis at all (no ticks, no gridlines) — only the
-      // dense chronological chart (too many bars for per-bar text) keeps a
-      // real scale instead of labels.
       scales: horizontal
-        ? { x:{ display:false, suggestedMax:maxPct*1.18 }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:tickFont}} } }
+        ? { x:{ display:false, suggestedMax:maxPct*1.24 }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:tickFont}} } }
         : denseX
-          ? { y:{ suggestedMax:maxPct*1.18, ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false}, ticks:{maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7.5:9.5}} } }
-          : { y:{ display:false, suggestedMax:maxPct*1.18 }, x:{ grid:{display:false}, ticks:{font:{size:tickFont}} } }
+          ? { y:{ suggestedMax:maxPct*1.2, ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false}, ticks:{maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7:8.5}} } }
+          : { y:{ display:false, suggestedMax:maxPct*1.2 }, x:{ grid:{display:false}, ticks:{font:{size:tickFont}} } }
     }
   });
 }
@@ -691,14 +591,8 @@ function donutChart(canvasId, dataObj, field=null){
     return;
   }
   ctx.style.display='';
-  // legend goes below (not to the right): a right-side legend gets squeezed
-  // to near-zero width in a two-column card and clips label text.
   const isPrint = document.body.classList.contains('printing-all');
-  // legend as real markup, not inside the canvas: Chart.js lays its own legend
-  // out in canvas space and won't wrap a long label, so in a narrow print
-  // column the last entries were simply clipped off the bottom of the card.
-  // HTML legend wraps, and the card grows to fit it.
-  ctx.parentElement.style.height = (isPrint?86:165)+'px';
+  ctx.parentElement.style.height = (isPrint?80:145)+'px';
   const wrap = ctx.parentElement;
   let lg = wrap.nextElementSibling;
   if(!lg || !lg.classList.contains('legend-inline')){
@@ -718,14 +612,10 @@ function donutChart(canvasId, dataObj, field=null){
   });
 }
 
-// age-gender pyramid: diverging horizontal bars (male left/negative, female
-// right/positive) sharing one symmetric numeric scale — that scale is the
-// one case a diverging chart genuinely needs an axis for (labels alone
-// can't convey "which side is bigger"), so it keeps light center-zero
-// gridlines instead of printed value text.
 const ACCOMM_LENGTH_ORDER = ['less_1_mth','less_3_mth','less_6_mth','less_12_mth','more_12_mth','no_limit','when_long_term','dont_know'];
 const PYRAMID_ORDER = ['60+','35-59','18-34','5-17','0-4'];
 const PYRAMID_LABELS = {'60+':'60+','35-59':'35–59','18-34':'18–34','5-17':'5–17','0-4':'0–4'};
+
 function pyramidChart(canvasId, records){
   if(charts[canvasId]) charts[canvasId].destroy();
   const ctx = document.getElementById(canvasId);
@@ -750,11 +640,7 @@ function pyramidChart(canvasId, records){
   }
   ctx.style.display='';
   const isPrint = document.body.classList.contains('printing-all');
-  ctx.parentElement.style.height = (isPrint?130:190)+'px';
-  // legend as real markup under the chart, matching the treemap/waffle
-  // legends — Chart.js's own legend floats inside the canvas centred on the
-  // full width (not on the plot area), so it sits visibly off-centre next to
-  // the y-axis labels and eats chart height
+  ctx.parentElement.style.height = (isPrint?115:165)+'px';
   const wrap = ctx.parentElement;
   let lg = wrap.nextElementSibling;
   if(!lg || !lg.classList.contains('legend-inline')){
@@ -772,29 +658,26 @@ function pyramidChart(canvasId, records){
     data:{
       labels: PYRAMID_ORDER.map(k=>PYRAMID_LABELS[k]),
       datasets:[
-        {label:'Male', data:maleVals, backgroundColor:PALETTE[1], maxBarThickness:20},
-        {label:'Female', data:femaleVals, backgroundColor:PALETTE[0], maxBarThickness:20}
+        {label:'Male', data:maleVals, backgroundColor:PALETTE[1], maxBarThickness:16},
+        {label:'Female', data:femaleVals, backgroundColor:PALETTE[0], maxBarThickness:16}
       ]
     },
     options:{
       indexAxis:'y', maintainAspectRatio:false,
-      layout:{padding:{left:6,right:6}},
+      layout:{padding:{left:4,right:4}},
       plugins:{
         legend:{display:false},
         tooltip:{callbacks:{label:(c)=>Math.abs(c.raw)+'%'}}
       },
       scales:{
-        x:{stacked:true, min:-maxAbs, max:maxAbs, grid:{color:'#eef1f4'}, ticks:{callback:v=>Math.abs(v)+'%', font:{size:isPrint?8:9.5}}},
-        y:{stacked:true, grid:{display:false}, ticks:{font:{size:isPrint?8.5:10.5}}}
+        x:{stacked:true, min:-maxAbs, max:maxAbs, grid:{color:'#eef1f4'}, ticks:{callback:v=>Math.abs(v)+'%', font:{size:isPrint?7.5:8.5}}},
+        y:{stacked:true, grid:{display:false}, ticks:{font:{size:isPrint?8:9.5}}}
       }
     }
   });
 }
 
-// simplified treemap / segmented bar — one flex row of blocks sized by
-// share of total, each big enough for its own %+label, plus a full legend
-// underneath (small slices lose their in-block text, legend covers them)
-function proportionalStrip(containerId, dataObj, field, {height=110, printHeight=52}={}){
+function proportionalStrip(containerId, dataObj, field, {height=90, printHeight=48}={}){
   const el = document.getElementById(containerId);
   if(!el) return;
   const entries = sorted(Object.entries(dataObj));
@@ -812,8 +695,6 @@ function proportionalStrip(containerId, dataObj, field, {height=110, printHeight
   el.innerHTML = `<div class="treemap-row" style="height:${isPrint?printHeight:height}px">${blocks}</div><div class="legend-inline">${legend}</div>`;
 }
 
-// pictogram / waffle — 100 unit squares, one per percentage point, colored
-// by category (rounding fixed up on the largest slice so squares sum to 100)
 function waffleChart(containerId, dataObj, field){
   const el = document.getElementById(containerId);
   if(!el) return;
@@ -829,9 +710,6 @@ function waffleChart(containerId, dataObj, field){
   el.innerHTML = `<div class="waffle-grid">${dots.map(i=>`<i style="background:${PALETTE[i%PALETTE.length]}"></i>`).join('')}</div><div class="legend-inline">${legend}</div>`;
 }
 
-// comparison bars — one thin proportional track per group (eg household
-// type), used where the question is "how does X vary across groups" rather
-// than "what's the overall split"
 function comparisonBars(containerId, records, groupField, valueField, isPositive){
   const el = document.getElementById(containerId);
   if(!el) return;
@@ -851,8 +729,6 @@ function comparisonBars(containerId, records, groupField, valueField, isPositive
   }).join('');
 }
 
-// time-series line — same dense-tick handling as the chronological bar
-// chart, but drawn as a line/area so departure & arrival read as trends
 function lineChart(canvasId, dataObj, {field=null, order=null}={}){
   const formatter = (code)=>L(code, field);
   const entries = order
@@ -873,19 +749,19 @@ function lineChart(canvasId, dataObj, {field=null, order=null}={}){
   }
   ctx.style.display='';
   const isPrint = document.body.classList.contains('printing-all');
-  ctx.parentElement.style.height = (isPrint?112:200)+'px';
+  ctx.parentElement.style.height = (isPrint?100:175)+'px';
   const dense = entries.length>10;
-  const maxTicksX = dense ? Math.max(6, Math.floor((ctx.parentElement.clientWidth||500)/(isPrint?34:46))) : undefined;
+  const maxTicksX = dense ? Math.max(6, Math.floor((ctx.parentElement.clientWidth||500)/(isPrint?34:44))) : undefined;
   const pctValues = entries.map(e=>Math.round(1000*e[1]/total)/10);
   charts[canvasId] = new Chart(ctx, {
     type:'line',
-    data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data:pctValues, borderColor:PALETTE[0], backgroundColor:PALETTE[0]+'26', fill:true, tension:.25, pointRadius:dense?0:3, pointBackgroundColor:PALETTE[0], borderWidth:2 }]},
+    data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data:pctValues, borderColor:PALETTE[0], backgroundColor:PALETTE[0]+'26', fill:true, tension:.25, pointRadius:dense?0:2.5, pointBackgroundColor:PALETTE[0], borderWidth:1.8 }]},
     options:{
       maintainAspectRatio:false,
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}} },
       scales:{
-        y:{ suggestedMax:Math.max(...pctValues,1)*1.2, ticks:{callback:v=>v+'%', font:{size:isPrint?8:9.5}}, grid:{color:'#eef1f4'} },
-        x:{ grid:{display:false}, ticks: dense ? {maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7.5:9.5}} : {font:{size:isPrint?8.5:10.5}} }
+        y:{ suggestedMax:Math.max(...pctValues,1)*1.2, ticks:{callback:v=>v+'%', font:{size:isPrint?7.5:8.5}}, grid:{color:'#eef1f4'} },
+        x:{ grid:{display:false}, ticks: dense ? {maxRotation:90, minRotation:90, autoSkip:true, maxTicksLimit:maxTicksX, font:{size:isPrint?7:8.5}} : {font:{size:isPrint?8:9.5}} }
       }
     }
   });
@@ -906,7 +782,6 @@ function gauge(canvasId, pctObj, captionEl){
   });
 }
 
-// ---------- tabs ----------
 const TAB_DEFS = [
   {id:'overview', label:'Key Findings'},
   {id:'profile', label:'Refugee Profiles'},
@@ -924,7 +799,7 @@ function buildTabs(){
     b.classList.add('active');
     document.querySelectorAll('#tabs > section').forEach(s=>s.classList.remove('active'));
     document.getElementById('tab-'+b.dataset.tab).classList.add('active');
-    layoutMasonry(); // this tab's cards are measurable only now that it's visible
+    layoutMasonry();
   });
 
   const tabs = document.getElementById('tabs');
@@ -1038,7 +913,7 @@ function buildTabs(){
       <div class="card"><h3>Challenges registering them in Ukraine</h3><div class="chart-wrap"><canvas id="c-famchalukr"></canvas></div></div>
       <div class="card stat"><div class="n" id="stat-famchange">–</div><div class="lbl">had a change in family composition</div>
         <div class="sub-h">Faced challenges registering it</div>
-        <div style="display:flex;gap:14px"><div><div class="n" id="stat-famchalhc" style="font-size:19px">–</div><div class="lbl">in Moldova</div></div><div><div class="n" id="stat-famchalukr" style="font-size:19px">–</div><div class="lbl">in Ukraine</div></div></div></div>
+        <div style="display:flex;gap:12px"><div><div class="n" id="stat-famchalhc" style="font-size:17px">–</div><div class="lbl">in Moldova</div></div><div><div class="n" id="stat-famchalukr" style="font-size:17px">–</div><div class="lbl">in Ukraine</div></div></div></div>
     </div>
   </section>
 
@@ -1063,7 +938,7 @@ function buildTabs(){
       <div class="card"><h3>Qualification match with current job</h3><div class="chart-wrap"><canvas id="c-qualmatch"></canvas></div></div>
       <div class="card"><h3>Regularity of access to earnings (employed)</h3><div id="c-earnings"></div>
         <div class="sub-h">Working conditions</div>
-        <div style="display:flex;gap:16px"><div><div class="n" id="stat-worklong" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">work beyond the legal limit</div></div><div><div class="n" id="stat-docskept" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">documents kept by employer</div></div></div></div>
+        <div style="display:flex;gap:14px"><div><div class="n" id="stat-worklong" style="font-size:17px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">work beyond the legal limit</div></div><div><div class="n" id="stat-docskept" style="font-size:17px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">documents kept by employer</div></div></div></div>
     </div>
 
     <div class="sub-bar">Education &amp; social protection</div>
@@ -1071,7 +946,7 @@ function buildTabs(){
       <div class="card"><h3>Reasons children are not enrolled in school</h3><div class="chart-wrap"><canvas id="c-notenrol"></canvas></div></div>
       <div class="card"><h3>Social protection benefits applied for</h3><div class="chart-wrap"><canvas id="c-socprot"></canvas></div></div>
       <div class="card"><h3>Challenges accessing social protection</h3><div class="chart-wrap"><canvas id="c-socprotdiff"></canvas></div>
-        <div class="sub-h">Faced any challenge</div><div class="n" id="stat-socprotchal" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div></div>
+        <div class="sub-h">Faced any challenge</div><div class="n" id="stat-socprotchal" style="font-size:17px;font-weight:900;color:var(--blue06)">–</div></div>
     </div>
   </section>
 
@@ -1098,26 +973,18 @@ function buildTabs(){
       <div class="card"><h3>Most urgent needs</h3><div class="chart-wrap"><canvas id="c-needs"></canvas></div></div>
       <div class="card"><h3>Information needs</h3><div class="chart-wrap"><canvas id="c-infoneeds"></canvas></div></div>
       <div class="card"><h3>Access to childcare services</h3><div class="chart-wrap"><canvas id="c-childcare"></canvas></div>
-        <p class="note" style="margin:2px 0 8px">Households with children below mandatory school age.</p>
+        <p class="note" style="margin:2px 0 6px">Households with children below mandatory school age.</p>
         <div class="sub-h">By household type</div><div id="c-childcarecmp"></div></div>
     </div>
   </section>
-
   `;
 }
 
-// ---------- masonry ----------
-// CSS multicol balances badly when items can't be split (one 9-bar chart in a
-// column and three short ones in the other), so columns are filled here
-// instead: each card goes to whichever column is currently shortest. Cards are
-// kept in a stable list so re-layouts don't shuffle them arbitrarily.
 const MASONRY_CARDS = new WeakMap();
 function layoutMasonry(){
   const isPrint = document.body.classList.contains('printing-all');
   const cols = (isPrint || window.innerWidth >= 860) ? 2 : 1;
   document.querySelectorAll('.grid').forEach(grid=>{
-    // a hidden tab measures every card at 0px, which would dump them all into
-    // the first column — leave it alone and lay it out when its tab is shown
     if(!isPrint && grid.offsetParent === null) return;
     const gridCols = grid.classList.contains('cols-3') ? (cols === 1 ? 1 : 3) : cols;
     let cards = MASONRY_CARDS.get(grid);
@@ -1126,10 +993,6 @@ function layoutMasonry(){
       MASONRY_CARDS.set(grid, cards);
     }
     grid.textContent = '';
-    // print: no column wrappers at all. A flex/multicol column can't be split
-    // across a page boundary, so an overflowing tab pushed whole columns to
-    // the next page and left half-empty pages behind. Plain grid children
-    // paginate row by row instead.
     if(isPrint){ cards.forEach(c=>grid.appendChild(c)); return; }
     const colEls = [];
     for(let i=0;i<gridCols;i++){
@@ -1160,7 +1023,6 @@ function setStat(id, value, suffix=''){ document.getElementById(id).textContent 
 
 function renderAll(){
   const n = VIEW.length;
-  // overview gauges (10, matching the original Power BI Key Findings page)
   gauge('g-tp', pctYes(VIEW,'temp_protection','granted_tp'));
   gauge('g-medical', pctYes(VIEW,'medical_condition','yes'));
   gauge('g-docmissing', pctYes(VIEW,'missing_documentation','yes'));
@@ -1185,7 +1047,7 @@ function renderAll(){
   setStat('stat-age', avgAgeEstimate(VIEW));
   setStat('stat-hhsize', avg(VIEW,'household_size'));
 
-  // ---- Refugee Profiles ----
+  // Refugee Profiles
   const pwsn = pctTrue(VIEW,'pwsn'); setStat('stat-pwsn', pwsn? pwsn.pct:null, pwsn?'%':'');
   const disab = pctFlag(VIEW,'disability', v=>['some_difficulty','lot_difficulty','cannot_do'].includes(v)); setStat('stat-disability', disab? disab.pct:null, disab?'%':'');
   const medcond = pctYes(VIEW,'medical_condition','yes'); setStat('stat-medcond', medcond? medcond.pct:null, medcond?'%':'');
@@ -1196,7 +1058,7 @@ function renderAll(){
   barChart('c-activity', countBy(VIEW,'resp_activity'), {field:'resp_activity'});
   barChart('c-lang', countBy(VIEW,'language_other',{multi:true}), {field:'language_other'});
 
-  // ---- Displacement Patterns ----
+  // Displacement Patterns
   const visited = pctFlag(VIEW,'temp_return', v=>v==='yes_more'||v==='yes_once'); setStat('stat-visited', visited? visited.pct:null, visited?'%':'');
   const returndiff = pctYes(VIEW,'temp_return_difficulties','yes'); setStat('stat-returndiff', returndiff? returndiff.pct:null, returndiff?'%':'');
   const shortvisit = pctYes(VIEW,'return_stay','less_than_two_weeks'); setStat('stat-shortvisit', shortvisit? shortvisit.pct:null, shortvisit?'%':'');
@@ -1209,7 +1071,7 @@ function renderAll(){
   barChart('c-returndiffwhat', countBy(VIEW,'temp_return_difficulties_what',{multi:true}), {top:8, field:'temp_return_difficulties_what'});
   barChart('c-noreturn', countBy(VIEW,'no_return_reason',{multi:true}), {top:8, field:'no_return_reason'});
 
-  // ---- Access to Rights #1 ----
+  // Access to Rights #1
   const lackdoc = pctYes(VIEW,'lack_documentation','yes'); setStat('stat-lackdoc', lackdoc? lackdoc.pct:null, lackdoc?'%':'');
   const docimpact = pctFlag(VIEW,'documents_affect', v=>v.split(' ').some(c=>!['no_specific_impact','prefer_no_answer'].includes(c))); setStat('stat-docimpact', docimpact? docimpact.pct:null, docimpact?'%':'');
   const tpdiff = pctYes(VIEW,'temp_protection_difficulty','yes'); setStat('stat-tpdiff', tpdiff? tpdiff.pct:null, tpdiff?'%':'');
@@ -1228,7 +1090,7 @@ function renderAll(){
   barChart('c-tpdiffwhat', countBy(VIEW,'temp_protection_difficulty_what',{multi:true}), {top:8, field:'temp_protection_difficulty_what'});
   barChart('c-famchalukr', countBy(VIEW,'family_comp_challenges_ukr',{multi:true}), {top:8, field:'family_comp_challenges_ukr'});
 
-  // ---- Access to Rights #2 ----
+  // Access to Rights #2
   const reunif = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'reunification_support')); setStat('stat-reunif', reunif? reunif.pct:null, reunif?'%':'');
   const tracing = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'family_traig')); setStat('stat-tracing', tracing? tracing.pct:null, tracing?'%':'');
   const noenrol = pctFlag(VIEW,'school_enrol', v=>v==='no'||v==='yes_some'); setStat('stat-noenrol', noenrol? noenrol.pct:null, noenrol?'%':'');
@@ -1245,7 +1107,7 @@ function renderAll(){
   barChart('c-socprot', countBy(VIEW,'social_prot_access',{multi:true}), {top:8, field:'social_prot_access'});
   barChart('c-socprotdiff', countBy(VIEW,'social_prot_difficulties',{multi:true}), {top:8, field:'social_prot_difficulties'});
 
-  // ---- Access to Rights #3 ----
+  // Access to Rights #3
   const rental = pctYes(VIEW,'rental_contract','yes'); setStat('stat-rental', rental? rental.pct:null, rental?'%':'');
   const leaveaccomm = pctYes(VIEW,'leave_accomm','yes'); setStat('stat-leaveaccomm', leaveaccomm? leaveaccomm.pct:null, leaveaccomm?'%':'');
   const childcare = pctYes(VIEW,'childcare_services','yes'); setStat('stat-childcare', childcare? childcare.pct:null, childcare?'%':'');
@@ -1260,7 +1122,7 @@ function renderAll(){
   donutChart('c-childcare', countBy(VIEW,'childcare_services'), 'childcare_services');
   comparisonBars('c-childcarecmp', VIEW, 'household_type', 'childcare_services', v=>v==='yes');
 
-  layoutMasonry(); // card heights just changed — repack the columns
+  layoutMasonry();
 }
 
 boot();
