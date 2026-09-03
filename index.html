@@ -22,38 +22,39 @@
   body{margin:0;background:var(--bg);color:var(--text);font-family:'Lato',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:14px}
   header{background:var(--unhcr-blue);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
   header .title-block{display:flex;align-items:center;gap:12px}
-  header .unhcr-mark{font-weight:900;font-size:15px;letter-spacing:.04em;background:#fff;color:var(--unhcr-blue);border-radius:4px;padding:4px 8px}
+  header .unhcr-logo{height:34px;width:auto;display:block}
   header h1{margin:0;font-size:19px;font-weight:700}
   header .subtitle{margin:2px 0 0;font-size:12px;color:#dceaf6}
-  nav{display:flex;gap:6px;background:var(--unhcr-blue-dark);padding:0 20px;overflow-x:auto}
-  nav button{background:transparent;border:none;color:#a9c4d6;padding:12px 16px;font-size:13px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;font-family:inherit}
-  nav button.active{color:#fff;border-bottom-color:var(--unhcr-yellow);font-weight:700}
-  nav button:hover{color:#fff}
-  .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--card);padding:12px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
-  .filters label{font-size:11px;color:var(--sub);display:block;margin-bottom:2px}
-  .filters select{font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;min-width:130px;font-family:inherit}
-  .filters .sample{margin-left:auto;font-size:12.5px;color:var(--sub)}
-  .filters .sample b{color:var(--unhcr-blue);font-size:15px}
+  nav{display:flex;flex-wrap:wrap;gap:6px;background:var(--unhcr-blue-dark);padding:10px;justify-content:center}
+  nav button{background:rgba(255,255,255,.08);border:1px solid transparent;color:#c7d9e8;padding:8px 14px;font-size:12.5px;cursor:pointer;white-space:nowrap;border-radius:20px;font-family:inherit;font-weight:600}
+  nav button.active{color:var(--unhcr-blue-dark);background:var(--unhcr-yellow);font-weight:800}
+  nav button:hover:not(.active){color:#fff;background:rgba(255,255,255,.18)}
+  .filters{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+  .filters label{font-size:10.5px;color:var(--sub);display:block;margin-bottom:2px}
+  .filters select{font-size:12.5px;padding:5px 6px;border:1px solid var(--border);border-radius:6px;background:#fff;width:100%;font-family:inherit}
+  .filters .filter-field{flex:1 1 auto;min-width:118px}
+  .filters .sample{width:100%;font-size:12px;color:var(--sub);text-align:center;order:99}
+  .filters .sample b{color:var(--unhcr-blue);font-size:14px}
+  .filters .btn-row{display:flex;gap:8px;width:100%}
   .filters button{font-family:inherit}
-  .filters button.reset{border:1px solid var(--border);background:#fff;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;color:var(--sub)}
-  .filters button.print-btn{border:none;background:var(--unhcr-blue);color:#fff;border-radius:6px;padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer}
+  .filters button.reset{flex:1;border:1px solid var(--border);background:#fff;border-radius:6px;padding:7px 10px;font-size:12px;cursor:pointer;color:var(--sub)}
+  .filters button.print-btn{flex:2;border:none;background:var(--unhcr-blue);color:#fff;border-radius:6px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer}
   .filters button.print-btn:hover{background:var(--unhcr-blue-dark)}
-  main{padding:20px;max-width:1400px;margin:0 auto}
-  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px}
+  main{padding:16px;max-width:640px;margin:0 auto}
+  .grid{display:block}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px}
   .card h3{margin:0 0 12px;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:#fff;font-weight:700;background:var(--gray-700);padding:8px 10px;border-radius:4px 4px 0 0;margin:-16px -16px 12px}
-  .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:span 12}
-  @media screen and (max-width:900px){.span-3,.span-4,.span-6,.span-8{grid-column:span 12}}
   .stat{padding:14px 16px;border-top:3px solid var(--unhcr-blue)}
-  .stat .n{font-size:30px;font-weight:900;color:var(--unhcr-blue);line-height:1.1}
-  .stat .lbl{font-size:12.5px;color:var(--sub);margin-top:4px}
-  .kf-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
-  @media screen and (max-width:900px){.kf-grid{grid-template-columns:repeat(2,1fr)}}
-  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;border-top:3px solid var(--unhcr-yellow)}
-  .gauge canvas{max-height:90px}
+  .stat .n{font-size:28px;font-weight:900;color:var(--unhcr-blue);line-height:1.1}
+  .stat .lbl{font-size:12px;color:var(--sub);margin-top:4px}
+  .stat-row{display:flex;gap:10px;margin-bottom:14px}
+  .stat-row .card{flex:1;margin-bottom:0;padding:12px}
+  .kf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;border-top:3px solid var(--unhcr-yellow);padding:12px 10px}
+  .gauge canvas{max-height:80px}
   .card canvas{max-width:100% !important}
-  .gauge .pct{font-size:20px;font-weight:900;color:var(--unhcr-blue);margin-top:-58px}
-  .gauge .cap{font-size:11.5px;color:var(--sub);margin-top:26px;line-height:1.35}
+  .gauge .pct{font-size:19px;font-weight:900;color:var(--unhcr-blue);margin-top:-52px}
+  .gauge .cap{font-size:11px;color:var(--sub);margin-top:24px;line-height:1.3}
   .note{font-size:11px;color:var(--gray-400);margin-top:8px}
   .suppressed{font-size:12.5px;color:var(--gray-400);font-style:italic;padding:20px 0;text-align:center}
   .methodology{background:var(--unhcr-blue-light);border:1px solid #b7d6ec;border-radius:8px;padding:16px;font-size:13px;line-height:1.6;color:var(--gray-900)}
@@ -78,8 +79,12 @@
     main{padding:0;max-width:none}
     #tabs>section{display:block !important; page-break-after:always; break-after:page}
     #tabs>section:last-child{page-break-after:auto; break-after:auto}
-    .card{break-inside:avoid; box-shadow:none; padding:10px}
-    .card h3{-webkit-print-color-adjust:exact; print-color-adjust:exact; margin:-10px -10px 10px; font-size:11px; padding:6px 8px}
+    /* screen layout is a single portrait column; print goes back to a
+       2-column grid so the A4 factsheet still packs 6 pages */
+    .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+    .stat-row{display:grid; grid-template-columns:repeat(3,1fr)}
+    .card{break-inside:avoid; box-shadow:none; padding:10px; margin-bottom:0}
+    .card h3{-webkit-print-color-adjust:exact; print-color-adjust:exact; margin:-10px -10px 8px; font-size:10.5px; padding:6px 8px}
     .page-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:12px; padding:7px 12px}
     .kf-grid{grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:10px !important}
     .gauge .cap{font-size:9.5px}
@@ -87,10 +92,6 @@
     .stat .n{font-size:20px}
     .stat{padding:8px 10px}
     body{font-size:11px}
-    .grid{gap:8px}
-    .card h3{font-size:10.5px; padding:6px 8px; margin:-10px -10px 8px}
-    .card{padding:10px}
-    .grid{gap:8px}
   }
 </style>
 </head>
@@ -98,7 +99,7 @@
 
 <header>
   <div class="title-block">
-    <span class="unhcr-mark">UNHCR</span>
+    <img class="unhcr-logo" src="Horizontal white.png" alt="UNHCR">
     <div>
       <h1>Republic of Moldova</h1>
       <p class="subtitle">Protection Profiling &amp; Monitoring — refugees from Ukraine</p>
@@ -109,14 +110,16 @@
 <nav id="tabnav"></nav>
 
 <div class="filters">
-  <div><label>Interview month</label><select id="f-interview"></select></div>
-  <div><label>Arrival month</label><select id="f-arrival"></select></div>
-  <div><label>Gender</label><select id="f-gender"></select></div>
-  <div><label>Age group</label><select id="f-age"></select></div>
-  <div><label>Household type</label><select id="f-hhtype"></select></div>
-  <div><label>PWSN household</label><select id="f-pwsn"></select></div>
-  <button class="reset" id="reset-filters">Reset filters</button>
-  <button class="print-btn" id="print-btn">⭳ Download PDF factsheet</button>
+  <div class="filter-field"><label>Interview month</label><select id="f-interview"></select></div>
+  <div class="filter-field"><label>Arrival month</label><select id="f-arrival"></select></div>
+  <div class="filter-field"><label>Gender</label><select id="f-gender"></select></div>
+  <div class="filter-field"><label>Age group</label><select id="f-age"></select></div>
+  <div class="filter-field"><label>Household type</label><select id="f-hhtype"></select></div>
+  <div class="filter-field"><label>PWSN household</label><select id="f-pwsn"></select></div>
+  <div class="btn-row">
+    <button class="reset" id="reset-filters">Reset filters</button>
+    <button class="print-btn" id="print-btn">⭳ Download PDF factsheet</button>
+  </div>
   <div class="sample"><b id="sample-n">–</b> respondents in current view</div>
 </div>
 
@@ -347,66 +350,70 @@ function buildTabs(){
   tabs.innerHTML = `
   <section id="tab-overview" class="active">
     <div class="page-bar">Key Findings</div>
-    <div class="kf-grid" style="margin-bottom:16px">
+    <div class="kf-grid">
       <div class="card gauge"><canvas id="g-tp"></canvas><div class="pct"></div><div class="cap">granted temporary protection</div></div>
       <div class="card gauge"><canvas id="g-female"></canvas><div class="pct"></div><div class="cap">of respondents are female</div></div>
       <div class="card gauge"><canvas id="g-medical"></canvas><div class="pct"></div><div class="cap">households with a serious medical condition</div></div>
       <div class="card gauge"><canvas id="g-remain"></canvas><div class="pct"></div><div class="cap">have immediate family remaining in Ukraine</div></div>
       <div class="card gauge"><canvas id="g-needwork"></canvas><div class="pct"></div><div class="cap">employed with no work contract</div></div>
     </div>
+    <div class="stat-row">
+      <div class="card stat"><div class="n" id="stat-n">–</div><div class="lbl"># of respondents in current filter</div></div>
+      <div class="card stat"><div class="n" id="stat-hhsize">–</div><div class="lbl">avg. household size</div></div>
+      <div class="card stat"><div class="n" id="stat-pwsn">–</div><div class="lbl">% households with PWSN</div></div>
+    </div>
     <div class="grid">
-      <div class="card span-4 stat"><div class="n" id="stat-n">–</div><div class="lbl"># of respondents in current filter</div></div>
-      <div class="card span-4 stat"><div class="n" id="stat-hhsize">–</div><div class="lbl">average household size</div></div>
-      <div class="card span-4 stat"><div class="n" id="stat-pwsn">–</div><div class="lbl">% of households with PWSN member</div></div>
-      <div class="card span-6"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
-      <div class="card span-6"><h3>Current legal status</h3><canvas id="c-legal"></canvas></div>
+      <div class="card"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
+      <div class="card"><h3>Current legal status</h3><canvas id="c-legal"></canvas></div>
     </div>
   </section>
 
   <section id="tab-profile">
     <div class="page-bar">Refugee Profiles</div>
     <div class="grid">
-      <div class="card span-6"><h3>Gender</h3><canvas id="c-gender"></canvas></div>
-      <div class="card span-6"><h3>Age group</h3><canvas id="c-age"></canvas></div>
-      <div class="card span-6"><h3>Education level</h3><canvas id="c-educ"></canvas></div>
-      <div class="card span-6"><h3>Main activity before departure</h3><canvas id="c-activity"></canvas></div>
-      <div class="card span-6"><h3>Household type</h3><canvas id="c-hhtype"></canvas></div>
-      <div class="card span-6"><h3>Languages spoken at home</h3><canvas id="c-lang"></canvas></div>
+      <div class="card"><h3>Gender</h3><canvas id="c-gender"></canvas></div>
+      <div class="card"><h3>Age group</h3><canvas id="c-age"></canvas></div>
+      <div class="card"><h3>Education level</h3><canvas id="c-educ"></canvas></div>
+      <div class="card"><h3>Main activity before departure</h3><canvas id="c-activity"></canvas></div>
+      <div class="card"><h3>Household type</h3><canvas id="c-hhtype"></canvas></div>
+      <div class="card"><h3>Languages spoken at home</h3><canvas id="c-lang"></canvas></div>
     </div>
   </section>
 
   <section id="tab-displacement">
     <div class="page-bar">Displacement Patterns</div>
     <div class="grid">
-      <div class="card span-6"><h3>Oblast of origin</h3><canvas id="c-oblast"></canvas></div>
-      <div class="card span-6"><h3>Arrival month (host country)</h3><canvas id="c-arrival"></canvas></div>
-      <div class="card span-6"><h3>Visited Ukraine since departure?</h3><canvas id="c-return"></canvas></div>
-      <div class="card span-6"><h3>Duration of most recent visit</h3><canvas id="c-returnstay"></canvas></div>
-      <div class="card span-12"><h3>Main reason unable to visit Ukraine</h3><canvas id="c-noreturn"></canvas></div>
+      <div class="card"><h3>Oblast of origin</h3><canvas id="c-oblast"></canvas></div>
+      <div class="card"><h3>Arrival month (host country)</h3><canvas id="c-arrival"></canvas></div>
+      <div class="card"><h3>Visited Ukraine since departure?</h3><canvas id="c-return"></canvas></div>
+      <div class="card"><h3>Duration of most recent visit</h3><canvas id="c-returnstay"></canvas></div>
+      <div class="card"><h3>Main reason unable to visit Ukraine</h3><canvas id="c-noreturn"></canvas></div>
     </div>
   </section>
 
   <section id="tab-rights">
     <div class="page-bar">Documentation &amp; Legal Status</div>
+    <div class="stat-row">
+      <div class="card stat"><div class="n" id="stat-lackdoc">–</div><div class="lbl">HH missing an ID document</div></div>
+      <div class="card stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">difficulty in TP application</div></div>
+      <div class="card stat"><div class="n" id="stat-famchange">–</div><div class="lbl">change in family composition</div></div>
+    </div>
     <div class="grid">
-      <div class="card span-4 stat"><div class="n" id="stat-lackdoc">–</div><div class="lbl">HH missing an identity document</div></div>
-      <div class="card span-4 stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">faced difficulty in TP application/extension</div></div>
-      <div class="card span-4 stat"><div class="n" id="stat-famchange">–</div><div class="lbl">reported a change in family composition</div></div>
-      <div class="card span-6"><h3>Documents currently missing</h3><canvas id="c-missingdocs"></canvas></div>
-      <div class="card span-6"><h3>Why temporary protection not applied for</h3><canvas id="c-tpreason"></canvas></div>
-      <div class="card span-12"><h3>Difficulties in the TP application / extension process</h3><canvas id="c-tpdiffwhat"></canvas></div>
+      <div class="card"><h3>Documents currently missing</h3><canvas id="c-missingdocs"></canvas></div>
+      <div class="card"><h3>Why temporary protection not applied for</h3><canvas id="c-tpreason"></canvas></div>
+      <div class="card"><h3>Difficulties in the TP application / extension process</h3><canvas id="c-tpdiffwhat"></canvas></div>
     </div>
   </section>
 
   <section id="tab-access">
     <div class="page-bar">Access to Services</div>
     <div class="grid">
-      <div class="card span-6"><h3>Current accommodation</h3><canvas id="c-accomm"></canvas></div>
-      <div class="card span-6"><h3>Rental contract with landlord</h3><canvas id="c-rental"></canvas></div>
-      <div class="card span-6"><h3>Current main activity in host country</h3><canvas id="c-workcoa"></canvas></div>
-      <div class="card span-6"><h3>Barriers to employment</h3><canvas id="c-diffwork"></canvas></div>
-      <div class="card span-6"><h3>Applied for social protection benefits</h3><canvas id="c-socprot"></canvas></div>
-      <div class="card span-6"><h3>School enrolment (school-aged children)</h3><canvas id="c-school"></canvas></div>
+      <div class="card"><h3>Current accommodation</h3><canvas id="c-accomm"></canvas></div>
+      <div class="card"><h3>Rental contract with landlord</h3><canvas id="c-rental"></canvas></div>
+      <div class="card"><h3>Current main activity in host country</h3><canvas id="c-workcoa"></canvas></div>
+      <div class="card"><h3>Barriers to employment</h3><canvas id="c-diffwork"></canvas></div>
+      <div class="card"><h3>Applied for social protection benefits</h3><canvas id="c-socprot"></canvas></div>
+      <div class="card"><h3>School enrolment (school-aged children)</h3><canvas id="c-school"></canvas></div>
     </div>
   </section>
 
