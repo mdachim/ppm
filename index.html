@@ -38,7 +38,19 @@
   .filters label{font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--grey04);display:block;margin-bottom:4px}
   .filters select{font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;width:100%;font-family:inherit;color:var(--ink)}
   .filters select:focus{outline:2px solid var(--blue02);outline-offset:0;border-color:var(--blue)}
-  .filters .filter-field{flex:1 1 auto;min-width:118px}
+  .filters .filter-field{flex:1 1 auto;min-width:118px;position:relative}
+  /* multi-select dropdown (checkbox list) */
+  .msel{position:relative}
+  .msel summary{list-style:none;font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .msel summary::-webkit-details-marker{display:none}
+  .msel summary svg{width:12px;height:12px;stroke:var(--grey04);flex-shrink:0;transition:transform .15s}
+  .msel[open] summary svg{transform:rotate(180deg)}
+  .msel[open] summary{border-color:var(--blue);outline:2px solid var(--blue02)}
+  .msel-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .msel-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;width:max-content;max-width:240px;max-height:220px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;z-index:40}
+  .msel-row{display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:5px;font-size:12.5px;color:var(--ink);cursor:pointer;white-space:nowrap}
+  .msel-row:hover{background:var(--canvas)}
+  .msel-row input{margin:0;accent-color:var(--blue);width:14px;height:14px;flex-shrink:0}
   .filters .sample{width:100%;font-size:12px;color:var(--grey04);text-align:center;order:99}
   .filters .sample b{color:var(--blue);font-size:14px}
   .filters button{font-family:inherit}
@@ -62,12 +74,12 @@
   .stat .lbl{font-size:11.5px;color:var(--grey04);margin-top:6px;font-weight:700}
   .stat-row{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
   .stat-row .card{margin-bottom:0}
-  .kf-panel{display:flex;flex-direction:column;gap:16px}
-  .kf-side{display:flex;flex-direction:column;gap:14px;padding-bottom:6px;border-bottom:1px solid var(--line)}
-  .kf-h{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--grey04)}
-  .kf-stat .n{font-size:26px;font-weight:900;color:var(--blue);line-height:1.15;margin-top:2px}
-  .kf-stat .lbl{font-size:11px;color:var(--grey05);margin-top:1px}
-  .kf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 14px}
+  .kf-panel{display:flex;flex-direction:row;gap:16px}
+  .kf-side{flex:0 0 118px;display:flex;flex-direction:column;gap:13px;padding-right:12px;border-right:1px solid var(--line)}
+  .kf-h{font-size:9px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--grey04)}
+  .kf-stat .n{font-size:21px;font-weight:900;color:var(--blue);line-height:1.15;margin-top:2px}
+  .kf-stat .lbl{font-size:10px;color:var(--grey05);margin-top:1px;line-height:1.3}
+  .kf-grid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(2,1fr);gap:18px 10px}
   .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;padding:2px 4px;position:relative}
   .gauge canvas{max-height:80px}
   .card canvas{max-width:100% !important}
@@ -151,11 +163,21 @@
 <nav id="tabnav"></nav>
 
 <div class="filters">
-  <div class="filter-field"><label>Interview month</label><select id="f-interview"></select></div>
-  <div class="filter-field"><label>Arrival month</label><select id="f-arrival"></select></div>
-  <div class="filter-field"><label>Gender</label><select id="f-gender"></select></div>
-  <div class="filter-field"><label>Age group</label><select id="f-age"></select></div>
-  <div class="filter-field"><label>Household type</label><select id="f-hhtype"></select></div>
+  <div class="filter-field"><label>Interview month</label>
+    <details class="msel" id="f-interview"><summary><span class="msel-txt">All months</span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary><div class="msel-panel"></div></details>
+  </div>
+  <div class="filter-field"><label>Arrival month</label>
+    <details class="msel" id="f-arrival"><summary><span class="msel-txt">All months</span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary><div class="msel-panel"></div></details>
+  </div>
+  <div class="filter-field"><label>Gender</label>
+    <details class="msel" id="f-gender"><summary><span class="msel-txt">All genders</span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary><div class="msel-panel"></div></details>
+  </div>
+  <div class="filter-field"><label>Age group</label>
+    <details class="msel" id="f-age"><summary><span class="msel-txt">All ages</span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary><div class="msel-panel"></div></details>
+  </div>
+  <div class="filter-field"><label>Household type</label>
+    <details class="msel" id="f-hhtype"><summary><span class="msel-txt">All household types</span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary><div class="msel-panel"></div></details>
+  </div>
   <div class="filter-field"><label>PWSN household</label><select id="f-pwsn"></select></div>
   <button class="reset" id="reset-filters">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7"/><path d="M3 4v5h5"/></svg>
@@ -230,8 +252,10 @@ async function boot(){
       }));
     }));
   };
-  ['f-interview','f-arrival','f-gender','f-age','f-hhtype','f-pwsn'].forEach(id=>{
-    document.getElementById(id).addEventListener('change', ()=>{ applyFilters(); renderAll(); });
+  document.getElementById('f-pwsn').addEventListener('change', ()=>{ applyFilters(); renderAll(); });
+  // close any open multi-select dropdown when clicking outside it
+  document.addEventListener('click', (e)=>{
+    document.querySelectorAll('.msel[open]').forEach(d=>{ if(!d.contains(e.target)) d.removeAttribute('open'); });
   });
   renderAll();
 }
@@ -245,29 +269,61 @@ function fillSelect(id, values, allLabel, field){
   const el = document.getElementById(id);
   el.innerHTML = `<option value="">${allLabel}</option>` + values.map(v=>`<option value="${v}">${L(v,field)}</option>`).join('');
 }
+
+// ---------- multi-select filter dropdowns (checkbox lists) ----------
+const MULTI_FIELDS = ['f-interview','f-arrival','f-gender','f-age','f-hhtype'];
+const MSEL = {}; // id -> Set of selected raw codes (empty set = "all")
+
+function fillMultiSelect(id, values, allLabel, field){
+  MSEL[id] = new Set();
+  const root = document.getElementById(id);
+  root.dataset.allLabel = allLabel;
+  const panel = root.querySelector('.msel-panel');
+  panel.innerHTML = values.map(v=>`<label class="msel-row"><input type="checkbox" value="${v}"> ${L(v,field)}</label>`).join('');
+  panel.querySelectorAll('input').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked) MSEL[id].add(cb.value); else MSEL[id].delete(cb.value);
+      updateMselLabel(id, values, field);
+      applyFilters(); renderAll();
+    });
+  });
+  updateMselLabel(id, values, field);
+}
+function updateMselLabel(id, values, field){
+  const root = document.getElementById(id);
+  const sel = MSEL[id];
+  const txt = root.querySelector('.msel-txt');
+  if(sel.size===0) txt.textContent = root.dataset.allLabel;
+  else if(sel.size===1) txt.textContent = L([...sel][0], field);
+  else txt.textContent = sel.size+' selected';
+}
 function populateFilterOptions(){
-  fillSelect('f-interview', uniqueSorted('interview_month'), 'All months');
-  fillSelect('f-arrival', uniqueSorted('arrival_month'), 'All months');
-  fillSelect('f-gender', uniqueSorted('resp_gender'), 'All genders', 'resp_gender');
-  fillSelect('f-age', ['18-24','25-34','35-59','60+'], 'All ages');
-  fillSelect('f-hhtype', uniqueSorted('household_type'), 'All household types');
+  fillMultiSelect('f-interview', uniqueSorted('interview_month'), 'All months');
+  fillMultiSelect('f-arrival', uniqueSorted('arrival_month'), 'All months');
+  fillMultiSelect('f-gender', uniqueSorted('resp_gender'), 'All genders', 'resp_gender');
+  fillMultiSelect('f-age', ['18-24','25-34','35-59','60+'], 'All ages');
+  fillMultiSelect('f-hhtype', uniqueSorted('household_type'), 'All household types');
   fillSelect('f-pwsn', ['true','false'], 'All households');
 }
-function resetFilterSelects(){ ['f-interview','f-arrival','f-gender','f-age','f-hhtype','f-pwsn'].forEach(id=>document.getElementById(id).value=''); }
+function resetFilterSelects(){
+  MULTI_FIELDS.forEach(id=>{
+    MSEL[id] = new Set();
+    document.getElementById(id).querySelectorAll('input').forEach(cb=>cb.checked=false);
+    document.getElementById(id).querySelector('.msel-txt').textContent = document.getElementById(id).dataset.allLabel;
+    document.getElementById(id).removeAttribute('open');
+  });
+  document.getElementById('f-pwsn').value = '';
+}
 
 function applyFilters(){
-  const fi = document.getElementById('f-interview').value;
-  const fa = document.getElementById('f-arrival').value;
-  const fg = document.getElementById('f-gender').value;
-  const fage = document.getElementById('f-age').value;
-  const fh = document.getElementById('f-hhtype').value;
+  const fi = MSEL['f-interview'], fa = MSEL['f-arrival'], fg = MSEL['f-gender'], fage = MSEL['f-age'], fh = MSEL['f-hhtype'];
   const fp = document.getElementById('f-pwsn').value;
   VIEW = DATA.records.filter(r=>
-    (!fi || r.interview_month===fi) &&
-    (!fa || r.arrival_month===fa) &&
-    (!fg || r.resp_gender===fg) &&
-    (!fage || r.age_group===fage) &&
-    (!fh || r.household_type===fh) &&
+    (fi.size===0 || fi.has(r.interview_month)) &&
+    (fa.size===0 || fa.has(r.arrival_month)) &&
+    (fg.size===0 || fg.has(r.resp_gender)) &&
+    (fage.size===0 || fage.has(r.age_group)) &&
+    (fh.size===0 || fh.has(r.household_type)) &&
     (!fp || String(r.pwsn)===fp)
   );
   document.getElementById('sample-n').textContent = VIEW.length;
@@ -455,11 +511,6 @@ function buildTabs(){
       </div>
     </div>
 
-    <div class="grid">
-      <div class="card"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
-      <div class="card"><h3>Current legal status</h3><canvas id="c-legal"></canvas></div>
-    </div>
-
     <div class="ack-box">
       <h4>Acknowledgements</h4>
       We are grateful for the extensive involvement and support of UNHCR's partners: Charity Center for Refugees, Law Center for Advocates, INTERSOS and REACH. We are also grateful for the support of local authorities, civil society, international organizations and donors. Most importantly, UNHCR would like to acknowledge the resilience and strength of refugees from Ukraine, who continue to share with us their challenges, fears and hopes.
@@ -497,6 +548,7 @@ function buildTabs(){
       <div class="card stat"><div class="n" id="stat-famchange">–</div><div class="lbl">change in family composition</div></div>
     </div>
     <div class="grid">
+      <div class="card"><h3>Current legal status</h3><canvas id="c-legal"></canvas></div>
       <div class="card"><h3>Documents currently missing</h3><canvas id="c-missingdocs"></canvas></div>
       <div class="card"><h3>Why temporary protection not applied for</h3><canvas id="c-tpreason"></canvas></div>
       <div class="card"><h3>Difficulties in the TP application / extension process</h3><canvas id="c-tpdiffwhat"></canvas></div>
@@ -506,6 +558,7 @@ function buildTabs(){
   <section id="tab-access">
     <div class="page-bar">Access to Services</div>
     <div class="grid">
+      <div class="card"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
       <div class="card"><h3>Current accommodation</h3><canvas id="c-accomm"></canvas></div>
       <div class="card"><h3>Rental contract with landlord</h3><canvas id="c-rental"></canvas></div>
       <div class="card"><h3>Current main activity in host country</h3><canvas id="c-workcoa"></canvas></div>
