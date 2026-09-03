@@ -903,6 +903,10 @@ function buildTabs(){
       <div class="card"><h3>Departure from Ukraine</h3><div class="chart-wrap"><canvas id="c-departure"></canvas></div></div>
       <div class="card"><h3>Arrival to Moldova</h3><div class="chart-wrap"><canvas id="c-arrival"></canvas></div></div>
       <div class="card"><h3>Reasons for temporary visits to Ukraine</h3><div class="chart-wrap"><canvas id="c-visitreason"></canvas></div></div>
+      <div class="card"><h3>Duration of most recent visit</h3><div class="chart-wrap"><canvas id="c-returnstay"></canvas></div></div>
+      <div class="card"><h3>Documents retrieved while in Ukraine</h3><div class="chart-wrap"><canvas id="c-renewdocs"></canvas></div></div>
+      <div class="card"><h3>Difficulties faced on return to Moldova</h3><div class="chart-wrap"><canvas id="c-returndiffwhat"></canvas></div></div>
+      <div class="card"><h3>Main reasons for being unable to visit Ukraine</h3><div class="chart-wrap"><canvas id="c-noreturn"></canvas></div></div>
     </div>
   </section>
 
@@ -912,6 +916,9 @@ function buildTabs(){
       <div class="card stat"><div class="n" id="stat-lackdoc">–</div><div class="lbl">HH missing an ID document</div></div>
       <div class="card stat"><div class="n" id="stat-docimpact">–</div><div class="lbl">say missing docs limit access to services</div></div>
       <div class="card stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">had difficulty in the TP application</div></div>
+      <div class="card stat"><div class="n" id="stat-famchange">–</div><div class="lbl">had a change in family composition</div></div>
+      <div class="card stat"><div class="n" id="stat-famchalhc">–</div><div class="lbl">faced challenges registering it in Moldova</div></div>
+      <div class="card stat"><div class="n" id="stat-famchalukr">–</div><div class="lbl">faced challenges registering it in Ukraine</div></div>
     </div>
     <div class="grid">
       <div class="card"><h3>Legal status in Moldova</h3><div class="chart-wrap"><canvas id="c-legal"></canvas></div></div>
@@ -919,6 +926,12 @@ function buildTabs(){
       <div class="card"><h3>Documents currently missing</h3><div class="chart-wrap"><canvas id="c-missingdocs"></canvas></div></div>
       <div class="card"><h3>Able to replace / renew missing documents</h3><div id="c-replacedocs"></div></div>
       <div class="card"><h3>Registration of vital events since arrival</h3><div id="c-vitalevents"></div></div>
+      <div class="card"><h3>Challenges faced due to lack of documentation</h3><div class="chart-wrap"><canvas id="c-docsaffect"></canvas></div></div>
+      <div class="card"><h3>Reasons unable to replace / renew documentation</h3><div class="chart-wrap"><canvas id="c-noreplace"></canvas></div></div>
+      <div class="card"><h3>Timeline of application for temporary protection</h3><div class="chart-wrap"><canvas id="c-tptimeline"></canvas></div></div>
+      <div class="card"><h3>Top reasons for not applying for temporary protection</h3><div class="chart-wrap"><canvas id="c-tpreason"></canvas></div></div>
+      <div class="card"><h3>Difficulties in the TP application / extension</h3><div class="chart-wrap"><canvas id="c-tpdiffwhat"></canvas></div></div>
+      <div class="card"><h3>Challenges registering vital events in Ukraine</h3><div class="chart-wrap"><canvas id="c-famchalukr"></canvas></div></div>
     </div>
   </section>
 
@@ -928,15 +941,20 @@ function buildTabs(){
       <div class="card stat"><div class="n" id="stat-reunif">–</div><div class="lbl">cite family reunification as an urgent need</div></div>
       <div class="card stat"><div class="n" id="stat-tracing">–</div><div class="lbl">cite tracing of family members as an urgent need</div></div>
       <div class="card stat"><div class="n" id="stat-noenrol">–</div><div class="lbl">HH with children have some not enrolled in school</div></div>
+      <div class="card stat"><div class="n" id="stat-worklong">–</div><div class="lbl">of employed work longer than the legal limit</div></div>
+      <div class="card stat"><div class="n" id="stat-docskept">–</div><div class="lbl">had identity documents kept by an employer</div></div>
+      <div class="card stat"><div class="n" id="stat-socprotchal">–</div><div class="lbl">faced challenges accessing social protection</div></div>
     </div>
     <div class="grid">
-      <div class="card"><h3>Barriers to family reunification / vital-event registration</h3><div class="chart-wrap"><canvas id="c-reunifbarriers"></canvas></div></div>
+      <div class="card"><h3>Factors preventing family reunification</h3><div class="chart-wrap"><canvas id="c-obstacles"></canvas></div></div>
+      <div class="card"><h3>Challenges registering vital events in Moldova</h3><div class="chart-wrap"><canvas id="c-reunifbarriers"></canvas></div></div>
       <div class="card"><h3>Current main activity in host country</h3><div class="chart-wrap"><canvas id="c-workcoa"></canvas></div></div>
       <div class="card"><h3>Barriers to employment</h3><div class="chart-wrap"><canvas id="c-diffwork"></canvas></div></div>
       <div class="card"><h3>Qualification match with current job</h3><div class="chart-wrap"><canvas id="c-qualmatch"></canvas></div></div>
       <div class="card"><h3>Regularity of access to earnings (employed)</h3><div id="c-earnings"></div></div>
       <div class="card"><h3>Reasons children are not enrolled in school</h3><div class="chart-wrap"><canvas id="c-notenrol"></canvas></div></div>
       <div class="card"><h3>Applied for social protection benefits</h3><div class="chart-wrap"><canvas id="c-socprot"></canvas></div></div>
+      <div class="card"><h3>Challenges accessing social protection</h3><div class="chart-wrap"><canvas id="c-socprotdiff"></canvas></div></div>
     </div>
   </section>
 
@@ -955,6 +973,8 @@ function buildTabs(){
       <div class="card"><h3>Rental contract with landlord</h3><div class="chart-wrap"><canvas id="c-rental"></canvas></div></div>
       <div class="card"><h3>Reasons for lacking a rental contract</h3><div class="chart-wrap"><canvas id="c-norentalwhy"></canvas></div></div>
       <div class="card"><h3>Reasons for leaving current accommodation</h3><div class="chart-wrap"><canvas id="c-leavewhy"></canvas></div></div>
+      <div class="card"><h3>Reasons for having to leave accommodation within 3 months</h3><div class="chart-wrap"><canvas id="c-accommreason"></canvas></div></div>
+      <div class="card"><h3>Access to childcare services</h3><div class="chart-wrap"><canvas id="c-childcare"></canvas></div></div>
       <div class="card"><h3>Access to childcare services, by household type</h3><div id="c-childcarecmp"></div></div>
     </div>
   </section>
@@ -1054,21 +1074,38 @@ function renderAll(){
   lineChart('c-departure', countBy(VIEW,'departure_month'));
   lineChart('c-arrival', countBy(VIEW,'arrival_month'));
   barChart('c-visitreason', countBy(VIEW,'temp_return_reason'), {field:'temp_return_reason', top:8});
+  barChart('c-returnstay', countBy(VIEW,'return_stay'), {field:'return_stay'});
+  barChart('c-renewdocs', countBy(VIEW,'renew_documents',{multi:true}), {field:'renew_documents'});
+  barChart('c-returndiffwhat', countBy(VIEW,'temp_return_difficulties_what',{multi:true}), {top:8, field:'temp_return_difficulties_what'});
+  barChart('c-noreturn', countBy(VIEW,'no_return_reason',{multi:true}), {top:8, field:'no_return_reason'});
 
   // ---- Access to Rights #1 ----
   const lackdoc = pctYes(VIEW,'lack_documentation','yes'); setStat('stat-lackdoc', lackdoc? lackdoc.pct:null, lackdoc?'%':'');
   const docimpact = pctFlag(VIEW,'documents_affect', v=>v.split(' ').some(c=>!['no_specific_impact','prefer_no_answer'].includes(c))); setStat('stat-docimpact', docimpact? docimpact.pct:null, docimpact?'%':'');
   const tpdiff = pctYes(VIEW,'temp_protection_difficulty','yes'); setStat('stat-tpdiff', tpdiff? tpdiff.pct:null, tpdiff?'%':'');
+  const famchange = pctFlag(VIEW,'family_comp', v=>v!=='no' && v!=='prefer_no_answer'); setStat('stat-famchange', famchange? famchange.pct:null, famchange?'%':'');
+  const famchalhc = pctYes(VIEW,'family_comp_challenges_faced','yes'); setStat('stat-famchalhc', famchalhc? famchalhc.pct:null, famchalhc?'%':'');
+  const famchalukr = pctYes(VIEW,'family_comp_challenges_faced_ukr','yes'); setStat('stat-famchalukr', famchalukr? famchalukr.pct:null, famchalukr?'%':'');
   barChart('c-legal', countBy(VIEW,'temp_protection'), {field:'temp_protection', top:9});
   donutChart('c-tpprev', countBy(VIEW,'tp_granted_previously'), 'tp_granted_previously');
   barChart('c-missingdocs', countBy(VIEW,'missing_docs',{multi:true}), {field:'missing_docs'});
   waffleChart('c-replacedocs', countBy(VIEW,'replacing_documentation'), 'replacing_documentation');
   proportionalStrip('c-vitalevents', countBy(VIEW,'family_comp',{multi:true}), 'family_comp');
+  barChart('c-docsaffect', countBy(VIEW,'documents_affect',{multi:true}), {top:8, field:'documents_affect'});
+  barChart('c-noreplace', countBy(VIEW,'no_replace_docs_reason',{multi:true}), {top:8, field:'no_replace_docs_reason'});
+  lineChart('c-tptimeline', countBy(VIEW,'temp_protection_month'));
+  barChart('c-tpreason', countBy(VIEW,'temp_protection_reasons',{multi:true}), {top:8, field:'temp_protection_reasons'});
+  barChart('c-tpdiffwhat', countBy(VIEW,'temp_protection_difficulty_what',{multi:true}), {top:8, field:'temp_protection_difficulty_what'});
+  barChart('c-famchalukr', countBy(VIEW,'family_comp_challenges_ukr',{multi:true}), {top:8, field:'family_comp_challenges_ukr'});
 
   // ---- Access to Rights #2 ----
   const reunif = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'reunification_support')); setStat('stat-reunif', reunif? reunif.pct:null, reunif?'%':'');
   const tracing = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'family_traig')); setStat('stat-tracing', tracing? tracing.pct:null, tracing?'%':'');
   const noenrol = pctFlag(VIEW,'school_enrol', v=>v==='no'||v==='yes_some'); setStat('stat-noenrol', noenrol? noenrol.pct:null, noenrol?'%':'');
+  const worklong = pctYes(VIEW,'work_long','yes'); setStat('stat-worklong', worklong? worklong.pct:null, worklong?'%':'');
+  const docskept = pctYes(VIEW,'documents_kept','yes'); setStat('stat-docskept', docskept? docskept.pct:null, docskept?'%':'');
+  const socprotchal = pctYes(VIEW,'social_prot_access_challenge','yes'); setStat('stat-socprotchal', socprotchal? socprotchal.pct:null, socprotchal?'%':'');
+  barChart('c-obstacles', countBy(VIEW,'obstacles',{multi:true}), {top:8, field:'obstacles'});
   barChart('c-reunifbarriers', countBy(VIEW,'family_comp_challenges',{multi:true}), {top:8, field:'family_comp_challenges'});
   barChart('c-workcoa', countBy(VIEW,'work_coa'), {field:'work_coa'});
   barChart('c-diffwork', countBy(VIEW,'diff_work',{multi:true}), {top:8, field:'diff_work'});
@@ -1076,6 +1113,7 @@ function renderAll(){
   proportionalStrip('c-earnings', countBy(VIEW,'access_earnings'), 'access_earnings');
   barChart('c-notenrol', countBy(VIEW,'not_enrol_reason',{multi:true}), {top:8, field:'not_enrol_reason'});
   barChart('c-socprot', countBy(VIEW,'social_prot_access',{multi:true}), {top:8, field:'social_prot_access'});
+  barChart('c-socprotdiff', countBy(VIEW,'social_prot_difficulties',{multi:true}), {top:8, field:'social_prot_difficulties'});
 
   // ---- Access to Rights #3 ----
   const rental = pctYes(VIEW,'rental_contract','yes'); setStat('stat-rental', rental? rental.pct:null, rental?'%':'');
@@ -1088,6 +1126,8 @@ function renderAll(){
   donutChart('c-rental', countBy(VIEW,'rental_contract'), 'rental_contract');
   barChart('c-norentalwhy', countBy(VIEW,'no_contract_why'), {field:'no_contract_why'});
   barChart('c-leavewhy', countBy(VIEW,'leave_accomm_reason'), {field:'leave_accomm_reason'});
+  barChart('c-accommreason', countBy(VIEW,'accomm_reason',{multi:true}), {top:8, field:'accomm_reason'});
+  donutChart('c-childcare', countBy(VIEW,'childcare_services'), 'childcare_services');
   comparisonBars('c-childcarecmp', VIEW, 'household_type', 'childcare_services', v=>v==='yes');
 
   layoutMasonry(); // card heights just changed — repack the columns
