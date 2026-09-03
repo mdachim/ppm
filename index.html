@@ -118,6 +118,18 @@
      second column leaves the final pair centred under the rows above */
   .kf-grid.rows442{grid-template-columns:repeat(4,1fr)}
   .kf-grid.rows442 .gauge:nth-child(9){grid-column:2}
+  /* phones: 4 gauges across leaves ~55px each and the captions run into one
+     another, so drop to 2 columns and put the stat sidebar above the grid
+     instead of beside it */
+  @media screen and (max-width:859px){
+    .kf-panel{flex-direction:column;gap:14px}
+    .kf-side{flex:none;width:100%;padding-right:0;padding-bottom:14px;border-right:0;
+      border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(2,1fr);gap:12px 14px}
+    .kf-side .note{grid-column:1/-1;margin:0}
+    .kf-grid.rows442{grid-template-columns:repeat(2,1fr);gap:16px 12px}
+    .kf-grid.rows442 .gauge:nth-child(9){grid-column:auto}
+    .gauge .cap{font-size:11.5px}
+  }
   .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;padding:2px 4px;position:relative;min-width:0}
   /* the dial is a fixed 2:1 box the half-donut fits exactly, with the % placed
      inside it — the old version pulled the % and caption up with hardcoded
