@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Republic of Moldova — Protection Monitoring Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  /* UNHCR dataviz brand palette — https://dataviz.unhcr.org/guidance/ */
+  :root{
+    --unhcr-blue:#0072bc; --unhcr-blue-dark:#0b3754; --unhcr-blue-light:#cde3f1;
+    --unhcr-yellow:#ffc740; --unhcr-green:#32c189; --unhcr-cyan:#6cd8fd;
+    --unhcr-red:#d25a45; --unhcr-purple:#a097e3; --unhcr-brown:#7c3c36; --unhcr-grey:#bfbfbf;
+    --gray-900:#1c2530; --gray-700:#4a5560; --gray-400:#8b96a1; --gray-200:#e2e6ea; --gray-100:#f4f6f8;
+    --bg:#f4f6f8; --card:#ffffff; --text:var(--gray-900); --sub:var(--gray-700);
+    --border:var(--gray-200);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Lato',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:14px}
+  header{background:var(--unhcr-blue);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  header .title-block{display:flex;align-items:center;gap:12px}
+  header .unhcr-mark{font-weight:900;font-size:15px;letter-spacing:.04em;background:#fff;color:var(--unhcr-blue);border-radius:4px;padding:4px 8px}
+  header h1{margin:0;font-size:19px;font-weight:700}
+  header .subtitle{margin:2px 0 0;font-size:12px;color:#dceaf6}
+  nav{display:flex;gap:6px;background:var(--unhcr-blue-dark);padding:0 20px;overflow-x:auto}
+  nav button{background:transparent;border:none;color:#a9c4d6;padding:12px 16px;font-size:13px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;font-family:inherit}
+  nav button.active{color:#fff;border-bottom-color:var(--unhcr-yellow);font-weight:700}
+  nav button:hover{color:#fff}
+  .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--card);padding:12px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+  .filters label{font-size:11px;color:var(--sub);display:block;margin-bottom:2px}
+  .filters select{font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;min-width:130px;font-family:inherit}
+  .filters .sample{margin-left:auto;font-size:12.5px;color:var(--sub)}
+  .filters .sample b{color:var(--unhcr-blue);font-size:15px}
+  .filters button{font-family:inherit}
+  .filters button.reset{border:1px solid var(--border);background:#fff;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;color:var(--sub)}
+  .filters button.print-btn{border:none;background:var(--unhcr-blue);color:#fff;border-radius:6px;padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer}
+  .filters button.print-btn:hover{background:var(--unhcr-blue-dark)}
+  main{padding:20px;max-width:1400px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px}
+  .card h3{margin:0 0 12px;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:#fff;font-weight:700;background:var(--gray-700);padding:8px 10px;border-radius:4px 4px 0 0;margin:-16px -16px 12px}
+  .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:span 12}
+  @media screen and (max-width:900px){.span-3,.span-4,.span-6,.span-8{grid-column:span 12}}
+  .stat{padding:14px 16px;border-top:3px solid var(--unhcr-blue)}
+  .stat .n{font-size:30px;font-weight:900;color:var(--unhcr-blue);line-height:1.1}
+  .stat .lbl{font-size:12.5px;color:var(--sub);margin-top:4px}
+  .kf-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+  @media screen and (max-width:900px){.kf-grid{grid-template-columns:repeat(2,1fr)}}
+  .gauge{display:flex;flex-direction:column;align-items:center;text-align:center;border-top:3px solid var(--unhcr-yellow)}
+  .gauge canvas{max-height:90px}
+  .card canvas{max-width:100% !important}
+  .gauge .pct{font-size:20px;font-weight:900;color:var(--unhcr-blue);margin-top:-58px}
+  .gauge .cap{font-size:11.5px;color:var(--sub);margin-top:26px;line-height:1.35}
+  .note{font-size:11px;color:var(--gray-400);margin-top:8px}
+  .suppressed{font-size:12.5px;color:var(--gray-400);font-style:italic;padding:20px 0;text-align:center}
+  .methodology{background:var(--unhcr-blue-light);border:1px solid #b7d6ec;border-radius:8px;padding:16px;font-size:13px;line-height:1.6;color:var(--gray-900)}
+  .methodology b{color:var(--unhcr-blue-dark)}
+  .privacy-badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--gray-700);background:var(--gray-100);border:1px solid var(--border);border-radius:20px;padding:4px 10px;margin-top:10px}
+  .privacy-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--unhcr-green)}
+  .page-bar{background:var(--unhcr-blue-dark);color:#fff;font-weight:700;font-size:13px;letter-spacing:.03em;text-transform:uppercase;padding:9px 14px;border-radius:6px;margin-bottom:14px}
+  #tabs>section{display:none}
+  #tabs>section.active{display:block}
+  /* forced on briefly (via JS) right before window.print() so every chart
+     has a real, non-zero-size canvas to draw into before print rasterizes —
+     the print media query alone reflows too late for Chart.js to catch */
+  body.printing-all #tabs>section{display:block}
+  footer{padding:14px 24px;font-size:11px;color:var(--gray-400);text-align:center}
+
+  /* ---- print / PDF factsheet: 6 A4 portrait pages, one per tab ---- */
+  @media print{
+    @page{ size:A4 portrait; margin:12mm; }
+    body{background:#fff}
+    nav, .filters, footer{display:none !important}
+    header{background:var(--unhcr-blue) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+    main{padding:0;max-width:none}
+    #tabs>section{display:block !important; page-break-after:always; break-after:page}
+    #tabs>section:last-child{page-break-after:auto; break-after:auto}
+    .card{break-inside:avoid; box-shadow:none; padding:10px}
+    .card h3{-webkit-print-color-adjust:exact; print-color-adjust:exact; margin:-10px -10px 10px; font-size:11px; padding:6px 8px}
+    .page-bar{-webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:12px; padding:7px 12px}
+    .kf-grid{grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:10px !important}
+    .gauge .cap{font-size:9.5px}
+    .gauge .pct{font-size:16px}
+    .stat .n{font-size:20px}
+    .stat{padding:8px 10px}
+    body{font-size:11px}
+    .grid{gap:8px}
+    .card h3{font-size:10.5px; padding:6px 8px; margin:-10px -10px 8px}
+    .card{padding:10px}
+    .grid{gap:8px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <span class="unhcr-mark">UNHCR</span>
+    <div>
+      <h1>Republic of Moldova</h1>
+      <p class="subtitle">Protection Profiling &amp; Monitoring — refugees from Ukraine</p>
+    </div>
+  </div>
+</header>
+
+<nav id="tabnav"></nav>
+
+<div class="filters">
+  <div><label>Interview month</label><select id="f-interview"></select></div>
+  <div><label>Arrival month</label><select id="f-arrival"></select></div>
+  <div><label>Gender</label><select id="f-gender"></select></div>
+  <div><label>Age group</label><select id="f-age"></select></div>
+  <div><label>Household type</label><select id="f-hhtype"></select></div>
+  <div><label>PWSN household</label><select id="f-pwsn"></select></div>
+  <button class="reset" id="reset-filters">Reset filters</button>
+  <button class="print-btn" id="print-btn">⭳ Download PDF factsheet</button>
+  <div class="sample"><b id="sample-n">–</b> respondents in current view</div>
+</div>
+
+<main>
+  <div id="tabs"></div>
+</main>
+
+<footer>
+  UNHCR Operational Portal for the Ukraine Emergency
+</footer>
+
+<script>
+// UNHCR dataviz brand palette — https://dataviz.unhcr.org/guidance/
+const PALETTE = ['#0072bc','#ffc740','#32c189','#6cd8fd','#d25a45','#a097e3','#7c3c36','#bfbfbf'];
+Chart.defaults.font.family = "'Lato',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
+Chart.defaults.font.size = 11.5;
+Chart.defaults.color = '#4a5560';
+Chart.defaults.plugins.legend.labels.boxWidth = 10;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+
+const MIN_CELL = 5;
+let DATA = null;         // full dataset
+let VIEW = [];           // filtered records
+const charts = {};       // registry so we can destroy/redraw on filter change
+
+let CHOICE_LABELS = {field_to_list:{}, choices_by_list:{}};
+function titleCase(code){ return String(code).replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+// L(code, field) resolves a raw Kobo code to its English label, scoped to
+// the specific question it came from (avoids two questions that happen to
+// reuse the same code, e.g. "other", meaning different things).
+function L(code, field){
+  if(code===null||code===undefined||code==='') return null;
+  const listName = field && CHOICE_LABELS.field_to_list[field];
+  const list = listName && CHOICE_LABELS.choices_by_list[listName];
+  const label = list && list[code];
+  return label || titleCase(code);
+}
+
+async function boot(){
+  const [dataRes, labelRes] = await Promise.all([fetch('data/data.json'), fetch('data/labels.json')]);
+  DATA = await dataRes.json();
+  CHOICE_LABELS = await labelRes.json();
+  populateFilterOptions();
+  applyFilters();
+  buildTabs();
+  document.getElementById('reset-filters').onclick = () => { resetFilterSelects(); applyFilters(); renderAll(); };
+  document.getElementById('print-btn').onclick = () => {
+    // make every tab's charts real-sized before print rasterizes them —
+    // Chart.js sizes a canvas to 0x0 while its tab is hidden and only
+    // redraws on a resize; the print media query alone fires too late.
+    document.body.classList.add('printing-all');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      Object.values(charts).forEach(c => c && c.resize());
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        window.print();
+        document.body.classList.remove('printing-all');
+        Object.values(charts).forEach(c => c && c.resize());
+      }));
+    }));
+  };
+  ['f-interview','f-arrival','f-gender','f-age','f-hhtype','f-pwsn'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', ()=>{ applyFilters(); renderAll(); });
+  });
+  renderAll();
+}
+
+function uniqueSorted(field, mapFn){
+  const s = new Set();
+  DATA.records.forEach(r=>{ const v=r[field]; if(v!==null && v!==undefined && v!=='') s.add(v); });
+  return [...s].sort();
+}
+function fillSelect(id, values, allLabel, field){
+  const el = document.getElementById(id);
+  el.innerHTML = `<option value="">${allLabel}</option>` + values.map(v=>`<option value="${v}">${L(v,field)}</option>`).join('');
+}
+function populateFilterOptions(){
+  fillSelect('f-interview', uniqueSorted('interview_month'), 'All months');
+  fillSelect('f-arrival', uniqueSorted('arrival_month'), 'All months');
+  fillSelect('f-gender', uniqueSorted('resp_gender'), 'All genders', 'resp_gender');
+  fillSelect('f-age', ['18-24','25-34','35-59','60+'], 'All ages');
+  fillSelect('f-hhtype', uniqueSorted('household_type'), 'All household types');
+  fillSelect('f-pwsn', ['true','false'], 'All households');
+}
+function resetFilterSelects(){ ['f-interview','f-arrival','f-gender','f-age','f-hhtype','f-pwsn'].forEach(id=>document.getElementById(id).value=''); }
+
+function applyFilters(){
+  const fi = document.getElementById('f-interview').value;
+  const fa = document.getElementById('f-arrival').value;
+  const fg = document.getElementById('f-gender').value;
+  const fage = document.getElementById('f-age').value;
+  const fh = document.getElementById('f-hhtype').value;
+  const fp = document.getElementById('f-pwsn').value;
+  VIEW = DATA.records.filter(r=>
+    (!fi || r.interview_month===fi) &&
+    (!fa || r.arrival_month===fa) &&
+    (!fg || r.resp_gender===fg) &&
+    (!fage || r.age_group===fage) &&
+    (!fh || r.household_type===fh) &&
+    (!fp || String(r.pwsn)===fp)
+  );
+  document.getElementById('sample-n').textContent = VIEW.length;
+}
+
+// ---------- aggregation helpers ----------
+function countBy(records, field, {multi=false}={}){
+  const c = {};
+  records.forEach(r=>{
+    let v = r[field];
+    if(v===null||v===undefined||v==='') return;
+    const vals = multi ? String(v).split(' ').filter(Boolean) : [v];
+    vals.forEach(val=>{ c[val] = (c[val]||0)+1; });
+  });
+  return c;
+}
+function pctYes(records, field, yesVal='yes'){
+  const denom = records.filter(r=>r[field]!==null && r[field]!==undefined && r[field]!=='').length;
+  if(denom < MIN_CELL) return null;
+  const num = records.filter(r=>r[field]===yesVal).length;
+  return {pct: Math.round(100*num/denom), n: denom};
+}
+function pctTrue(records, field){
+  if(records.length < MIN_CELL) return null;
+  const num = records.filter(r=>r[field]===true || r[field]==='true').length;
+  return {pct: Math.round(100*num/records.length), n: records.length};
+}
+function sorted(entries){ return entries.sort((a,b)=>b[1]-a[1]); }
+
+function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chronological=false}={}){
+  const formatter = (code)=>L(code, field);
+  const entries = chronological
+    ? Object.entries(dataObj).sort((a,b)=>a[0]<b[0]?-1:1)
+    : sorted(Object.entries(dataObj)).slice(0, top);
+  const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const ctx = document.getElementById(canvasId);
+  if(!ctx) return;
+  ctx.parentElement.querySelectorAll('.suppressed').forEach(n=>n.remove());
+  if(entries.length===0 || total < MIN_CELL){
+    const note = document.createElement('div');
+    note.className='suppressed'; note.textContent='Insufficient sample in this view';
+    ctx.style.display='none'; ctx.after(note);
+    return;
+  }
+  ctx.style.display='';
+  // size the chart to how many bars it actually has, rather than a fixed
+  // height for every card — a fixed height either wastes space on a
+  // 3-category chart or forces Chart.js to auto-skip labels on an 8-category
+  // one (which silently drops rows, not just letters).
+  if(horizontal) ctx.parentElement.style.height = Math.max(90, entries.length*24+30)+'px';
+  charts[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: entries.map(e=>formatter(e[0])),
+      datasets: [{ data: entries.map(e=>Math.round(1000*e[1]/total)/10), backgroundColor: PALETTE[0], borderRadius:4, maxBarThickness:22 }]
+    },
+    options: {
+      indexAxis: horizontal ? 'y' : 'x',
+      maintainAspectRatio: !horizontal,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}} },
+      scales: horizontal
+        ? { x:{ ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, y:{ grid:{display:false}, ticks:{autoSkip:false} } }
+        : { y:{ ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false} } }
+    }
+  });
+}
+
+function donutChart(canvasId, dataObj, field=null){
+  const formatter = (code)=>L(code, field);
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const ctx = document.getElementById(canvasId);
+  if(!ctx) return;
+  ctx.parentElement.querySelectorAll('.suppressed').forEach(n=>n.remove());
+  const entries = sorted(Object.entries(dataObj));
+  const total = entries.reduce((a,[,v])=>a+v,0);
+  if(total < MIN_CELL){
+    ctx.style.display='none';
+    const note = document.createElement('div'); note.className='suppressed'; note.textContent='Insufficient sample';
+    ctx.after(note);
+    return;
+  }
+  ctx.style.display='';
+  // legend goes below (not to the right): a right-side legend gets squeezed
+  // to near-zero width in a two-column card and clips label text.
+  ctx.parentElement.style.height = Math.max(160, 130+entries.length*15)+'px';
+  charts[canvasId] = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data: entries.map(e=>e[1]), backgroundColor: PALETTE }]},
+    options:{ maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10, padding:8}}}, cutout:'55%' }
+  });
+}
+
+function gauge(canvasId, pctObj, captionEl){
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const ctx = document.getElementById(canvasId);
+  const pctEl = ctx.parentElement.querySelector('.pct');
+  if(!pctObj){ pctEl.textContent='n/a'; captionEl && (captionEl.textContent += ' (insufficient sample)'); charts[canvasId]=null;
+    charts[canvasId] = new Chart(ctx,{type:'doughnut',data:{datasets:[{data:[1],backgroundColor:['#e2e6ea']}]},options:{rotation:-90,circumference:180,cutout:'75%',plugins:{tooltip:{enabled:false}}}});
+    return; }
+  pctEl.textContent = pctObj.pct+'%';
+  charts[canvasId] = new Chart(ctx, {
+    type:'doughnut',
+    data:{ datasets:[{ data:[pctObj.pct, 100-pctObj.pct], backgroundColor:[PALETTE[0], '#e2e6ea'], borderWidth:0 }]},
+    options:{ rotation:-90, circumference:180, cutout:'75%', plugins:{tooltip:{enabled:false}}, animation:{duration:400} }
+  });
+}
+
+// ---------- tabs ----------
+const TAB_DEFS = [
+  {id:'overview', label:'Key Findings'},
+  {id:'profile', label:'Refugee Profiles'},
+  {id:'displacement', label:'Displacement Patterns'},
+  {id:'rights', label:'Documentation & Legal Status'},
+  {id:'access', label:'Access to Services'},
+  {id:'methodology', label:'Methodology & Data Privacy'},
+];
+
+function buildTabs(){
+  const nav = document.getElementById('tabnav');
+  nav.innerHTML = TAB_DEFS.map((t,i)=>`<button data-tab="${t.id}" class="${i===0?'active':''}">${t.label}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('#tabs > section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+  });
+
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = `
+  <section id="tab-overview" class="active">
+    <div class="page-bar">Key Findings</div>
+    <div class="kf-grid" style="margin-bottom:16px">
+      <div class="card gauge"><canvas id="g-tp"></canvas><div class="pct"></div><div class="cap">granted temporary protection</div></div>
+      <div class="card gauge"><canvas id="g-female"></canvas><div class="pct"></div><div class="cap">of respondents are female</div></div>
+      <div class="card gauge"><canvas id="g-medical"></canvas><div class="pct"></div><div class="cap">households with a serious medical condition</div></div>
+      <div class="card gauge"><canvas id="g-remain"></canvas><div class="pct"></div><div class="cap">have immediate family remaining in Ukraine</div></div>
+      <div class="card gauge"><canvas id="g-needwork"></canvas><div class="pct"></div><div class="cap">employed with no work contract</div></div>
+    </div>
+    <div class="grid">
+      <div class="card span-4 stat"><div class="n" id="stat-n">–</div><div class="lbl"># of respondents in current filter</div></div>
+      <div class="card span-4 stat"><div class="n" id="stat-hhsize">–</div><div class="lbl">average household size</div></div>
+      <div class="card span-4 stat"><div class="n" id="stat-pwsn">–</div><div class="lbl">% of households with PWSN member</div></div>
+      <div class="card span-6"><h3>Most urgent needs</h3><canvas id="c-needs"></canvas></div>
+      <div class="card span-6"><h3>Current legal status</h3><canvas id="c-legal"></canvas></div>
+    </div>
+  </section>
+
+  <section id="tab-profile">
+    <div class="page-bar">Refugee Profiles</div>
+    <div class="grid">
+      <div class="card span-6"><h3>Gender</h3><canvas id="c-gender"></canvas></div>
+      <div class="card span-6"><h3>Age group</h3><canvas id="c-age"></canvas></div>
+      <div class="card span-6"><h3>Education level</h3><canvas id="c-educ"></canvas></div>
+      <div class="card span-6"><h3>Main activity before departure</h3><canvas id="c-activity"></canvas></div>
+      <div class="card span-6"><h3>Household type</h3><canvas id="c-hhtype"></canvas></div>
+      <div class="card span-6"><h3>Languages spoken at home</h3><canvas id="c-lang"></canvas></div>
+    </div>
+  </section>
+
+  <section id="tab-displacement">
+    <div class="page-bar">Displacement Patterns</div>
+    <div class="grid">
+      <div class="card span-6"><h3>Oblast of origin</h3><canvas id="c-oblast"></canvas></div>
+      <div class="card span-6"><h3>Arrival month (host country)</h3><canvas id="c-arrival"></canvas></div>
+      <div class="card span-6"><h3>Visited Ukraine since departure?</h3><canvas id="c-return"></canvas></div>
+      <div class="card span-6"><h3>Duration of most recent visit</h3><canvas id="c-returnstay"></canvas></div>
+      <div class="card span-12"><h3>Main reason unable to visit Ukraine</h3><canvas id="c-noreturn"></canvas></div>
+    </div>
+  </section>
+
+  <section id="tab-rights">
+    <div class="page-bar">Documentation &amp; Legal Status</div>
+    <div class="grid">
+      <div class="card span-4 stat"><div class="n" id="stat-lackdoc">–</div><div class="lbl">HH missing an identity document</div></div>
+      <div class="card span-4 stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">faced difficulty in TP application/extension</div></div>
+      <div class="card span-4 stat"><div class="n" id="stat-famchange">–</div><div class="lbl">reported a change in family composition</div></div>
+      <div class="card span-6"><h3>Documents currently missing</h3><canvas id="c-missingdocs"></canvas></div>
+      <div class="card span-6"><h3>Why temporary protection not applied for</h3><canvas id="c-tpreason"></canvas></div>
+      <div class="card span-12"><h3>Difficulties in the TP application / extension process</h3><canvas id="c-tpdiffwhat"></canvas></div>
+    </div>
+  </section>
+
+  <section id="tab-access">
+    <div class="page-bar">Access to Services</div>
+    <div class="grid">
+      <div class="card span-6"><h3>Current accommodation</h3><canvas id="c-accomm"></canvas></div>
+      <div class="card span-6"><h3>Rental contract with landlord</h3><canvas id="c-rental"></canvas></div>
+      <div class="card span-6"><h3>Current main activity in host country</h3><canvas id="c-workcoa"></canvas></div>
+      <div class="card span-6"><h3>Barriers to employment</h3><canvas id="c-diffwork"></canvas></div>
+      <div class="card span-6"><h3>Applied for social protection benefits</h3><canvas id="c-socprot"></canvas></div>
+      <div class="card span-6"><h3>School enrolment (school-aged children)</h3><canvas id="c-school"></canvas></div>
+    </div>
+  </section>
+
+  <section id="tab-methodology">
+    <div class="page-bar">Methodology &amp; Data Privacy</div>
+    <div class="methodology">
+      <p><b>What this dashboard is.</b> It replaces the previous Power BI dashboard. Instead of a self-contained file with an embedded Kobo API token, this page is a static site that reads a pre-processed <code>data.json</code> file, rebuilt on a schedule from the live Kobo dataset.</p>
+      <p><b>Where the token lives.</b> The Kobo API token is stored as an encrypted secret in the hosting repository's CI settings and is used once, server-side, at rebuild time. It is never sent to a browser and never appears in this page's source.</p>
+      <p><b>What is filtered out before this file is ever written:</b> respondent name/contact details (never collected by the form), enumerator/device/audit metadata, all free-text "other, specify" answers, the entire protection-incidents module (GBV, trafficking, perpetrator fields), exact interview/departure/arrival dates (bucketed to month), exact age (bucketed to age group), and the precise raion of origin and interview location (kept at oblast level or dropped).</p>
+      <p><b>Small-cell suppression.</b> Any chart or figure whose underlying sample after filtering falls below <b>${MIN_CELL}</b> respondents is hidden and marked "insufficient sample" rather than shown, to reduce re-identification risk from narrow filter combinations.</p>
+      <div class="privacy-badge"><span class="dot"></span> data.json generated: <span id="gen-time">–</span> · <span id="gen-n">–</span> respondents after consent/eligibility filtering</div>
+      <p class="note" style="margin-top:14px">Individual interviews are conducted in transit centers, reception centers, and UNHCR office premises. Respondents are randomly selected to reduce bias (non-probability sampling); results should not be extrapolated to all refugees from Ukraine. Data is unweighted.</p>
+    </div>
+  </section>
+  `;
+  document.getElementById('gen-time').textContent = new Date(DATA.generated_at).toLocaleString();
+  document.getElementById('gen-n').textContent = DATA.n_respondents;
+}
+
+function avg(records, field){
+  const vals = records.map(r=>r[field]).filter(v=>typeof v==='number');
+  if(vals.length < MIN_CELL) return null;
+  return (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
+}
+function setStat(id, value, suffix=''){ document.getElementById(id).textContent = (value===null||value===undefined) ? 'n/a' : value+suffix; }
+
+function renderAll(){
+  const n = VIEW.length;
+  // overview gauges
+  gauge('g-tp', pctYes(VIEW,'temp_protection','granted_tp'));
+  gauge('g-female', pctYes(VIEW,'resp_gender','female'));
+  gauge('g-medical', pctYes(VIEW,'medical_condition','yes'));
+  gauge('g-remain', pctYes(VIEW,'remain_in_ukraine','yes'));
+  gauge('g-needwork', (()=>{ const employed = VIEW.filter(r=>r.work_coa==='employed_here'||r.work_coa==='employed_remote'||r.work_coa==='self_employed'); if(employed.length<MIN_CELL) return null; const noc = employed.filter(r=>r.work_coa_contract==='no'); return {pct:Math.round(100*noc.length/employed.length), n:employed.length}; })());
+
+  setStat('stat-n', n);
+  setStat('stat-hhsize', avg(VIEW,'household_size'));
+  const pwsn = pctTrue(VIEW,'pwsn'); setStat('stat-pwsn', pwsn? pwsn.pct : null, pwsn? '%':'');
+
+  barChart('c-needs', countBy(VIEW,'most_urgent_needs',{multi:true}), {field:'most_urgent_needs'});
+  barChart('c-legal', countBy(VIEW,'temp_protection'), {field:'temp_protection', top:9});
+
+  donutChart('c-gender', countBy(VIEW,'resp_gender'), 'resp_gender');
+  barChart('c-age', countBy(VIEW,'age_group'), {horizontal:false});
+  barChart('c-educ', countBy(VIEW,'educ_level'), {field:'educ_level'});
+  barChart('c-activity', countBy(VIEW,'resp_activity'), {field:'resp_activity'});
+  donutChart('c-hhtype', countBy(VIEW,'household_type'));
+  barChart('c-lang', countBy(VIEW,'language_other',{multi:true}), {field:'language_other'});
+
+  barChart('c-oblast', countBy(VIEW,'oblast_orig'), {field:'oblast_orig'});
+  barChart('c-arrival', countBy(VIEW,'arrival_month'), {horizontal:false, chronological:true});
+  donutChart('c-return', countBy(VIEW,'temp_return'), 'temp_return');
+  barChart('c-returnstay', countBy(VIEW,'return_stay'), {field:'return_stay'});
+  barChart('c-noreturn', countBy(VIEW,'no_return_reason'), {top:10, field:'no_return_reason'});
+
+  const lackdoc = pctYes(VIEW,'lack_documentation','yes'); setStat('stat-lackdoc', lackdoc? lackdoc.pct:null, lackdoc?'%':'');
+  const tpdiff = pctYes(VIEW,'temp_protection_difficulty','yes'); setStat('stat-tpdiff', tpdiff? tpdiff.pct:null, tpdiff?'%':'');
+  const famchange = (()=>{ const denom = VIEW.filter(r=>r.family_comp!==null).length; if(denom<MIN_CELL) return null; const yes = VIEW.filter(r=>r.family_comp && r.family_comp!=='no').length; return Math.round(100*yes/denom); })();
+  setStat('stat-famchange', famchange, famchange!==null?'%':'');
+
+  barChart('c-missingdocs', countBy(VIEW,'missing_docs',{multi:true}), {field:'missing_docs'});
+  barChart('c-tpreason', countBy(VIEW,'temp_protection_reasons'), {field:'temp_protection_reasons'});
+  barChart('c-tpdiffwhat', countBy(VIEW,'temp_protection_difficulty_what',{multi:true}), {top:10, field:'temp_protection_difficulty_what'});
+
+  donutChart('c-accomm', countBy(VIEW,'accomm_coa'), 'accomm_coa');
+  donutChart('c-rental', countBy(VIEW,'rental_contract'), 'rental_contract');
+  barChart('c-workcoa', countBy(VIEW,'work_coa'), {field:'work_coa'});
+  barChart('c-diffwork', countBy(VIEW,'diff_work',{multi:true}), {top:8, field:'diff_work'});
+  barChart('c-socprot', countBy(VIEW,'social_prot_access',{multi:true}), {top:8, field:'social_prot_access'});
+  donutChart('c-school', countBy(VIEW,'school_enrol'), 'school_enrol');
+}
+
+boot();
+</script>
+</body>
+</html>
