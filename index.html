@@ -25,16 +25,16 @@
   header{background:var(--blue);color:#fff;padding:14px 20px;border-bottom:3px solid var(--yellow);position:sticky;top:0;z-index:20}
   header .head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
   header .title-block{display:flex;align-items:center;gap:14px}
-  header .unhcr-logo{height:44px;width:auto;display:block}
+  header .unhcr-logo{height:60px;width:auto;display:block}
   header h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.01em}
   header .subtitle{margin:2px 0 0;font-size:11.5px;color:var(--blue01)}
   header .head-meta{text-align:right;flex-shrink:0}
   header .head-date{display:block;font-size:10.5px;color:var(--blue01);font-style:italic}
-  nav{display:flex;flex-wrap:wrap;gap:2px;background:#fff;padding:0 8px;justify-content:center;border-bottom:1px solid var(--line);position:sticky;top:76px;z-index:19;overflow-x:auto}
+  nav{display:flex;flex-wrap:wrap;gap:2px;background:#fff;padding:0 8px;justify-content:center;border-bottom:1px solid var(--line);position:sticky;top:92px;z-index:19;overflow-x:auto}
   nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--grey04);padding:11px 12px 9px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:700;transition:color .15s,border-color .15s}
   nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
   nav button:hover:not(.active){color:var(--blue05)}
-  .filters{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:113px;z-index:5}
+  .filters{display:flex;flex-wrap:wrap;gap:10px 10px;align-items:flex-end;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:129px;z-index:5}
   .filters label{font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--grey04);display:block;margin-bottom:4px}
   .filters select{font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;width:100%;font-family:inherit;color:var(--ink)}
   .filters select:focus{outline:2px solid var(--blue02);outline-offset:0;border-color:var(--blue)}
@@ -114,6 +114,22 @@
      the print media query alone reflows too late for Chart.js to catch */
   body.printing-all #tabs>section{display:block}
   footer{padding:16px 24px;font-size:11px;color:var(--grey03);text-align:center}
+
+  /* ---- web view widens into a landscape layout on real screens; the PDF
+     factsheet (below) stays a fixed A4 portrait page regardless ---- */
+  @media screen and (min-width:860px){
+    main{max-width:1180px}
+    .grid{grid-template-columns:repeat(2,1fr)}
+    .stat-row{grid-template-columns:repeat(3,1fr)}
+    .icon-stats{grid-template-columns:repeat(2,1fr);max-width:420px}
+    .kf-side{flex:0 0 170px}
+    .kf-grid{grid-template-columns:repeat(5,1fr)}
+    .filters{max-width:1180px;margin:0 auto}
+    nav{padding:0 calc((100% - 1180px)/2)}
+  }
+  @media screen and (min-width:1240px){
+    .grid{grid-template-columns:repeat(3,1fr)}
+  }
 
   /* ---- print / PDF factsheet: 6 A4 portrait pages, one per tab ---- */
   @media print{
@@ -375,6 +391,28 @@ function totalHouseholdMembers(records){
 }
 function sorted(entries){ return entries.sort((a,b)=>b[1]-a[1]); }
 
+// wraps a long tick label onto multiple lines (word-boundary) instead of
+// truncating mid-word with an ellipsis — Chart.js renders an array-of-strings
+// label as multiple stacked lines natively. Chart.js gives every category on
+// a y-axis the SAME row height (sized to the tallest tick), so a single
+// runaway label would blow up every row — capped at maxLines, with the
+// overflow folded into the last line and ellipsised.
+function wrapLabel(str, maxLen=24, maxLines=3){
+  if(!str) return str;
+  const words = String(str).split(' ');
+  const lines = []; let cur = '';
+  words.forEach(w=>{
+    if((cur+' '+w).trim().length > maxLen && cur){ lines.push(cur); cur = w; }
+    else cur = (cur ? cur+' ' : '') + w;
+  });
+  if(cur) lines.push(cur);
+  if(lines.length > maxLines){
+    lines.length = maxLines;
+    lines[maxLines-1] = lines[maxLines-1].replace(/\s*\S*$/,'') + '…';
+  }
+  return lines.length > 1 ? lines : str;
+}
+
 function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chronological=false}={}){
   const formatter = (code)=>L(code, field);
   const entries = chronological
@@ -392,15 +430,30 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
     return;
   }
   ctx.style.display='';
-  // size the chart to how many bars it actually has, rather than a fixed
-  // height for every card — a fixed height either wastes space on a
-  // 3-category chart or forces Chart.js to auto-skip labels on an 8-category
-  // one (which silently drops rows, not just letters).
-  if(horizontal) ctx.parentElement.style.height = Math.max(90, entries.length*24+30)+'px';
+  // the PDF factsheet forces every tab visible+narrow at once (see
+  // 'printing-all' below) — keep labels shorter and text smaller there so
+  // 6-8 category charts still fit their A4 card without bleeding into the
+  // next row or pushing the page to overflow.
+  const isPrint = document.body.classList.contains('printing-all');
+  const wrapMax = horizontal ? (isPrint ? 18 : (ctx.parentElement.clientWidth > 340 ? 30 : 20)) : 999;
+  const tickFont = isPrint ? 8.5 : 10.5;
+  const lineH = isPrint ? 10 : 12;
+  const wrappedLabels = entries.map(e=>wrapLabel(formatter(e[0]), wrapMax, isPrint?2:3));
+  // size the chart to how many bars it has, rather than a fixed height for
+  // every card. Chart.js gives every category row on a y-axis the SAME
+  // height (sized to the tallest tick label), so the row height here must
+  // be driven by the MAX line count across all labels, not a per-row sum —
+  // summing produced wildly uneven/overlapping rows whenever just one
+  // label happened to wrap onto more lines than the rest.
+  if(horizontal){
+    const maxLines = Math.max(1, ...wrappedLabels.map(l=>Array.isArray(l)?l.length:1));
+    const rowUnit = (isPrint?16:20) + maxLines*lineH;
+    ctx.parentElement.style.height = Math.max(isPrint?70:100, entries.length*rowUnit+(isPrint?10:18))+'px';
+  }
   charts[canvasId] = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: entries.map(e=>formatter(e[0])),
+      labels: horizontal ? wrappedLabels : entries.map(e=>formatter(e[0])),
       datasets: [{ data: entries.map(e=>Math.round(1000*e[1]/total)/10), backgroundColor: PALETTE[0], borderRadius:4, maxBarThickness:22 }]
     },
     options: {
@@ -408,7 +461,7 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
       maintainAspectRatio: !horizontal,
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.formattedValue+'%'}} },
       scales: horizontal
-        ? { x:{ ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:10.5}, callback:function(v){ const l=this.getLabelForValue(v); return l && l.length>26 ? l.slice(0,25)+'…' : l; } } } }
+        ? { x:{ ticks:{callback:v=>v+'%', font:{size:tickFont}}, grid:{color:'#eef1f4'} }, y:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:tickFont}} } }
         : { y:{ ticks:{callback:v=>v+'%'}, grid:{color:'#eef1f4'} }, x:{ grid:{display:false} } }
     }
   });
@@ -431,11 +484,12 @@ function donutChart(canvasId, dataObj, field=null){
   ctx.style.display='';
   // legend goes below (not to the right): a right-side legend gets squeezed
   // to near-zero width in a two-column card and clips label text.
-  ctx.parentElement.style.height = Math.max(160, 130+entries.length*15)+'px';
+  const isPrint = document.body.classList.contains('printing-all');
+  ctx.parentElement.style.height = Math.max(isPrint?120:160, (isPrint?90:130)+entries.length*(isPrint?13:15))+'px';
   charts[canvasId] = new Chart(ctx, {
     type:'doughnut',
     data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data: entries.map(e=>e[1]), backgroundColor: PALETTE }]},
-    options:{ maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10, padding:8}}}, cutout:'55%' }
+    options:{ maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:isPrint?7:10, padding:isPrint?4:8, font:{size:isPrint?8.5:11.5}}}}, cutout:'55%' }
   });
 }
 
