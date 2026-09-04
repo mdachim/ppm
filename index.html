@@ -727,6 +727,20 @@ function pctFlag(records, field, isPositive){
   return {pct: Math.round(100*num/answered.length), n: answered.length};
 }
 const hasCode = (val, code) => val.split(' ').includes(code);
+// for multi-select "which of these needs/topics" questions where one option
+// is an explicit "no need"/"none" — respondents who picked that are excluded
+// from the base entirely (they weren't asked to specify a need), so this
+// reads as "of those who have a need, % who named a substantive one" rather
+// than being diluted by the no-need group
+function pctAnyOf(records, field, noneCode, vagueCodes){
+  const base = records.filter(r=>{
+    const v = r[field];
+    return v!==null && v!==undefined && v!=='' && !hasCode(String(v), noneCode);
+  });
+  if(base.length < MIN_CELL) return null;
+  const num = base.filter(r=>String(r[field]).split(' ').some(c=>!vagueCodes.includes(c)));
+  return {pct: Math.round(100*num.length/base.length), n: base.length};
+}
 // like pctYes, but excludes "prefer not to answer" from the denominator too —
 // for yes/no questions where non-response would otherwise dilute the rate
 function pctYesNoOnly(records, field){
@@ -807,29 +821,6 @@ const barValueLabels = {
     ctx.restore();
   }
 };
-const donutSliceLabels = {
-  id: 'donutSliceLabels',
-  afterDatasetsDraw(chart){
-    const {ctx} = chart;
-    const meta = chart.getDatasetMeta(0);
-    const data = chart.data.datasets[0].data;
-    const total = data.reduce((a,b)=>a+b,0);
-    if(!total) return;
-    ctx.save();
-    ctx.font = '700 11px Lato, sans-serif';
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    meta.data.forEach((arc,i)=>{
-      const pct = Math.round(100*data[i]/total);
-      if(pct < 6) return; // slice too thin for its own label — legend covers it
-      const pos = arc.tooltipPosition();
-      ctx.fillText(pct+'%', pos.x, pos.y);
-    });
-    ctx.restore();
-  }
-};
-
 // several choice lists phrase every option as one long sentence sharing the
 // same opening ("Could not leave Ukraine due to security reasons", "...due to
 // financial constraints", ...). Wrapped to a chart tick, they all truncate to
@@ -941,7 +932,7 @@ function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chrono
   });
 }
 
-function donutChart(canvasId, dataObj, field=null){
+function donutChart(canvasId, dataObj, field=null, {height=165, printHeight=86}={}){
   const formatter = (code)=>SL(code, field);
   if(charts[canvasId]) charts[canvasId].destroy();
   const ctx = document.getElementById(canvasId);
@@ -962,8 +953,10 @@ function donutChart(canvasId, dataObj, field=null){
   // legend as real markup, not inside the canvas: Chart.js lays its own legend
   // out in canvas space and won't wrap a long label, so in a narrow print
   // column the last entries were simply clipped off the bottom of the card.
-  // HTML legend wraps, and the card grows to fit it.
-  ctx.parentElement.style.height = (isPrint?86:165)+'px';
+  // HTML legend wraps, and the card grows to fit it. The % lives here only —
+  // it used to also get drawn on the slice itself, which just repeated the
+  // same number twice for every slice big enough to carry it.
+  ctx.parentElement.style.height = (isPrint?printHeight:height)+'px';
   const wrap = ctx.parentElement;
   let lg = wrap.nextElementSibling;
   if(!lg || !lg.classList.contains('legend-inline')){
@@ -977,7 +970,6 @@ function donutChart(canvasId, dataObj, field=null){
   }).join('');
   charts[canvasId] = new Chart(ctx, {
     type:'doughnut',
-    plugins: [donutSliceLabels],
     data:{ labels: entries.map(e=>formatter(e[0])), datasets:[{ data: entries.map(e=>e[1]), backgroundColor: PALETTE }]},
     options:{ maintainAspectRatio:false, plugins:{legend:{display:false}}, cutout:'55%' }
   });
@@ -1312,35 +1304,36 @@ function buildTabs(){
 
   <section id="tab-rights2">
     <div class="page-bar">Access to Rights #2 — Family, Work, Education &amp; Social Protection</div>
-    <div class="stat-row">
-      <div class="card stat"><div class="n" id="stat-reunif">–</div><div class="lbl">cite family reunification as an urgent need</div></div>
-      <div class="card stat"><div class="n" id="stat-tracing">–</div><div class="lbl">cite tracing of family members as an urgent need</div></div>
-      <div class="card stat"><div class="n" id="stat-noenrol">–</div><div class="lbl">HH with children have some not enrolled in school</div></div>
-    </div>
 
     <div class="sub-bar">Family reunification</div>
-    <div class="stat-row" style="margin-bottom:10px">
-      <div class="card stat"><div class="n" id="stat-remainukr">–</div><div class="lbl">have immediate family members remaining in Ukraine</div></div>
-      <div class="card stat"><div class="n" id="stat-reunifobstacles">–</div><div class="lbl">of those face obstacles to reunite in the host country</div></div>
-    </div>
-    <div class="grid">
-      <div class="card"><h3>Factors preventing family reunification</h3><div class="chart-wrap"><canvas id="c-obstacles"></canvas></div></div>
+    <div class="card kf-panel">
+      <div class="kf-side" style="flex:0 0 170px">
+        <div class="kf-stat"><div class="kf-h">Family separation</div><div class="n" id="stat-remainukr">–</div><div class="lbl">have immediate family members remaining in Ukraine</div></div>
+        <div class="kf-stat"><div class="kf-h">Reunification</div><div class="n" id="stat-reunifobstacles">–</div><div class="lbl">of those face obstacles to reunite in the host country</div></div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <h3>Factors preventing family reunification</h3>
+        <div class="chart-wrap"><canvas id="c-obstacles"></canvas></div>
+      </div>
     </div>
 
     <div class="sub-bar">Access to work</div>
     <div class="grid">
       <div class="card"><h3>Current main activity in host country</h3><div class="chart-wrap"><canvas id="c-workcoa"></canvas></div></div>
       <div class="card"><h3>Barriers to employment</h3><div class="chart-wrap"><canvas id="c-diffwork"></canvas></div></div>
-      <div class="card"><h3>Qualification match with current job</h3><div class="chart-wrap"><canvas id="c-qualmatch"></canvas></div></div>
       <div class="card"><h3>Regularity of access to earnings (employed)</h3><div id="c-earnings"></div>
         <div class="sub-h">Working conditions</div>
         <div style="display:flex;gap:16px;flex-wrap:wrap"><div><div class="n" id="stat-nocontract" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">have no employment contract</div></div><div><div class="n" id="stat-worklong" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">work beyond the legal limit</div></div><div><div class="n" id="stat-docskept" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">documents kept by employer</div></div></div></div>
+      <div class="card"><h3>Qualification match with current job</h3><div class="chart-wrap"><canvas id="c-qualmatch"></canvas></div></div>
     </div>
 
     <div class="sub-bar">Education &amp; social protection</div>
-    <div class="grid cols-3">
-      <div class="card"><h3>Reasons children are not enrolled in school</h3><div class="chart-wrap"><canvas id="c-notenrol"></canvas></div></div>
-      <div class="card"><h3>Social protection benefits applied for</h3><div class="chart-wrap"><canvas id="c-socprot"></canvas></div></div>
+    <div class="grid">
+      <div class="card"><h3>Reasons children are not enrolled in school</h3><div class="chart-wrap"><canvas id="c-notenrol"></canvas></div>
+        <div class="sub-h">HH with children have some not enrolled</div><div class="n" id="stat-noenrol" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div></div>
+      <div class="card"><h3>Social protection support received</h3><div class="chart-wrap"><canvas id="c-socprot"></canvas></div></div>
+    </div>
+    <div class="grid">
       <div class="card"><h3>Challenges accessing social protection</h3><div class="chart-wrap"><canvas id="c-socprotdiff"></canvas></div>
         <div class="sub-h">Faced any challenge</div><div class="n" id="stat-socprotchal" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div></div>
     </div>
@@ -1513,8 +1506,6 @@ function renderAll(){
   barChart('c-famchalukr', countBy(VIEW,'family_comp_challenges_ukr',{multi:true}), {top:8, field:'family_comp_challenges_ukr'});
 
   // ---- Access to Rights #2 ----
-  const reunif = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'reunification_support')); setStat('stat-reunif', reunif? reunif.pct:null, reunif?'%':'');
-  const tracing = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'family_traig')); setStat('stat-tracing', tracing? tracing.pct:null, tracing?'%':'');
   const noenrol = pctFlag(VIEW,'school_enrol', v=>v==='no'||v==='yes_some'); setStat('stat-noenrol', noenrol? noenrol.pct:null, noenrol?'%':'');
   const remainukr = pctYes(VIEW,'remain_in_ukraine','yes'); setStat('stat-remainukr', remainukr? remainukr.pct:null, remainukr?'%':'');
   const reunifobstacles = pctYes(VIEW,'obstacles_y_n','yes'); setStat('stat-reunifobstacles', reunifobstacles? reunifobstacles.pct:null, reunifobstacles?'%':'');
@@ -1537,13 +1528,13 @@ function renderAll(){
   const rental = pctYes(VIEW,'rental_contract','yes'); setStat('stat-rental', rental? rental.pct:null, rental?'%':'');
   const leaveaccomm = pctYes(VIEW,'leave_accomm','yes'); setStat('stat-leaveaccomm', leaveaccomm? leaveaccomm.pct:null, leaveaccomm?'%':'');
   const childcare = pctYes(VIEW,'childcare_services','yes'); setStat('stat-childcare', childcare? childcare.pct:null, childcare?'%':'');
-  const anyurgent = pctFlag(VIEW,'most_urgent_needs', v=>v.split(' ').some(c=>!['none','prefer_no_answer'].includes(c))); setStat('stat-anyurgent', anyurgent? anyurgent.pct:null, anyurgent?'%':'');
-  const anyinfo = pctFlag(VIEW,'info_receive', v=>v.split(' ').some(c=>!['none','dont_know','prefer_no_answer'].includes(c))); setStat('stat-anyinfo', anyinfo? anyinfo.pct:null, anyinfo?'%':'');
+  const anyurgent = pctAnyOf(VIEW,'most_urgent_needs','none',['none','prefer_no_answer']); setStat('stat-anyurgent', anyurgent? anyurgent.pct:null, anyurgent?'%':'');
+  const anyinfo = pctAnyOf(VIEW,'info_receive','none',['none','dont_know','prefer_no_answer']); setStat('stat-anyinfo', anyinfo? anyinfo.pct:null, anyinfo?'%':'');
   barChart('c-accomm', countBy(VIEW,'accomm_coa'), {field:'accomm_coa', top:9});
   lineChart('c-accomlength', countBy(VIEW,'accomm_lenght'), {field:'accomm_lenght', order:ACCOMM_LENGTH_ORDER});
   barChart('c-needs', countBy(VIEW,'most_urgent_needs',{multi:true}), {field:'most_urgent_needs'});
   barChart('c-infoneeds', countBy(VIEW,'info_receive',{multi:true}), {top:8, field:'info_receive'});
-  donutChart('c-rental', countBy(VIEW,'rental_contract'), 'rental_contract');
+  donutChart('c-rental', countBy(VIEW,'rental_contract'), 'rental_contract', {height:110, printHeight:64});
   barChart('c-norentalwhy', countBy(VIEW,'no_contract_why'), {field:'no_contract_why'});
   barChart('c-leavewhy', countBy(VIEW,'leave_accomm_reason'), {field:'leave_accomm_reason'});
   barChart('c-accommreason', countBy(VIEW,'accomm_reason',{multi:true}), {top:8, field:'accomm_reason'});
