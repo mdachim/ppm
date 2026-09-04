@@ -21,7 +21,14 @@
     --f:'Lato',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
   }
   *{box-sizing:border-box}
+  /* the ODP embeds this page in a fixed-height iframe with scrolling="no" —
+     that attribute blocks the iframe's own document from scrolling at all
+     (even with a wheel over it), so the page can't rely on window/body scroll
+     the way a normal tab would. Instead #scrollport below is a plain
+     overflow:auto box the wheel scrolls independently of that attribute. */
+  html,body{height:100%;overflow:hidden}
   body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  #scrollport{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
   /* header + nav + filters live in one sticky wrapper so their stacking is
      always correct — three separately-stickied elements with hand-guessed
      top offsets drifted out of sync and started overlapping content
@@ -258,6 +265,10 @@
        every side gets an even sliver of white space instead of the content
        running edge-to-edge */
     @page{ size:A4 portrait; margin:16.7mm; }
+    /* undo the iframe-scroll containment for print — overflow:hidden there
+       would clip every page after the first to the on-screen viewport height */
+    html,body{height:auto;overflow:visible}
+    #scrollport{height:auto;overflow:visible}
     body{background:#fff; zoom:.95}
     /* must out-specify the body.printing-all prep rule above, or main stays
        capped at the assumed A4 content width and sits left-aligned with a dead
@@ -316,6 +327,7 @@
 </style>
 </head>
 <body>
+<div id="scrollport">
 
 <div class="topbar">
 <header>
@@ -381,6 +393,8 @@
 <button class="fab-print" id="print-btn" title="Download PDF factsheet" aria-label="Download PDF factsheet">
   <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
 </button>
+
+</div><!-- #scrollport -->
 
 <script>
 // UNHCR dataviz brand palette — https://dataviz.unhcr.org/guidance/
