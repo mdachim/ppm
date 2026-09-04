@@ -251,8 +251,14 @@
 
   /* ---- print / PDF factsheet: A4 portrait, one tab per page ---- */
   @media print{
-    @page{ size:A4 portrait; margin:12mm; }
-    body{background:#fff}
+    /* the page content is laid out (and every chart pixel-sized) for a 186mm-
+       wide printable area — rather than re-tuning every card for a narrower
+       area, zoom the whole rendered page down 5% and grow the page margin by
+       the same amount, so the zoomed content still lands flush inside it and
+       every side gets an even sliver of white space instead of the content
+       running edge-to-edge */
+    @page{ size:A4 portrait; margin:16.7mm; }
+    body{background:#fff; zoom:.95}
     /* must out-specify the body.printing-all prep rule above, or main stays
        capped at the assumed A4 content width and sits left-aligned with a dead
        gutter on any paper the browser actually uses (Letter, or A4 with
