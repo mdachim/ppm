@@ -152,6 +152,11 @@
   .legend-inline i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
   .waffle-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;max-width:230px;margin:0 auto}
   .waffle-grid i{display:block;aspect-ratio:1/1;border-radius:2px}
+  /* "Able to replace/renew missing documents" is the one waffle chart that
+     sits in a busy 2-up grid on Access to Rights #1 — shrink it so it doesn't
+     dominate the card next to its 3-4 line legend */
+  #c-replacedocs .waffle-grid{max-width:130px;gap:2px}
+  #c-replacedocs .legend-inline{font-size:10px;gap:4px 8px}
   .mapwrap{display:flex;gap:12px;align-items:center}
   .ua-map{flex:1 1 auto;min-width:0;width:100%;height:auto;display:block}
   .ua-map path{transition:fill .15s}
@@ -207,7 +212,7 @@
      factsheet (below) stays a fixed A4 portrait page regardless ---- */
   @media screen and (min-width:860px){
     main{max-width:1180px}
-    .stat-row{grid-template-columns:repeat(3,1fr)}
+    .stat-row{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
     .icon-stats{grid-template-columns:repeat(2,1fr);max-width:420px}
     .kf-side{flex:0 0 170px}
     .filters{max-width:1180px;margin:0 auto}
@@ -683,6 +688,25 @@ function countBy(records, field, {multi=false}={}){
   });
   return c;
 }
+// buckets a "YYYY-MM" field into "YYYY-Qn" — used for the time-series charts,
+// which read as a trend more clearly aggregated by quarter than by every
+// individual month
+function monthToQuarter(m){
+  const parts = String(m).split('-');
+  const y = parts[0], mo = Number(parts[1]);
+  if(!mo) return m;
+  return `${y}-Q${Math.ceil(mo/3)}`;
+}
+function countByQuarter(records, field){
+  const c = {};
+  records.forEach(r=>{
+    const v = r[field];
+    if(v===null||v===undefined||v==='') return;
+    const q = monthToQuarter(v);
+    c[q] = (c[q]||0)+1;
+  });
+  return c;
+}
 function pctYes(records, field, yesVal='yes'){
   const denom = records.filter(r=>r[field]!==null && r[field]!==undefined && r[field]!=='').length;
   if(denom < MIN_CELL) return null;
@@ -703,6 +727,14 @@ function pctFlag(records, field, isPositive){
   return {pct: Math.round(100*num/answered.length), n: answered.length};
 }
 const hasCode = (val, code) => val.split(' ').includes(code);
+// like pctYes, but excludes "prefer not to answer" from the denominator too —
+// for yes/no questions where non-response would otherwise dilute the rate
+function pctYesNoOnly(records, field){
+  const ans = records.filter(r=>r[field]==='yes'||r[field]==='no');
+  if(ans.length < MIN_CELL) return null;
+  const num = ans.filter(r=>r[field]==='yes').length;
+  return {pct: Math.round(100*num/ans.length), n: ans.length};
+}
 // exact ages were dropped from the dataset for privacy (bucketed to
 // age_group only) — this is a rough estimate from band midpoints, not a
 // true average, and is labeled as such wherever it's shown
@@ -717,6 +749,14 @@ function totalHouseholdMembers(records){
   return records.reduce((a,r)=>a+(r.household_size||0),0);
 }
 function sorted(entries){ return entries.sort((a,b)=>b[1]-a[1]); }
+// drop categories rounding to under 1% of the total — they're unreadable
+// slivers on a bar/donut/waffle and just add clutter; the denominator (total)
+// is left untouched so the remaining bars still read as true percentages
+function dropSubOnePercent(dataObj){
+  const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
+  if(!total) return dataObj;
+  return Object.fromEntries(Object.entries(dataObj).filter(([,v])=>(100*v/total)>=1));
+}
 
 // wraps a long tick label onto multiple lines (word-boundary) instead of
 // truncating mid-word with an ellipsis — Chart.js renders an array-of-strings
@@ -809,10 +849,11 @@ function stripSharedPrefix(labels){
 
 function barChart(canvasId, dataObj, {horizontal=true, field=null, top=8, chronological=false}={}){
   const formatter = (code)=>SL(code, field);
-  const entries = chronological
-    ? Object.entries(dataObj).sort((a,b)=>a[0]<b[0]?-1:1)
-    : sorted(Object.entries(dataObj)).slice(0, top);
   const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
+  const shown = dropSubOnePercent(dataObj);
+  const entries = chronological
+    ? Object.entries(shown).sort((a,b)=>a[0]<b[0]?-1:1)
+    : sorted(Object.entries(shown)).slice(0, top);
   if(charts[canvasId]) charts[canvasId].destroy();
   const ctx = document.getElementById(canvasId);
   if(!ctx) return;
@@ -906,8 +947,8 @@ function donutChart(canvasId, dataObj, field=null){
   const ctx = document.getElementById(canvasId);
   if(!ctx) return;
   ctx.parentElement.querySelectorAll('.suppressed').forEach(n=>n.remove());
-  const entries = sorted(Object.entries(dataObj));
-  const total = entries.reduce((a,[,v])=>a+v,0);
+  const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
+  const entries = sorted(Object.entries(dropSubOnePercent(dataObj)));
   if(total < MIN_CELL){
     ctx.style.display='none';
     const note = document.createElement('div'); note.className='suppressed'; note.textContent='Insufficient sample';
@@ -1021,8 +1062,8 @@ function pyramidChart(canvasId, records){
 function proportionalStrip(containerId, dataObj, field, {height=110, printHeight=52}={}){
   const el = document.getElementById(containerId);
   if(!el) return;
-  const entries = sorted(Object.entries(dataObj));
-  const total = entries.reduce((a,[,v])=>a+v,0);
+  const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
+  const entries = sorted(Object.entries(dropSubOnePercent(dataObj)));
   if(total < MIN_CELL){ el.innerHTML = '<div class="suppressed">Insufficient sample</div>'; return; }
   const isPrint = document.body.classList.contains('printing-all');
   const rows = entries.map((e,i)=>{
@@ -1041,8 +1082,8 @@ function proportionalStrip(containerId, dataObj, field, {height=110, printHeight
 function waffleChart(containerId, dataObj, field){
   const el = document.getElementById(containerId);
   if(!el) return;
-  const entries = sorted(Object.entries(dataObj));
-  const total = entries.reduce((a,[,v])=>a+v,0);
+  const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
+  const entries = sorted(Object.entries(dropSubOnePercent(dataObj)));
   if(total < MIN_CELL){ el.innerHTML = '<div class="suppressed">Insufficient sample</div>'; return; }
   const counts = entries.map(e=>Math.round(100*e[1]/total));
   const diff = 100 - counts.reduce((a,b)=>a+b,0);
@@ -1199,8 +1240,9 @@ function buildTabs(){
     <div class="page-bar">Refugee Profiles</div>
     <div class="stat-row">
       <div class="card stat"><div class="n" id="stat-pwsn">–</div><div class="lbl">of households have a person with specific needs (PWSN)</div></div>
-      <div class="card stat"><div class="n" id="stat-disability">–</div><div class="lbl">of respondents report a disability</div></div>
-      <div class="card stat"><div class="n" id="stat-medcond">–</div><div class="lbl">of HH have a serious medical condition</div></div>
+      <div class="card stat"><div class="n" id="stat-disability">–</div><div class="lbl">of respondents report a disability (a lot of difficulty or cannot do at all)</div></div>
+      <div class="card stat"><div class="n" id="stat-medcond">–</div><div class="lbl">of HH have a member with a serious medical condition</div></div>
+      <div class="card stat"><div class="n" id="stat-sepchildren">–</div><div class="lbl">of HH report children separated from both parents</div></div>
     </div>
     <div class="grid">
       <div class="card"><h3>Age &amp; gender of household members</h3><div class="chart-wrap"><canvas id="c-pyramid"></canvas></div></div>
@@ -1236,7 +1278,7 @@ function buildTabs(){
     <div class="stat-row">
       <div class="card stat"><div class="n" id="stat-lackdoc">–</div><div class="lbl">HH missing an ID document</div></div>
       <div class="card stat"><div class="n" id="stat-docimpact">–</div><div class="lbl">say missing docs limit access to services</div></div>
-      <div class="card stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">had difficulty in the TP application</div></div>
+      <div class="card stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">had difficulty in the TP application/extension</div></div>
     </div>
 
     <div class="sub-bar">Identity documents</div>
@@ -1248,21 +1290,23 @@ function buildTabs(){
     </div>
 
     <div class="sub-bar">Legal status in the host country</div>
-    <div class="grid cols-3">
+    <div class="grid">
       <div class="card"><h3>Legal status in Moldova</h3><div class="chart-wrap"><canvas id="c-legal"></canvas></div></div>
+      <div class="card"><h3>Difficulties in the TP application / extension</h3><div class="chart-wrap"><canvas id="c-tpdiffwhat"></canvas></div></div>
+    </div>
+    <div class="grid cols-3">
       <div class="card"><h3>Previously held temporary protection</h3><div class="chart-wrap"><canvas id="c-tpprev"></canvas></div></div>
       <div class="card"><h3>Timeline of application for temporary protection</h3><div class="chart-wrap"><canvas id="c-tptimeline"></canvas></div></div>
       <div class="card"><h3>Top reasons for not applying for TP</h3><div class="chart-wrap"><canvas id="c-tpreason"></canvas></div></div>
-      <div class="card"><h3>Difficulties in the TP application / extension</h3><div class="chart-wrap"><canvas id="c-tpdiffwhat"></canvas></div></div>
     </div>
 
     <div class="sub-bar">Registration of vital events</div>
     <div class="grid cols-3">
       <div class="card"><h3>Vital events registered since arrival</h3><div id="c-vitalevents"></div></div>
-      <div class="card"><h3>Challenges registering them in Ukraine</h3><div class="chart-wrap"><canvas id="c-famchalukr"></canvas></div></div>
+      <div class="card"><h3>Challenges registering them at the Ukrainian consulate/embassy</h3><div class="chart-wrap"><canvas id="c-famchalukr"></canvas></div></div>
       <div class="card stat"><div class="n" id="stat-famchange">–</div><div class="lbl">had a change in family composition</div>
         <div class="sub-h">Faced challenges registering it</div>
-        <div style="display:flex;gap:14px"><div><div class="n" id="stat-famchalhc" style="font-size:19px">–</div><div class="lbl">in Moldova</div></div><div><div class="n" id="stat-famchalukr" style="font-size:19px">–</div><div class="lbl">in Ukraine</div></div></div></div>
+        <div style="display:flex;gap:14px"><div><div class="n" id="stat-famchalhc" style="font-size:19px">–</div><div class="lbl">with Moldovan authorities</div></div><div><div class="n" id="stat-famchalukr" style="font-size:19px">–</div><div class="lbl">at the Ukrainian consulate/embassy</div></div></div></div>
     </div>
   </section>
 
@@ -1275,9 +1319,12 @@ function buildTabs(){
     </div>
 
     <div class="sub-bar">Family reunification</div>
+    <div class="stat-row" style="margin-bottom:10px">
+      <div class="card stat"><div class="n" id="stat-remainukr">–</div><div class="lbl">have immediate family members remaining in Ukraine</div></div>
+      <div class="card stat"><div class="n" id="stat-reunifobstacles">–</div><div class="lbl">of those face obstacles to reunite in the host country</div></div>
+    </div>
     <div class="grid">
       <div class="card"><h3>Factors preventing family reunification</h3><div class="chart-wrap"><canvas id="c-obstacles"></canvas></div></div>
-      <div class="card"><h3>Challenges registering vital events in Moldova</h3><div class="chart-wrap"><canvas id="c-reunifbarriers"></canvas></div></div>
     </div>
 
     <div class="sub-bar">Access to work</div>
@@ -1287,7 +1334,7 @@ function buildTabs(){
       <div class="card"><h3>Qualification match with current job</h3><div class="chart-wrap"><canvas id="c-qualmatch"></canvas></div></div>
       <div class="card"><h3>Regularity of access to earnings (employed)</h3><div id="c-earnings"></div>
         <div class="sub-h">Working conditions</div>
-        <div style="display:flex;gap:16px"><div><div class="n" id="stat-worklong" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">work beyond the legal limit</div></div><div><div class="n" id="stat-docskept" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">documents kept by employer</div></div></div></div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap"><div><div class="n" id="stat-nocontract" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">have no employment contract</div></div><div><div class="n" id="stat-worklong" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">work beyond the legal limit</div></div><div><div class="n" id="stat-docskept" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div><div class="lbl">documents kept by employer</div></div></div></div>
     </div>
 
     <div class="sub-bar">Education &amp; social protection</div>
@@ -1318,6 +1365,10 @@ function buildTabs(){
     </div>
 
     <div class="sub-bar">Urgent needs &amp; access to childcare</div>
+    <div class="stat-row" style="margin-bottom:10px">
+      <div class="card stat"><div class="n" id="stat-anyurgent">–</div><div class="lbl">of respondents report at least one urgent need</div></div>
+      <div class="card stat"><div class="n" id="stat-anyinfo">–</div><div class="lbl">of respondents report at least one information need</div></div>
+    </div>
     <div class="grid cols-3">
       <div class="card"><h3>Most urgent needs</h3><div class="chart-wrap"><canvas id="c-needs"></canvas></div></div>
       <div class="card"><h3>Information needs</h3><div class="chart-wrap"><canvas id="c-infoneeds"></canvas></div></div>
@@ -1411,11 +1462,15 @@ function renderAll(){
 
   // ---- Refugee Profiles ----
   const pwsn = pctTrue(VIEW,'pwsn'); setStat('stat-pwsn', pwsn? pwsn.pct:null, pwsn?'%':'');
-  const disab = pctFlag(VIEW,'disability', v=>['some_difficulty','lot_difficulty','cannot_do'].includes(v)); setStat('stat-disability', disab? disab.pct:null, disab?'%':'');
+  const disab = pctFlag(VIEW,'disability', v=>['lot_difficulty','cannot_do'].includes(v)); setStat('stat-disability', disab? disab.pct:null, disab?'%':'');
   const medcond = pctYes(VIEW,'medical_condition','yes'); setStat('stat-medcond', medcond? medcond.pct:null, medcond?'%':'');
+  const sepchildren = pctYes(VIEW,'separated_children','yes'); setStat('stat-sepchildren', sepchildren? sepchildren.pct:null, sepchildren?'%':'');
   pyramidChart('c-pyramid', VIEW);
   proportionalStrip('c-hhtype', countBy(VIEW,'household_type'));
-  barChart('c-nationality', countBy(VIEW,'nationality'), {field:'nationality', top:6});
+  // nationality is a multi-select field ("ukrainian russian" = dual nationality) —
+  // split it so dual-nationality respondents count toward both bars instead of
+  // showing as their own combined category
+  barChart('c-nationality', countBy(VIEW,'nationality',{multi:true}), {field:'nationality', top:6});
   barChart('c-educ', countBy(VIEW,'educ_level'), {field:'educ_level'});
   barChart('c-activity', countBy(VIEW,'resp_activity'), {field:'resp_activity'});
   barChart('c-lang', countBy(VIEW,'language_other',{multi:true}), {field:'language_other'});
@@ -1425,8 +1480,8 @@ function renderAll(){
   const returndiff = pctYes(VIEW,'temp_return_difficulties','yes'); setStat('stat-returndiff', returndiff? returndiff.pct:null, returndiff?'%':'');
   const shortvisit = pctYes(VIEW,'return_stay','less_than_two_weeks'); setStat('stat-shortvisit', shortvisit? shortvisit.pct:null, shortvisit?'%':'');
   oblastMap('c-oblast', VIEW);
-  lineChart('c-departure', countBy(VIEW,'departure_month'));
-  lineChart('c-arrival', countBy(VIEW,'arrival_month'));
+  lineChart('c-departure', countByQuarter(VIEW,'departure_month'));
+  lineChart('c-arrival', countByQuarter(VIEW,'arrival_month'));
   barChart('c-visitreason', countBy(VIEW,'temp_return_reason'), {field:'temp_return_reason', top:8});
   barChart('c-returnstay', countBy(VIEW,'return_stay'), {field:'return_stay'});
   barChart('c-renewdocs', countBy(VIEW,'renew_documents',{multi:true}), {field:'renew_documents'});
@@ -1439,15 +1494,20 @@ function renderAll(){
   const tpdiff = pctYes(VIEW,'temp_protection_difficulty','yes'); setStat('stat-tpdiff', tpdiff? tpdiff.pct:null, tpdiff?'%':'');
   const famchange = pctFlag(VIEW,'family_comp', v=>v!=='no' && v!=='prefer_no_answer'); setStat('stat-famchange', famchange? famchange.pct:null, famchange?'%':'');
   const famchalhc = pctYes(VIEW,'family_comp_challenges_faced','yes'); setStat('stat-famchalhc', famchalhc? famchalhc.pct:null, famchalhc?'%':'');
-  const famchalukr = pctYes(VIEW,'family_comp_challenges_faced_ukr','yes'); setStat('stat-famchalukr', famchalukr? famchalukr.pct:null, famchalukr?'%':'');
+  const famchalukr = pctYesNoOnly(VIEW,'family_comp_challenges_faced_ukr'); setStat('stat-famchalukr', famchalukr? famchalukr.pct:null, famchalukr?'%':'');
   barChart('c-legal', countBy(VIEW,'temp_protection'), {field:'temp_protection', top:9});
   donutChart('c-tpprev', countBy(VIEW,'tp_granted_previously'), 'tp_granted_previously');
   barChart('c-missingdocs', countBy(VIEW,'missing_docs',{multi:true}), {field:'missing_docs'});
   waffleChart('c-replacedocs', countBy(VIEW,'replacing_documentation'), 'replacing_documentation');
-  proportionalStrip('c-vitalevents', countBy(VIEW,'family_comp',{multi:true}), 'family_comp');
+  // "no change in family composition" (94% of respondents) swamps this chart
+  // and crowds out the events that actually happened — it's shown separately
+  // as stat-famchange above, so drop it here
+  const vitalEvents = countBy(VIEW,'family_comp',{multi:true});
+  delete vitalEvents['no'];
+  proportionalStrip('c-vitalevents', vitalEvents, 'family_comp');
   barChart('c-docsaffect', countBy(VIEW,'documents_affect',{multi:true}), {top:8, field:'documents_affect'});
   barChart('c-noreplace', countBy(VIEW,'no_replace_docs_reason',{multi:true}), {top:8, field:'no_replace_docs_reason'});
-  lineChart('c-tptimeline', countBy(VIEW,'temp_protection_month'));
+  lineChart('c-tptimeline', countByQuarter(VIEW,'temp_protection_month'));
   barChart('c-tpreason', countBy(VIEW,'temp_protection_reasons',{multi:true}), {top:8, field:'temp_protection_reasons'});
   barChart('c-tpdiffwhat', countBy(VIEW,'temp_protection_difficulty_what',{multi:true}), {top:8, field:'temp_protection_difficulty_what'});
   barChart('c-famchalukr', countBy(VIEW,'family_comp_challenges_ukr',{multi:true}), {top:8, field:'family_comp_challenges_ukr'});
@@ -1456,11 +1516,15 @@ function renderAll(){
   const reunif = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'reunification_support')); setStat('stat-reunif', reunif? reunif.pct:null, reunif?'%':'');
   const tracing = pctFlag(VIEW,'most_urgent_needs', v=>hasCode(v,'family_traig')); setStat('stat-tracing', tracing? tracing.pct:null, tracing?'%':'');
   const noenrol = pctFlag(VIEW,'school_enrol', v=>v==='no'||v==='yes_some'); setStat('stat-noenrol', noenrol? noenrol.pct:null, noenrol?'%':'');
+  const remainukr = pctYes(VIEW,'remain_in_ukraine','yes'); setStat('stat-remainukr', remainukr? remainukr.pct:null, remainukr?'%':'');
+  const reunifobstacles = pctYes(VIEW,'obstacles_y_n','yes'); setStat('stat-reunifobstacles', reunifobstacles? reunifobstacles.pct:null, reunifobstacles?'%':'');
   const worklong = pctYes(VIEW,'work_long','yes'); setStat('stat-worklong', worklong? worklong.pct:null, worklong?'%':'');
   const docskept = pctYes(VIEW,'documents_kept','yes'); setStat('stat-docskept', docskept? docskept.pct:null, docskept?'%':'');
   const socprotchal = pctYes(VIEW,'social_prot_access_challenge','yes'); setStat('stat-socprotchal', socprotchal? socprotchal.pct:null, socprotchal?'%':'');
+  const employedNow = VIEW.filter(r=>r.work_coa==='employed_here'||r.work_coa==='employed_remote'||r.work_coa==='self_employed');
+  const nocontract = employedNow.length>=MIN_CELL ? {pct:Math.round(100*employedNow.filter(r=>r.work_coa_contract==='no').length/employedNow.length)} : null;
+  setStat('stat-nocontract', nocontract? nocontract.pct:null, nocontract?'%':'');
   barChart('c-obstacles', countBy(VIEW,'obstacles',{multi:true}), {top:8, field:'obstacles'});
-  barChart('c-reunifbarriers', countBy(VIEW,'family_comp_challenges',{multi:true}), {top:8, field:'family_comp_challenges'});
   barChart('c-workcoa', countBy(VIEW,'work_coa'), {field:'work_coa'});
   barChart('c-diffwork', countBy(VIEW,'diff_work',{multi:true}), {top:8, field:'diff_work'});
   barChart('c-qualmatch', countBy(VIEW,'work_coa_qual'), {field:'work_coa_qual'});
@@ -1473,6 +1537,8 @@ function renderAll(){
   const rental = pctYes(VIEW,'rental_contract','yes'); setStat('stat-rental', rental? rental.pct:null, rental?'%':'');
   const leaveaccomm = pctYes(VIEW,'leave_accomm','yes'); setStat('stat-leaveaccomm', leaveaccomm? leaveaccomm.pct:null, leaveaccomm?'%':'');
   const childcare = pctYes(VIEW,'childcare_services','yes'); setStat('stat-childcare', childcare? childcare.pct:null, childcare?'%':'');
+  const anyurgent = pctFlag(VIEW,'most_urgent_needs', v=>v.split(' ').some(c=>!['none','prefer_no_answer'].includes(c))); setStat('stat-anyurgent', anyurgent? anyurgent.pct:null, anyurgent?'%':'');
+  const anyinfo = pctFlag(VIEW,'info_receive', v=>v.split(' ').some(c=>!['none','dont_know','prefer_no_answer'].includes(c))); setStat('stat-anyinfo', anyinfo? anyinfo.pct:null, anyinfo?'%':'');
   barChart('c-accomm', countBy(VIEW,'accomm_coa'), {field:'accomm_coa', top:9});
   lineChart('c-accomlength', countBy(VIEW,'accomm_lenght'), {field:'accomm_lenght', order:ACCOMM_LENGTH_ORDER});
   barChart('c-needs', countBy(VIEW,'most_urgent_needs',{multi:true}), {field:'most_urgent_needs'});
