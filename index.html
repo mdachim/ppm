@@ -230,6 +230,11 @@
   body.printing-all main{max-width:186mm;padding:0;margin:0}
   body.printing-all .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;align-items:start}
   body.printing-all .grid.cols-3{grid-template-columns:repeat(3,1fr);gap:7px}
+  /* print-only 3-up: unlike .cols-3 this stays a 2-column masonry grid on
+     screen (where these particular cards need the extra width so their
+     labels don't wrap) and only packs to 3 columns for the fixed-width A4
+     print layout, to save a row of vertical space */
+  body.printing-all .grid.grid3-print{grid-template-columns:repeat(3,1fr);gap:7px}
   body.printing-all .stat-row{display:grid;grid-template-columns:repeat(3,1fr)}
   body.printing-all .card{padding:8px;margin-bottom:0;font-size:11px}
   body.printing-all .card h3{margin:0 0 6px;font-size:10px}
@@ -272,6 +277,7 @@
        to an explicit 2-column grid so the A4 factsheet stays predictable */
     .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; align-items:start}
     .grid.cols-3{grid-template-columns:repeat(3,1fr); gap:7px}
+    .grid.grid3-print{grid-template-columns:repeat(3,1fr); gap:7px}
     .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:8px}
     .card{break-inside:avoid; box-shadow:none; padding:8px; margin-bottom:0}
     .card h3{margin:0 0 6px; font-size:10px}
@@ -1328,12 +1334,10 @@ function buildTabs(){
     </div>
 
     <div class="sub-bar">Education &amp; social protection</div>
-    <div class="grid">
+    <div class="grid grid3-print">
       <div class="card"><h3>Reasons children are not enrolled in school</h3><div class="chart-wrap"><canvas id="c-notenrol"></canvas></div>
         <div class="sub-h">HH with children have some not enrolled</div><div class="n" id="stat-noenrol" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div></div>
       <div class="card"><h3>Social protection support received</h3><div class="chart-wrap"><canvas id="c-socprot"></canvas></div></div>
-    </div>
-    <div class="grid">
       <div class="card"><h3>Challenges accessing social protection</h3><div class="chart-wrap"><canvas id="c-socprotdiff"></canvas></div>
         <div class="sub-h">Faced any challenge</div><div class="n" id="stat-socprotchal" style="font-size:19px;font-weight:900;color:var(--blue06)">–</div></div>
     </div>
