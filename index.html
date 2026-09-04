@@ -1305,9 +1305,8 @@ function buildTabs(){
     </div>
 
     <div class="sub-bar">Registration of vital events</div>
-    <div class="grid cols-3">
+    <div class="grid">
       <div class="card"><h3>Vital events registered since arrival</h3><div id="c-vitalevents"></div></div>
-      <div class="card"><h3>Challenges registering them at the Ukrainian consulate/embassy</h3><div class="chart-wrap"><canvas id="c-famchalukr"></canvas></div></div>
       <div class="card stat"><div class="n" id="stat-famchange">–</div><div class="lbl">had a change in family composition</div>
         <div class="sub-h">Faced challenges registering it</div>
         <div style="display:flex;gap:14px"><div><div class="n" id="stat-famchalhc" style="font-size:19px">–</div><div class="lbl">with Moldovan authorities</div></div><div><div class="n" id="stat-famchalukr" style="font-size:19px">–</div><div class="lbl">at the Ukrainian consulate/embassy</div></div></div></div>
@@ -1513,8 +1512,6 @@ function renderAll(){
   lineChart('c-tptimeline', countByQuarter(VIEW,'temp_protection_month'));
   barChart('c-tpreason', countBy(VIEW,'temp_protection_reasons',{multi:true}), {top:8, field:'temp_protection_reasons'});
   barChart('c-tpdiffwhat', countBy(VIEW,'temp_protection_difficulty_what',{multi:true}), {top:8, field:'temp_protection_difficulty_what'});
-  barChart('c-famchalukr', countBy(VIEW,'family_comp_challenges_ukr',{multi:true}), {top:8, field:'family_comp_challenges_ukr'});
-
   // ---- Access to Rights #2 ----
   const noenrol = pctFlag(VIEW,'school_enrol', v=>v==='no'||v==='yes_some'); setStat('stat-noenrol', noenrol? noenrol.pct:null, noenrol?'%':'');
   const remainukr = pctYes(VIEW,'remain_in_ukraine','yes'); setStat('stat-remainukr', remainukr? remainukr.pct:null, remainukr?'%':'');
