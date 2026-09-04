@@ -1310,11 +1310,7 @@ function buildTabs(){
         </div>
       </div>
     </div>
-    <div class="grid cols-3">
-      <div class="card"><h3>Previously held temporary protection</h3><div class="chart-wrap"><canvas id="c-tpprev"></canvas></div></div>
-      <div class="card"><h3>Timeline of application for temporary protection</h3><div class="chart-wrap"><canvas id="c-tptimeline"></canvas></div></div>
-      <div class="card"><h3>Top reasons for not applying for TP</h3><div class="chart-wrap"><canvas id="c-tpreason"></canvas></div></div>
-    </div>
+    <div class="card"><h3>Timeline of application for temporary protection</h3><div class="chart-wrap"><canvas id="c-tptimeline"></canvas></div></div>
 
     <div class="sub-bar">Registration of vital events</div>
     <div class="grid">
@@ -1510,7 +1506,6 @@ function renderAll(){
   const famchalhc = pctYes(VIEW,'family_comp_challenges_faced','yes'); setStat('stat-famchalhc', famchalhc? famchalhc.pct:null, famchalhc?'%':'');
   const famchalukr = pctYesNoOnly(VIEW,'family_comp_challenges_faced_ukr'); setStat('stat-famchalukr', famchalukr? famchalukr.pct:null, famchalukr?'%':'');
   barChart('c-legal', countBy(VIEW,'temp_protection'), {field:'temp_protection', top:9});
-  donutChart('c-tpprev', countBy(VIEW,'tp_granted_previously'), 'tp_granted_previously');
   barChart('c-missingdocs', countBy(VIEW,'missing_docs',{multi:true}), {field:'missing_docs'});
   waffleChart('c-replacedocs', countBy(VIEW,'replacing_documentation'), 'replacing_documentation');
   // "no change in family composition" (94% of respondents) swamps this chart
@@ -1522,7 +1517,6 @@ function renderAll(){
   barChart('c-docsaffect', countBy(VIEW,'documents_affect',{multi:true}), {top:8, field:'documents_affect'});
   barChart('c-noreplace', countBy(VIEW,'no_replace_docs_reason',{multi:true}), {top:8, field:'no_replace_docs_reason'});
   lineChart('c-tptimeline', countByQuarter(VIEW,'temp_protection_month'));
-  barChart('c-tpreason', countBy(VIEW,'temp_protection_reasons',{multi:true}), {top:8, field:'temp_protection_reasons'});
   barChart('c-tpdiffwhat', countBy(VIEW,'temp_protection_difficulty_what',{multi:true}), {top:8, field:'temp_protection_difficulty_what'});
   // ---- Access to Rights #2 ----
   const noenrol = pctFlag(VIEW,'school_enrol', v=>v==='no'||v==='yes_some'); setStat('stat-noenrol', noenrol? noenrol.pct:null, noenrol?'%':'');
