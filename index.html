@@ -1282,7 +1282,6 @@ function buildTabs(){
     <div class="stat-row">
       <div class="card stat"><div class="n" id="stat-lackdoc">–</div><div class="lbl">HH missing an ID document</div></div>
       <div class="card stat"><div class="n" id="stat-docimpact">–</div><div class="lbl">say missing docs limit access to services</div></div>
-      <div class="card stat"><div class="n" id="stat-tpdiff">–</div><div class="lbl">had difficulty in the TP application/extension</div></div>
     </div>
 
     <div class="sub-bar">Identity documents</div>
@@ -1294,9 +1293,22 @@ function buildTabs(){
     </div>
 
     <div class="sub-bar">Legal status in the host country</div>
-    <div class="grid">
-      <div class="card"><h3>Legal status in Moldova</h3><div class="chart-wrap"><canvas id="c-legal"></canvas></div></div>
-      <div class="card"><h3>Difficulties in the TP application / extension</h3><div class="chart-wrap"><canvas id="c-tpdiffwhat"></canvas></div></div>
+    <div class="card">
+      <div style="display:flex;gap:16px;align-items:stretch;flex-wrap:wrap">
+        <div style="flex:1 1 240px;min-width:0">
+          <h3>Legal status in Moldova</h3>
+          <div class="chart-wrap"><canvas id="c-legal"></canvas></div>
+        </div>
+        <div class="kf-stat" style="flex:0 0 130px;align-self:center;text-align:center">
+          <div class="kf-h">TP process</div>
+          <div class="n" id="stat-tpdiff" style="font-size:26px">–</div>
+          <div class="lbl">faced difficulties during the application/extension</div>
+        </div>
+        <div style="flex:1 1 240px;min-width:0">
+          <h3>Difficulties in the TP application / extension</h3>
+          <div class="chart-wrap"><canvas id="c-tpdiffwhat"></canvas></div>
+        </div>
+      </div>
     </div>
     <div class="grid cols-3">
       <div class="card"><h3>Previously held temporary protection</h3><div class="chart-wrap"><canvas id="c-tpprev"></canvas></div></div>
