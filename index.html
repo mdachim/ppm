@@ -1472,10 +1472,7 @@ function renderAll(){
     return codes.some(c=>!['not_applied','none_of_above','prefer_no_answer','do_not_know'].includes(c));
   }));
   gauge('g-needwork', (()=>{ const employed = VIEW.filter(r=>r.work_coa==='employed_here'||r.work_coa==='employed_remote'||r.work_coa==='self_employed'); if(employed.length<MIN_CELL) return null; const noc = employed.filter(r=>r.work_coa_contract==='no'); return {pct:Math.round(100*noc.length/employed.length), n:employed.length}; })());
-  gauge('g-urgentneed', pctFlag(VIEW,'most_urgent_needs', v=>{
-    const codes = v.split(' ');
-    return codes.some(c=>!['none','prefer_no_answer'].includes(c));
-  }));
+  gauge('g-urgentneed', pctAnyOf(VIEW,'most_urgent_needs','none',['none','prefer_no_answer']));
 
   setStat('stat-n', n);
   setStat('stat-hhmembers', totalHouseholdMembers(VIEW));
